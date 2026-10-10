@@ -5985,9 +5985,13 @@ startAutoRefresh();
                 });
             }
 
+            // Tooltip tetap terlihat saat pointer berpindah dari titik ke area chart lain,
+            // dan baru ditutup ketika pointer benar-benar keluar dari area chart.
+            const historyChartArea = svg.parentElement;
+            if (historyChartArea) historyChartArea.addEventListener('mouseleave', hideHistoryTooltip_);
+
             svg.querySelectorAll('.monitor-history-point').forEach(function(group) {
                 group.addEventListener('mouseenter', function() { showHistoryTooltip_(group); });
-                group.addEventListener('mouseleave', hideHistoryTooltip_);
                 group.addEventListener('focus', function() { showHistoryTooltip_(group); });
                 group.addEventListener('blur', hideHistoryTooltip_);
                 group.addEventListener('click', function(e) {
@@ -12107,6 +12111,13 @@ function renderPencapaianCards(data) {
 .home-admin-view .home-rebuild-outlet-table th:first-child,.home-admin-view .home-rebuild-outlet-table td:first-child{width:auto!important;text-align:center!important}
 .home-admin-view .home-rebuild-outlet-table th:nth-child(2),.home-admin-view .home-rebuild-outlet-table td:nth-child(2){width:auto!important;text-align:left!important}
 @media(max-width:640px){.home-rebuild-outlet-table{width:max-content!important;min-width:100%!important;table-layout:auto!important}.home-rebuild-outlet-table th,.home-rebuild-outlet-table td{padding:6px 8px!important}.home-rebuild-outlet-table th:nth-child(2),.home-rebuild-outlet-table td:nth-child(2){min-width:145px;max-width:300px}.home-rebuild-outlet-table .home-admin-dsr-col{min-width:100px;max-width:180px}}
+
+/* FIX: kolom angka/status tidak boleh memecah kata ke baris berikutnya */
+.home-rebuild-outlet-table th:nth-child(n+2),
+.home-rebuild-outlet-table td:nth-child(n+2){white-space:nowrap!important;overflow-wrap:normal!important;word-break:keep-all!important}
+.home-rebuild-outlet-table th:first-child:not(.home-admin-dsr-col),
+.home-rebuild-outlet-table td:first-child:not(.home-admin-dsr-col){white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important}
+.home-rebuild-outlet-table .home-admin-dsr-col{white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important}
 </style>
 <script id="input-step2-heading-sync-fix">
 (function(){
