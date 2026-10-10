@@ -6280,7 +6280,7 @@ startAutoRefresh();
             var editDisc=document.getElementById('editDisc');
             var editCashback=document.getElementById('editCashback');
             // ID unik untuk request ini; backend mencatatnya agar request sama tidak diproses ulang.
-            let payload={disc:editDisc?editDisc.value:(o.disc||0),cashback:editCashback?editCashback.value:(o.cashback||''),items:items};
+            let payload={disc:editDisc?editDisc.value:(o.disc||0),cashback:editCashback?editCashback.value:(o.cashback||''),items:items,syncLegacyDamen:true};
             payload.requestId='EDIT-'+Date.now()+'-'+Math.random().toString(36).slice(2,12);
             editSaveInFlight[saveOrderId]=true;
             document.getElementById('customModal').style.display='none';
