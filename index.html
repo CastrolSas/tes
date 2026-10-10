@@ -12055,3 +12055,49 @@ function renderPencapaianCards(data) {
 #inputStep2 .step2-outlet-summary { padding:8px!important; }
 #inputStep2 .input-step2-target-inline { margin-top:0!important; }
 </style>
+
+
+<style id="input-step2-heading-visibility-fix">
+/* Pastikan nama outlet dan CUST.CODE benar-benar terlihat pada Step 2. */
+#inputStep2 #inputStep2OutletHeading,
+#inputStep2 #inputStep2CustCodeHeading {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #006b43 !important;
+  min-height: 1em !important;
+}
+#inputStep2 #inputStep2CustCodeHeading { color: #334155 !important; }
+</style>
+<script id="input-step2-heading-sync-fix">
+(function(){
+  function syncStep2OutletHeading(){
+    var outletSelect=document.getElementById('inputOutlet');
+    var custInput=document.getElementById('inputCustCode');
+    var outletHeading=document.getElementById('inputStep2OutletHeading');
+    var custHeading=document.getElementById('inputStep2CustCodeHeading');
+    if(!outletHeading||!custHeading)return;
+    var selectedName='';
+    if(outletSelect){
+      var option=outletSelect.options&&outletSelect.selectedIndex>=0?outletSelect.options[outletSelect.selectedIndex]:null;
+      selectedName=String(option&&option.textContent||'').trim();
+      if(!selectedName || selectedName==='-- Pilih Outlet --') selectedName='';
+      var value=String(outletSelect.value||'').trim();
+      if(!selectedName && value) selectedName=value;
+    }
+    var code=String(custInput&&custInput.value||'').trim();
+    if(selectedName) outletHeading.textContent=selectedName;
+    else if(!String(outletHeading.textContent||'').trim() || outletHeading.textContent.trim()==='-') outletHeading.textContent='Outlet belum dipilih';
+    custHeading.textContent=code||'-';
+  }
+  document.addEventListener('DOMContentLoaded',syncStep2OutletHeading);
+  document.addEventListener('change',function(e){if(e.target&&(/inputOutlet|inputCustCode/.test(e.target.id||'')))syncStep2OutletHeading();});
+  var original=window.lanjutKeTambahProduk;
+  if(typeof original==='function'){
+    window.lanjutKeTambahProduk=function(){var result=original.apply(this,arguments);syncStep2OutletHeading();return result;};
+  }
+  var step2=document.getElementById('inputStep2');
+  if(step2&&window.MutationObserver)new MutationObserver(syncStep2OutletHeading).observe(step2,{attributes:true,attributeFilter:['class','style']});
+  syncStep2OutletHeading();
+})();
+</script>
