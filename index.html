@@ -3044,6 +3044,92 @@ body{background:
   }
 }
 </style>
+<style id="input-mobile-target-horizontal-scroll-fix">
+/* Khusus Halaman INPUT mobile: kartu target bulanan berjajar dan dapat digeser horizontal. */
+@media (max-width: 767px) {
+  #inputTargetCardStep1,
+  #inputTargetCardStep2 {
+    padding: 10px !important;
+    border-radius: 16px !important;
+    min-width: 0 !important;
+  }
+  #inputAchievementMonths1,
+  #inputAchievementMonths2 {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1px 1px 8px !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #a7d9c4 #eef8f3;
+  }
+  #inputAchievementMonths1 > div,
+  #inputAchievementMonths2 > div {
+    flex: 0 0 76% !important;
+    width: 76% !important;
+    min-width: 218px !important;
+    max-width: 270px !important;
+    box-sizing: border-box !important;
+    padding: 9px !important;
+    scroll-snap-align: start;
+  }
+  #inputAchievementMonths1 > div > div:first-child,
+  #inputAchievementMonths2 > div > div:first-child {
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+  }
+  #inputAchievementMonths1 > div .grid,
+  #inputAchievementMonths2 > div .grid {
+    gap: 6px !important;
+    margin-top: 7px !important;
+  }
+  #inputAchievementMonths1 > div .text-xs,
+  #inputAchievementMonths2 > div .text-xs {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+  }
+  #inputAchievementMonths1 > div .border-t,
+  #inputAchievementMonths2 > div .border-t {
+    margin-top: 7px !important;
+    padding-top: 7px !important;
+  }
+  #inputTargetCardStep1 > .mt-2.rounded-xl,
+  #inputTargetCardStep2 > .mt-2.rounded-xl {
+    padding: 9px !important;
+    margin-top: 8px !important;
+  }
+  #inputTargetCardStep1 > .mt-2.rounded-xl .grid,
+  #inputTargetCardStep2 > .mt-2.rounded-xl .grid {
+    gap: 6px !important;
+    margin-top: 8px !important;
+  }
+  #inputTargetCardStep1 > .mt-2.rounded-xl .grid > div,
+  #inputTargetCardStep2 > .mt-2.rounded-xl .grid > div {
+    padding: 8px !important;
+    min-width: 0 !important;
+  }
+  #inputTargetCardStep1 > .mt-2.rounded-xl .text-xs,
+  #inputTargetCardStep2 > .mt-2.rounded-xl .text-xs {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+  }
+}
+@media (max-width: 380px) {
+  #inputAchievementMonths1 > div,
+  #inputAchievementMonths2 > div {
+    flex-basis: 82% !important;
+    width: 82% !important;
+    min-width: 205px !important;
+  }
+}
+</style>
+
 </head>
 <body class="bg-slate-50 font-sans">
 
