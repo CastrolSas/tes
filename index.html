@@ -3507,26 +3507,17 @@ body{background:
                         <!-- STEP 2 -->
                         <div id="inputStep2" class="hidden p-4 space-y-3">
                             <div class="step2-outlet-summary">
-                                <div class="step2-outlet-head">
-                                    <div class="step2-outlet-caption">OUTLET TERPILIH</div>
-                                    <button type="button" onclick="kembaliKeInfoOrder()" class="step2-outlet-edit">Edit informasi</button>
+                                <div id="inputTargetCardStep2" class="input-step2-target-inline">
+                                <div class="flex items-start justify-between gap-2 mb-1">
+                                  <div class="min-w-0 flex-1">
+                                    <div id="inputStep2OutletHeading" class="text-[12px] font-extrabold text-emerald-800 leading-tight">-</div>
+                                    <div class="text-[9px] text-slate-400 mt-1">CUST.CODE: <span id="inputStep2CustCodeHeading" class="font-bold text-slate-600">-</span></div>
+                                  </div>
+                                  <div class="flex items-center gap-1.5 shrink-0">
+                                    <button type="button" onclick="loadInputCustCodeTarget(true, this)" data-refresh-label="↻ Refresh" class="rounded-lg border border-emerald-200 px-2 py-1 text-[9px] font-bold text-emerald-700 inline-flex items-center justify-center gap-1">↻ Refresh</button>
+                                    <button type="button" onclick="kembaliKeInfoOrder()" class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[9px] font-bold text-slate-600 inline-flex items-center justify-center">Edit informasi</button>
+                                  </div>
                                 </div>
-                                <div id="inputStep2Outlet" class="step2-outlet-name">-</div>
-                                <div class="step2-outlet-grid">
-                                    <div class="step2-outlet-field">
-                                        <div class="step2-outlet-label">CUST. CODE</div>
-                                        <div id="inputStep2CustCode" class="step2-outlet-value">-</div>
-                                        <span class="step2-outlet-status">TERPILIH</span>
-                                    </div>
-                                    <div class="step2-outlet-field">
-                                        <div class="step2-outlet-label">CHANNEL</div>
-                                        <div id="inputStep2Channel" class="step2-outlet-value">-</div>
-                                        <span class="step2-outlet-status">TERPILIH</span>
-                                    </div>
-                                </div>
-                                <div id="inputStep2Meta" class="step2-outlet-meta">Cust. Code - · Channel -</div>
-                            <div id="inputTargetCardStep2" class="input-step2-target-inline">
-                                <div class="flex items-center justify-between mb-1"><div class="text-[11px] font-extrabold tracking-wide text-emerald-800">TARGET &amp; PENCAPAIAN ORDER</div><button type="button" onclick="loadInputCustCodeTarget(true, this)" data-refresh-label="↻ Refresh" class="rounded-lg border border-emerald-200 px-2 py-1 text-[9px] font-bold text-emerald-700 inline-flex items-center justify-center gap-1">↻ Refresh</button></div>
                                 <div id="inputTargetQuarterLabel2" class="text-[9px] text-slate-400 mb-2">Pilih CUST.CODE dan tanggal input.</div>
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" id="inputAchievementMonths2">
                                   <div class="rounded-xl border border-slate-200 p-2.5"><div class="text-[10px] font-extrabold text-slate-700">Bulan 1</div><div class="grid grid-cols-2 gap-2 mt-2"><div><div class="text-[8px] text-slate-400">Target</div><div id="inputAchTargetM1_2" class="text-xs font-extrabold">-</div></div><div><div class="text-[8px] text-slate-400">Actual</div><div id="inputAchActualM1_2" class="text-xs font-extrabold text-emerald-700">0,0 dus</div></div></div><div class="border-t mt-2 pt-2 flex justify-between text-[8px]"><span class="text-slate-400">Gap <b id="inputAchGapM1_2" class="text-red-500">-</b></span><span class="text-slate-400">Ach <b id="inputAchPctM1_2">0,0%</b></span></div></div>
@@ -4653,6 +4644,10 @@ startAutoRefresh();
             document.getElementById('inputStep2Outlet').textContent = outlet;
             document.getElementById('inputStep2CustCode').textContent = custCodeStep2;
             document.getElementById('inputStep2Channel').textContent = channelStep2;
+            const outletHeading = document.getElementById('inputStep2OutletHeading');
+            const custCodeHeading = document.getElementById('inputStep2CustCodeHeading');
+            if (outletHeading) outletHeading.textContent = outlet;
+            if (custCodeHeading) custCodeHeading.textContent = custCodeStep2;
             document.getElementById('inputStep2Meta').textContent = 'Cust. Code ' + custCodeStep2 + ' · Channel ' + channelStep2;
             updateInputWizardIndicator(2);
             renderCart();
@@ -12049,3 +12044,14 @@ function renderPencapaianCards(data) {
 <script id="input-step2-quarter-total-label-sync">
 (function(){var sync=function(){var src=document.getElementById('inputTargetQuarterLabel2');var dst=document.getElementById('inputTargetQuarterTotalLabel2');if(src&&dst){var t=(src.textContent||'').trim();if(t&&t!=='Pilih CUST.CODE dan tanggal input.'&&!t.startsWith('Gagal memuat target:'))dst.textContent=t;}};sync();var src=document.getElementById('inputTargetQuarterLabel2');if(src&&window.MutationObserver){new MutationObserver(sync).observe(src,{childList:true,characterData:true,subtree:true});}})();
 </script>
+
+
+<style id="input-step2-outlet-heading-edit-actions">
+/* Step 2: ganti label Outlet Terpilih dengan nama outlet dan CUST.CODE; tombol edit di samping Refresh. */
+#inputStep2 .step2-outlet-head,
+#inputStep2 .step2-outlet-name,
+#inputStep2 .step2-outlet-grid,
+#inputStep2 .step2-outlet-meta { display:none!important; }
+#inputStep2 .step2-outlet-summary { padding:8px!important; }
+#inputStep2 .input-step2-target-inline { margin-top:0!important; }
+</style>
