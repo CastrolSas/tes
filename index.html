@@ -4129,6 +4129,8 @@ body{background:
         let editingOrderId = "";
         let editOrderItems = [];
         let editingOrderData = null;
+        // Permintaan edit yang sedang diproses dilacak per ID order, bukan secara global.
+        let editSaveInFlight = {};
         let globalOutletKontrakData = [];
         let riwayatLoading = false;
         let riwayatPage = 1;
@@ -5983,8 +5985,10 @@ startAutoRefresh();
         }
 
         function editRiwayat(idInput){
-            editingOrderId=String(idInput||'').trim();
-            if(!editingOrderId||editingOrderId==='-')return;
+            var requestedEditId=String(idInput||'').trim();
+            if(!requestedEditId||requestedEditId==='-')return;
+            if(editSaveInFlight[requestedEditId]){showModal('Edit Sedang Diproses','Order '+requestedEditId+' masih disimpan di server. Silakan tunggu sebelum mengedit order yang sama lagi.');return;}
+            editingOrderId=requestedEditId;
             const cached=(globalRiwayatData||[]).find(function(item){return String(item.id||'').trim()===editingOrderId;});
             if(!cached)return;
             editingOrderData=cached;
@@ -6066,6 +6070,8 @@ startAutoRefresh();
         }
         function simpanEditOrder(){
             if(!editingOrderId||!editingOrderData)return;
+            var saveOrderId=String(editingOrderId);
+            if(editSaveInFlight[saveOrderId]){showModal('Edit Sedang Diproses','Order '+saveOrderId+' sedang disimpan. Tunggu sampai proses tersebut selesai sebelum menyimpan edit lain untuk order yang sama.');return;}
             let items=[];
             for(let i=0;i<editOrderItems.length;i++){
                 let p=document.getElementById('editProd'+i),q=document.getElementById('editQty'+i),u=document.getElementById('editUnit'+i);
@@ -6078,14 +6084,33 @@ startAutoRefresh();
                 items.push({produk:p.value,kode:codeToSend,originalProduk:originalName,originalKode:originalCode,qty:Number(q.value),satuan:u?u.value:'Pcs',harga:Number(selectedObj.harga)||0,liter:Number(selectedObj.liter)||1,pack:Number(selectedObj.pack)||1});
             }
             if(!items.length){showModal('Peringatan','Minimal harus ada 1 produk.');return;}
-            showLoading(true);
-            document.getElementById('customModal').style.display='none';
             var o=editingOrderData;
             var editDisc=document.getElementById('editDisc');
             var editCashback=document.getElementById('editCashback');
-            // Hanya Disc, Cashback, dan Produk yang diedit. Kolom lain dipertahankan backend.
+            // ID unik untuk request ini; backend mencatatnya agar request sama tidak diproses ulang.
             let payload={disc:editDisc?editDisc.value:(o.disc||0),cashback:editCashback?editCashback.value:(o.cashback||''),items:items};
-            google.script.run.withSuccessHandler(function(res){showLoading(false);showModal(res&&res.success?'Berhasil':'Gagal',res&&res.message?res.message:'Tidak ada respons.');if(res&&res.success){editingOrderId='';editingOrderData=null;editOrderItems=[];loadRiwayat(true, true);}}).withFailureHandler(function(err){showLoading(false);showModal('Gagal',err&&err.message?err.message:'Gagal menyimpan perubahan.');}).updateOrderById(editingOrderId,payload,currentUser,currentUsernameInput);
+            payload.requestId='EDIT-'+Date.now()+'-'+Math.random().toString(36).slice(2,12);
+            editSaveInFlight[saveOrderId]=true;
+            document.getElementById('customModal').style.display='none';
+            // Tidak menampilkan overlay loading: pengguna dapat membuka dan menyimpan order lain.
+            // Proses server tetap berjalan jika tab/web ditutup setelah request terkirim.
+            google.script.run.withSuccessHandler(function(res){
+                delete editSaveInFlight[saveOrderId];
+                var anotherEditOpen=!!editingOrderId&&editingOrderId!==saveOrderId;
+                if(editingOrderId===saveOrderId){editingOrderId='';editingOrderData=null;editOrderItems=[];}
+                if(res&&res.success){
+                    if(!anotherEditOpen)showModal('Berhasil',res.message||('Order '+saveOrderId+' berhasil diperbarui.'));
+                    loadRiwayat(true, true);
+                }else{
+                    if(!anotherEditOpen)showModal('Gagal',res&&res.message?res.message:'Gagal menyimpan perubahan.');
+                    else console.warn('Gagal menyimpan edit order '+saveOrderId+': '+(res&&res.message||'Tidak ada respons.'));
+                }
+            }).withFailureHandler(function(err){
+                delete editSaveInFlight[saveOrderId];
+                var anotherEditOpen=!!editingOrderId&&editingOrderId!==saveOrderId;
+                if(!anotherEditOpen)showModal('Gagal',err&&err.message?err.message:'Gagal menyimpan perubahan. Periksa Riwayat sebelum mengirim ulang.');
+                else console.warn('Koneksi edit order '+saveOrderId+' gagal: '+(err&&err.message?err.message:'Gagal menyimpan perubahan. Periksa Riwayat sebelum mengirim ulang.'));
+            }).updateOrderById(saveOrderId,payload,currentUser,currentUsernameInput);
         }
 
         function updateSelectedRiwayatUI() {
