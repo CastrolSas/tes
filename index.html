@@ -11973,3 +11973,16 @@ function renderPencapaianCards(data) {
   }
 }
 </style>
+
+
+<style id="input-target-display-step2-only-no-selected-badges">
+/* Target & Pencapaian hanya ditampilkan pada Step 2. Tidak mengubah data atau perhitungan. */
+#inputTargetCardStep1 { display: none !important; }
+/* Hilangkan label badge TERPILIH pada kartu target/actual, tetap pertahankan isi dan angka. */
+#inputTargetCardStep2 *::after,
+#inputTargetCardStep2 *::before {
+  content: none !important;
+  display: none !important;
+}
+#inputTargetCardStep2 .step2-outlet-status { display: none !important; }
+</style>
