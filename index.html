@@ -4368,8 +4368,9 @@ body{background:
                 console.warn('Select2 tidak tersedia, gunakan select biasa.', e);
             }
 
+            // Tanggal sengaja dikosongkan saat halaman Input dibuka; pengguna wajib memilih tanggal.
             const tanggalInput = document.getElementById('inputTanggal');
-            if (tanggalInput) tanggalInput.valueAsDate = new Date();
+            if (tanggalInput) tanggalInput.value = '';
             loadSalesOptionsForRegister();
             const restored = restoreAuthState();
             showLoading(!restored);
