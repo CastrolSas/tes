@@ -3379,13 +3379,18 @@ body{background:
                                 </div>
                             </div>
 
+                            <div id="inputTargetCardStep1" class="rounded-xl border border-blue-200 bg-blue-50 p-3">
+                                <div class="flex items-center gap-2 mb-2"><span class="text-blue-600 text-lg">🎯</span><div><div class="text-xs font-extrabold text-blue-900">Target CUST.CODE</div><div id="inputTargetQuarterLabel1" class="text-[9px] text-blue-700">Pilih outlet dan tanggal untuk melihat target.</div></div></div>
+                                <div class="grid grid-cols-2 gap-2"><div class="rounded-lg bg-white border border-blue-100 p-2"><div class="text-[9px] text-slate-500">Target bulan</div><div id="inputTargetMonth1" class="text-sm font-extrabold text-blue-900">-</div><div class="text-[9px] text-slate-500 mt-1">Order keranjang: <span id="inputCartMonth1">0,0</span> Dus</div><div class="text-[10px] font-bold text-emerald-700">Perkiraan: <span id="inputForecastMonth1">-</span> Dus</div></div><div class="rounded-lg bg-white border border-blue-100 p-2"><div class="text-[9px] text-slate-500">Target total kuartal</div><div id="inputTargetQuarter1" class="text-sm font-extrabold text-blue-900">-</div><div class="text-[9px] text-slate-500 mt-1">Order keranjang: <span id="inputCartQuarter1">0,0</span> Dus</div><div class="text-[10px] font-bold text-emerald-700">Perkiraan: <span id="inputForecastQuarter1">-</span> Dus</div></div></div>
+                            </div>
+
                             <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
                                 <div class="flex items-center gap-2 mb-3">
                                     <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center">📋</span>
                                     <div><div class="text-xs font-extrabold text-slate-800">Detail Transaksi</div><div class="text-[9px] text-slate-400">Tanggal dan metode pembayaran.</div></div>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                    <div><label class="block text-[10px] font-bold text-slate-600 mb-1">Tanggal <span class="text-red-500">*</span></label><input type="date" id="inputTanggal" required class="w-full border border-slate-200 rounded-xl px-3 py-2.5 bg-white text-xs"></div>
+                                    <div><label class="block text-[10px] font-bold text-slate-600 mb-1">Tanggal <span class="text-red-500">*</span></label><input type="date" id="inputTanggal" onchange="loadInputCustCodeTarget()" required class="w-full border border-slate-200 rounded-xl px-3 py-2.5 bg-white text-xs"></div>
                                     <div>
 <label class="block text-[10px] font-bold text-slate-600 mb-1">Payment</label>
 <div id="paymentButtons" class="grid grid-cols-2 gap-2">
@@ -3428,6 +3433,10 @@ body{background:
                                     </div>
                                 </div>
                                 <div id="inputStep2Meta" class="step2-outlet-meta">Cust. Code - · Channel -</div>
+                            </div>
+                            <div id="inputTargetCardStep2" class="rounded-xl border border-blue-200 bg-blue-50 p-3">
+                                <div class="flex items-center gap-2 mb-2"><span class="text-blue-600 text-lg">🎯</span><div><div class="text-xs font-extrabold text-blue-900">Target CUST.CODE</div><div id="inputTargetQuarterLabel2" class="text-[9px] text-blue-700">Target sesuai tanggal input.</div></div></div>
+                                <div class="grid grid-cols-2 gap-2"><div class="rounded-lg bg-white border border-blue-100 p-2"><div class="text-[9px] text-slate-500">Target bulan</div><div id="inputTargetMonth2" class="text-sm font-extrabold text-blue-900">-</div><div class="text-[9px] text-slate-500 mt-1">Order keranjang: <span id="inputCartMonth2">0,0</span> Dus</div><div class="text-[10px] font-bold text-emerald-700">Perkiraan: <span id="inputForecastMonth2">-</span> Dus</div></div><div class="rounded-lg bg-white border border-blue-100 p-2"><div class="text-[9px] text-slate-500">Target total kuartal</div><div id="inputTargetQuarter2" class="text-sm font-extrabold text-blue-900">-</div><div class="text-[9px] text-slate-500 mt-1">Order keranjang: <span id="inputCartQuarter2">0,0</span> Dus</div><div class="text-[10px] font-bold text-emerald-700">Perkiraan: <span id="inputForecastQuarter2">-</span> Dus</div></div></div>
                             </div>
 
                             <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2 ui-product-entry">
@@ -4122,6 +4131,8 @@ body{background:
         let produkDataList = [];
         let cashbackDataList = [];
         let shoppingCart = [];
+        let inputTargetCustCodeData = null;
+        let inputTargetRequestKey = '';
         let outletDataList = [];
         let globalRiwayatData = [];
         let rawMonitoringDataObject = {};
@@ -4583,6 +4594,46 @@ startAutoRefresh();
                 document.getElementById('inputChannel').value = "";
             }
             renderCashbackOptionsForInputChannel();
+            loadInputCustCodeTarget();
+        }
+
+        function formatInputTargetNumber(v) {
+            return (Number(v)||0).toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1});
+        }
+        function getInputCartDusTotal() {
+            return (shoppingCart||[]).reduce(function(sum,item){
+                var qty=Number(item.qty)||0, pack=Number(item.pack)||1;
+                return sum + (String(item.satuan||'').toUpperCase()==='DUS' ? qty : qty/pack);
+            },0);
+        }
+        function renderInputCustCodeTarget() {
+            var d=inputTargetCustCodeData||{};
+            var monthOrder=getInputCartDusTotal();
+            var quarterOrder=monthOrder;
+            var monthTarget=Number(d.monthlyTarget)||0, quarterTarget=Number(d.quarterTarget)||0;
+            var monthName=d.monthName||'-', quarterName=d.quarterLabel||'-';
+            ['1','2'].forEach(function(suffix){
+                var set=function(id,val){var el=document.getElementById(id+suffix);if(el)el.textContent=val;};
+                set('inputTargetQuarterLabel',quarterName==='-'?'Pilih outlet dan tanggal untuk melihat target.':'Target '+quarterName+' · '+monthName);
+                set('inputTargetMonth',monthTarget>0?formatInputTargetNumber(monthTarget):'0,0');
+                set('inputTargetQuarter',quarterTarget>0?formatInputTargetNumber(quarterTarget):'0,0');
+                set('inputCartMonth',formatInputTargetNumber(monthOrder));
+                set('inputCartQuarter',formatInputTargetNumber(quarterOrder));
+                set('inputForecastMonth',formatInputTargetNumber(monthTarget+monthOrder));
+                set('inputForecastQuarter',formatInputTargetNumber(quarterTarget+quarterOrder));
+            });
+        }
+        function loadInputCustCodeTarget() {
+            var custCode=String(document.getElementById('inputCustCode')?.value||'').trim();
+            var dateValue=String(document.getElementById('inputTanggal')?.value||'').trim();
+            var key=custCode+'|'+dateValue;
+            if(!custCode||!dateValue){inputTargetCustCodeData=null;renderInputCustCodeTarget();return;}
+            if(key===inputTargetRequestKey && inputTargetCustCodeData){renderInputCustCodeTarget();return;}
+            inputTargetRequestKey=key;
+            google.script.run.withSuccessHandler(function(data){
+                if(inputTargetRequestKey!==key)return;
+                inputTargetCustCodeData=data||null;renderInputCustCodeTarget();
+            }).withFailureHandler(function(){if(inputTargetRequestKey===key){inputTargetCustCodeData=null;renderInputCustCodeTarget();}}).getInputCustCodeTarget(custCode,dateValue);
         }
 
         function tambahKeKeranjang() {
@@ -4633,6 +4684,7 @@ startAutoRefresh();
             if (cartCount) cartCount.textContent = shoppingCart.length + (shoppingCart.length === 1 ? ' item' : ' item');
             if (shoppingCart.length === 0) {
                 container.innerHTML = '<p class="text-xs text-slate-400 text-center py-3 border rounded bg-slate-50">Belum ada item.</p>';
+                renderInputCustCodeTarget();
                 document.getElementById('grandVol').textContent = "0";
                 document.getElementById('grandVal').textContent = "0";
                 return;
@@ -4670,6 +4722,7 @@ startAutoRefresh();
             container.innerHTML = html;
             document.getElementById('grandVol').textContent = totalVol.toFixed(1);
             document.getElementById('grandVal').textContent = Math.round(totalVal).toLocaleString('id-ID');
+            renderInputCustCodeTarget();
         }
 
         function setPayment(value) {
