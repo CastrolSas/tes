@@ -3139,12 +3139,13 @@ body{background:
 <style>
 @media (max-width: 767px) {
   /* Harga Nett: compact mobile table only */
-  #tabHargaNett .overflow-x-auto table { font-size: 10px !important; }
+  #tabHargaNett .overflow-x-auto table { font-size: 10px !important; width: max-content !important; min-width: 0 !important; table-layout: auto !important; }
   #tabHargaNett .overflow-x-auto table th,
   #tabHargaNett .overflow-x-auto table td { padding: 4px 5px !important; line-height: 1.2 !important; }
   #tabHargaNett .overflow-x-auto table th { font-size: 9px !important; white-space: nowrap !important; }
   #tabHargaNett .overflow-x-auto table td { font-size: 10px !important; }
-  #tabHargaNett .overflow-x-auto table td.harga-nett-product-sticky { min-width: 112px !important; max-width: 140px !important; white-space: normal !important; overflow-wrap: anywhere !important; }
+  #tabHargaNett .overflow-x-auto table th.harga-nett-product-sticky,
+  #tabHargaNett .overflow-x-auto table td.harga-nett-product-sticky { width: max-content !important; min-width: 0 !important; max-width: none !important; white-space: nowrap !important; overflow-wrap: normal !important; }
   #tabHargaNett .overflow-x-auto table td input[type="number"] { width: 64px !important; min-width: 64px !important; padding: 3px 4px !important; font-size: 10px !important; }
   #tabHargaNett .overflow-x-auto table th.harga-nett-product-sticky,
   #tabHargaNett .overflow-x-auto table td.harga-nett-product-sticky {
@@ -3995,7 +3996,7 @@ body{background:
                           <div class="flex items-center gap-1 col-span-2 md:col-span-1"><select id="discountTypeHargaNett" onchange="renderHargaNett()" aria-label="Jenis discount" class="border border-slate-200 rounded-xl px-2 py-2.5 text-xs bg-white"><option value="amount">Rp</option><option value="percent">%</option></select><input id="discountHargaNett" type="number" min="0" value="0" oninput="renderHargaNett()" placeholder="Discount" aria-label="Discount" class="w-full min-w-0 px-3 py-2.5 border border-slate-200 rounded-xl text-xs"></div>
                         </div>
                         <div class="text-[10px] text-slate-500 mb-2">Discount diisi di atas bersama filter dan mengurangi Pricelist pada semua produk yang tampil. Perubahan hanya berlaku pada tampilan ini dan tidak mengubah sheet.</div>
-                        <div class="overflow-x-auto rounded-lg border border-slate-200"><table class="text-[10px] border-collapse" style="min-width:950px;width:100%"><thead><tr class="bg-slate-100 text-slate-700">
+                        <div class="overflow-x-auto rounded-lg border border-slate-200"><table class="text-[10px] border-collapse" style="width:max-content;min-width:0;table-layout:auto"><thead><tr class="bg-slate-100 text-slate-700">
                         <th class="p-2 border harga-nett-product-sticky">PRODUK</th><th class="p-2 border">LITER</th><th class="p-2 border">PRICELIST</th><th class="p-2 border">CASHBACK</th><th class="p-2 border">EXTRA CASHBACK</th><th class="p-2 border">NETT</th>
                         </tr></thead><tbody id="hargaNettBody"><tr><td colspan="6" class="p-5 text-center text-slate-400">Klik menu Harga Nett untuk memuat data.</td></tr></tbody></table></div>
                     </div>
