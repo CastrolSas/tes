@@ -7895,12 +7895,25 @@ startAutoRefresh();
                 hargaNettCashbackChoices = Array.isArray(res.cashbackChoices)?res.cashbackChoices:[];
                 hargaNettQuarterChoices = Array.isArray(res.quarterChoices)?res.quarterChoices:[];
                 hargaNettCashbackMap = res.cashbackMap || {};
-                const sel=document.getElementById('hargaNettCashbackOptions');
-                if(sel){sel.innerHTML=hargaNettCashbackChoices.map(c=>'<option value="'+escapeHtml(c.value)+'"></option>').join('');}
+                renderHargaNettCashbackChoices();
                 const qsel=document.getElementById('hargaNettQuarterOptions');
                 if(qsel){qsel.innerHTML=hargaNettQuarterChoices.map(c=>'<option value="'+escapeHtml(c.value)+'"></option>').join('');}
                 renderHargaNett();
             }).withFailureHandler(function(err){ body.innerHTML='<tr><td colspan="6" class="p-5 text-center text-red-500">'+escapeHtml(err&&err.message||'Gagal memuat data.')+'</td></tr>'; }).getHargaNettData(!!forceRefresh);
+        }
+        function renderHargaNettCashbackChoices() {
+            const sel=document.getElementById('hargaNettCashbackOptions'); if(!sel)return;
+            const type=String((document.getElementById('filterProdukHargaNett')||{}).value||'').trim().toUpperCase();
+            let allowedTerms=null;
+            if(type==='PCO') allowedTerms=['PCO','CAS'];
+            else if(type==='MCO-4T') allowedTerms=['MCO-4T','BP'];
+            const choices=allowedTerms ? hargaNettCashbackChoices.filter(function(item){
+                const value=String(item && item.value || '').toUpperCase();
+                return allowedTerms.some(function(term){return value.includes(term);});
+            }) : hargaNettCashbackChoices;
+            sel.innerHTML=choices.map(c=>'<option value="'+escapeHtml(c.value)+'"></option>').join('');
+            const input=document.getElementById('filterCashbackHargaNett');
+            if(input && input.value && !choices.some(function(c){return String(c.value)===input.value;})) input.value='';
         }
         function renderHargaNett() {
             const body=document.getElementById('hargaNettBody'); if(!body)return;
@@ -7921,7 +7934,7 @@ startAutoRefresh();
                 '<td class="p-2 border whitespace-nowrap harga-nett-product-sticky">'+escapeHtml(x.produk)+'</td><td class="p-2 border text-center">'+escapeHtml(x.liter)+'</td><td class="p-2 border text-right whitespace-nowrap">'+formatHargaNett(discountedPricelist)+'</td><td class="p-2 border text-right whitespace-nowrap">'+formatHargaNett(cashbackAmount)+'</td><td class="p-2 border text-right"><input type="number" min="0" step="any" value="'+(hargaNettExtraCashback[String(x.produk||'')] == null ? '' : hargaNettExtraCashback[String(x.produk||'')])+'" aria-label="Extra Cashback '+escapeHtml(x.produk)+'" onchange="setHargaNettExtraCashback(\''+String(x.produk||'').replace(/\\/g,'\\\\').replace(/\'/g,"\\'")+'\',this.value)" class="w-28 min-w-20 px-2 py-1 border border-slate-200 rounded text-right"></td><td class="p-2 border text-right font-bold whitespace-nowrap">'+formatHargaNett(nettFinal)+'</td></tr>';
             }).join('');
         }
-        function setHargaNettProductType(type) { const el=document.getElementById('filterProdukHargaNett'); if(!el)return; el.value=(el.value===type?'':type); ['PCO','MCO-4T'].forEach(function(t){const b=document.getElementById(t==='PCO'?'filterProdukPCOHargaNett':'filterProdukMCOHargaNett');if(b){const active=el.value===t;b.classList.toggle('bg-emerald-700',active);b.classList.toggle('text-white',active);b.classList.toggle('border-emerald-700',active);}}); renderHargaNett(); }
+        function setHargaNettProductType(type) { const el=document.getElementById('filterProdukHargaNett'); if(!el)return; el.value=(el.value===type?'':type); ['PCO','MCO-4T'].forEach(function(t){const b=document.getElementById(t==='PCO'?'filterProdukPCOHargaNett':'filterProdukMCOHargaNett');if(b){const active=el.value===t;b.classList.toggle('bg-emerald-700',active);b.classList.toggle('text-white',active);b.classList.toggle('border-emerald-700',active);}}); renderHargaNettCashbackChoices(); renderHargaNett(); }
         function setHargaNettExtraCashback(produk, value) { hargaNettExtraCashback[String(produk||'')] = Math.max(0, Number(value)||0); renderHargaNett(); }
         function loadPricelist(forceRefresh, silentRefresh) {
             const tbody = document.getElementById('listPricelistTableBody');
