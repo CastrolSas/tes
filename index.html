@@ -7935,8 +7935,15 @@ startAutoRefresh();
             const campaign=String((document.getElementById('filterCashbackHargaNett')||{}).value||'').trim();
             const quarter=String((document.getElementById('filterQuarterHargaNett')||{}).value||'').trim();
             const discPercent=Math.min(100,Math.max(0,Number((document.getElementById('discountHargaNett')||{}).value||0)));
-            const rows=(hargaNettData||[]).filter(function(x){return !/CTM/i.test(String(x.ctmProdukF||''));});
-            if(!rows.length){showModal('Export PDF','Tidak ada produk tanpa CTM untuk diekspor.');return;}
+            const search=String((document.getElementById('searchHargaNett')||{}).value||'').toLowerCase().trim();
+            const productType=String((document.getElementById('filterProdukHargaNett')||{}).value||'').trim().toUpperCase();
+            // PDF mengikuti produk yang sedang difilter di tabel (pencarian + PCO/MCO-4T), tetap mengecualikan CTM.
+            const rows=(hargaNettData||[]).filter(function(x){
+                const matchesSearch=String(x.produk||'').toLowerCase().includes(search);
+                const matchesType=!productType||String(x.productType||'').toUpperCase()===productType;
+                return matchesSearch&&matchesType&&!/CTM/i.test(String(x.ctmProdukF||''));
+            });
+            if(!rows.length){showModal('Export PDF','Tidak ada produk sesuai filter (selain CTM) untuk diekspor.');return;}
             const esc=function(v){return escapeHtml(v==null?'':String(v));};
             const body=rows.map(function(x){
                 const base=Number(x.pricelist||0), hasCtm=/CTM/i.test(String(x.ctmProdukF||''));
@@ -12444,6 +12451,48 @@ function renderPencapaianCards(data) {
     padding: 0 2px !important;
     font-size: 8px !important;
     line-height: 18px !important;
+    box-sizing: border-box !important;
+  }
+}
+</style>
+
+<style id="harga-nett-mobile-product-column-fit-final">
+@media (max-width: 767px) {
+  #tabHargaNett .overflow-x-auto { overflow-x: hidden !important; }
+  #tabHargaNett .overflow-x-auto table {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+  }
+  /* Produk tetap satu baris, lebarnya dibatasi agar tidak mendorong tabel keluar layar. */
+  #tabHargaNett .overflow-x-auto table th:first-child,
+  #tabHargaNett .overflow-x-auto table td:first-child {
+    width: 34% !important;
+    max-width: 34% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: keep-all !important;
+  }
+  #tabHargaNett .overflow-x-auto table th:nth-child(4),
+  #tabHargaNett .overflow-x-auto table td:nth-child(4) { width: 22% !important; }
+  #tabHargaNett .overflow-x-auto table th:nth-child(5),
+  #tabHargaNett .overflow-x-auto table td:nth-child(5) { width: 22% !important; }
+  #tabHargaNett .overflow-x-auto table th:nth-child(6),
+  #tabHargaNett .overflow-x-auto table td:nth-child(6) { width: 22% !important; }
+  #tabHargaNett .overflow-x-auto table th,
+  #tabHargaNett .overflow-x-auto table td {
+    box-sizing: border-box !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    white-space: nowrap !important;
+  }
+  #tabHargaNett .overflow-x-auto table td input[type="number"] {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
   }
 }
