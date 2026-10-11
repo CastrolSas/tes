@@ -3135,6 +3135,21 @@ body{background:
 }
 </style>
 
+
+<style>
+@media (max-width: 767px) {
+  #tabHargaNett .overflow-x-auto table th.harga-nett-product-sticky,
+  #tabHargaNett .overflow-x-auto table td.harga-nett-product-sticky {
+    position: sticky; left: 0; z-index: 2; background: #fff;
+  }
+  #tabHargaNett .overflow-x-auto table th.harga-nett-product-sticky {
+    z-index: 4; background: #f1f5f9;
+  }
+  #tabHargaNett .overflow-x-auto table td.harga-nett-product-sticky {
+    box-shadow: 2px 0 3px rgba(15, 23, 42, 0.08);
+  }
+}
+</style>
 </head>
 <body class="bg-slate-50 font-sans">
 
@@ -3964,17 +3979,17 @@ body{background:
                         <button type="button" onclick="loadHargaNett(true)" class="px-3 py-2 rounded-xl bg-emerald-700 text-white text-xs font-bold">↻ Muat ulang</button>
                     </div>
                     <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-3">
-                        <div class="grid grid-cols-1 md:grid-cols-5 gap-2 mb-3 items-center">
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3 items-center">
                           <input id="searchHargaNett" oninput="renderHargaNett()" placeholder="Cari produk..." class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs">
                           <select id="filterCashbackHargaNett" onchange="renderHargaNett()" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs"><option value="">Pilih Cashback (CASHBACK A)</option></select>
                           <select id="filterQuarterHargaNett" onchange="renderHargaNett()" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs"><option value="">Pilih Quartal (CASHBACK K)</option></select>
                           <select id="filterProdukHargaNett" onchange="renderHargaNett()" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs"><option value="">Semua Produk (PCO / MCO-4T)</option><option value="PCO">PCO</option><option value="MCO-4T">MCO-4T</option></select>
-                          <div class="flex items-center gap-1"><select id="discountTypeHargaNett" onchange="renderHargaNett()" aria-label="Jenis discount" class="border border-slate-200 rounded-xl px-2 py-2.5 text-xs bg-white"><option value="amount">Rp</option><option value="percent">%</option></select><input id="discountHargaNett" type="number" min="0" value="0" oninput="renderHargaNett()" placeholder="Discount" aria-label="Discount" class="w-full min-w-0 px-3 py-2.5 border border-slate-200 rounded-xl text-xs"></div>
+                          <div class="flex items-center gap-1 col-span-2 md:col-span-1"><select id="discountTypeHargaNett" onchange="renderHargaNett()" aria-label="Jenis discount" class="border border-slate-200 rounded-xl px-2 py-2.5 text-xs bg-white"><option value="amount">Rp</option><option value="percent">%</option></select><input id="discountHargaNett" type="number" min="0" value="0" oninput="renderHargaNett()" placeholder="Discount" aria-label="Discount" class="w-full min-w-0 px-3 py-2.5 border border-slate-200 rounded-xl text-xs"></div>
                         </div>
                         <div class="text-[10px] text-slate-500 mb-2">Discount diisi di atas bersama filter dan mengurangi Pricelist pada semua produk yang tampil. Perubahan hanya berlaku pada tampilan ini dan tidak mengubah sheet.</div>
                         <div class="overflow-x-auto rounded-lg border border-slate-200"><table class="text-[10px] border-collapse" style="min-width:950px;width:100%"><thead><tr class="bg-slate-100 text-slate-700">
-                        <th class="p-2 border">PRODUK</th><th class="p-2 border">LITER</th><th class="p-2 border">PRICELIST</th><th class="p-2 border">CASHBACK</th><th class="p-2 border">EXTRA CASHBACK</th><th class="p-2 border">NETT</th><th class="p-2 border">KATEGORI CASHBACK</th>
-                        </tr></thead><tbody id="hargaNettBody"><tr><td colspan="7" class="p-5 text-center text-slate-400">Klik menu Harga Nett untuk memuat data.</td></tr></tbody></table></div>
+                        <th class="p-2 border harga-nett-product-sticky">PRODUK</th><th class="p-2 border">LITER</th><th class="p-2 border">PRICELIST</th><th class="p-2 border">CASHBACK</th><th class="p-2 border">EXTRA CASHBACK</th><th class="p-2 border">NETT</th>
+                        </tr></thead><tbody id="hargaNettBody"><tr><td colspan="6" class="p-5 text-center text-slate-400">Klik menu Harga Nett untuk memuat data.</td></tr></tbody></table></div>
                     </div>
                 </div>
 
@@ -7865,9 +7880,9 @@ startAutoRefresh();
         function formatHargaNett(n) { return 'Rp ' + (Number(n)||0).toLocaleString('id-ID',{maximumFractionDigits:0}); }
         function loadHargaNett(forceRefresh) {
             const body = document.getElementById('hargaNettBody'); if (!body) return;
-            body.innerHTML = '<tr><td colspan="7" class="p-5 text-center text-slate-400">Memuat data Harga Nett...</td></tr>';
+            body.innerHTML = '<tr><td colspan="6" class="p-5 text-center text-slate-400">Memuat data Harga Nett...</td></tr>';
             google.script.run.withSuccessHandler(function(res){
-                if (!res || !res.success) { body.innerHTML='<tr><td colspan="7" class="p-5 text-center text-red-500">'+escapeHtml(res&&res.error||'Gagal memuat data.')+'</td></tr>'; return; }
+                if (!res || !res.success) { body.innerHTML='<tr><td colspan="6" class="p-5 text-center text-red-500">'+escapeHtml(res&&res.error||'Gagal memuat data.')+'</td></tr>'; return; }
                 hargaNettData = Array.isArray(res.data)?res.data:[];
                 hargaNettCashbackChoices = Array.isArray(res.cashbackChoices)?res.cashbackChoices:[];
                 hargaNettQuarterChoices = Array.isArray(res.quarterChoices)?res.quarterChoices:[];
@@ -7877,7 +7892,7 @@ startAutoRefresh();
                 const qsel=document.getElementById('filterQuarterHargaNett');
                 if(qsel){const oldq=qsel.value;qsel.innerHTML='<option value="">Pilih Quartal (CASHBACK K)</option>'+hargaNettQuarterChoices.map(c=>'<option value="'+escapeHtml(c.value)+'">'+escapeHtml(c.label)+'</option>').join('');if(hargaNettQuarterChoices.some(c=>c.value===oldq))qsel.value=oldq;else if(hargaNettQuarterChoices.length)qsel.value=hargaNettQuarterChoices[0].value;}
                 renderHargaNett();
-            }).withFailureHandler(function(err){ body.innerHTML='<tr><td colspan="7" class="p-5 text-center text-red-500">'+escapeHtml(err&&err.message||'Gagal memuat data.')+'</td></tr>'; }).getHargaNettData(!!forceRefresh);
+            }).withFailureHandler(function(err){ body.innerHTML='<tr><td colspan="6" class="p-5 text-center text-red-500">'+escapeHtml(err&&err.message||'Gagal memuat data.')+'</td></tr>'; }).getHargaNettData(!!forceRefresh);
         }
         function renderHargaNett() {
             const body=document.getElementById('hargaNettBody'); if(!body)return;
@@ -7886,7 +7901,7 @@ startAutoRefresh();
             const quarter=String((document.getElementById('filterQuarterHargaNett')||{}).value||'').trim();
             const productType=String((document.getElementById('filterProdukHargaNett')||{}).value||'').trim().toUpperCase();
             const rows=hargaNettData.filter(x=>String(x.produk||'').toLowerCase().includes(q)&&(!productType||String(x.productType||'').toUpperCase()===productType));
-            if(!rows.length){body.innerHTML='<tr><td colspan="7" class="p-5 text-center text-slate-400">Tidak ada produk aktif sesuai filter.</td></tr>';return;}
+            if(!rows.length){body.innerHTML='<tr><td colspan="6" class="p-5 text-center text-slate-400">Tidak ada produk aktif sesuai filter.</td></tr>';return;}
             const disc=Number((document.getElementById('discountHargaNett')||{}).value||0); const discountType=String((document.getElementById('discountTypeHargaNett')||{}).value||'amount');
             body.innerHTML=rows.map(function(x){
                 const base=Number(x.pricelist||0); const hasCtmProdukF=/CTM/i.test(String(x.ctmProdukF||'')); const discountAmount=(discountType==='percent'?base*disc/100:disc); const discountedPricelist=hasCtmProdukF?base:Math.max(0,base-discountAmount); const nett=Math.max(0,discountedPricelist-Number(x.disc||0));
@@ -7895,7 +7910,7 @@ startAutoRefresh();
                 const literText=String(x.liter==null?'':x.liter).replace(/\./g,'').replace(',','.'); const literValue=Number(literText)||0;
                 const cashbackPerLiter=campaign ? Number(hargaNettCashbackMap[cashbackKey]||0) : 0; const cashbackAmount=cashbackPerLiter*literValue; const extraCashback=Number(hargaNettExtraCashback[String(x.produk||'')]||0); const nettFinal=Math.max(0,discountedPricelist-cashbackAmount-extraCashback);
                 return '<tr class="odd:bg-white even:bg-slate-50">'+
-                '<td class="p-2 border whitespace-nowrap">'+escapeHtml(x.produk)+'</td><td class="p-2 border text-center">'+escapeHtml(x.liter)+'</td><td class="p-2 border text-right whitespace-nowrap">'+formatHargaNett(discountedPricelist)+'</td><td class="p-2 border text-right whitespace-nowrap">'+formatHargaNett(cashbackAmount)+'</td><td class="p-2 border text-right"><input type="number" min="0" step="any" value="'+(extraCashback||0)+'" aria-label="Extra Cashback '+escapeHtml(x.produk)+'" onchange="setHargaNettExtraCashback(\''+String(x.produk||'').replace(/\\/g,'\\\\').replace(/\'/g,"\\'")+'\',this.value)" class="w-28 min-w-20 px-2 py-1 border border-slate-200 rounded text-right"></td><td class="p-2 border text-right font-bold whitespace-nowrap">'+formatHargaNett(nettFinal)+'</td><td class="p-2 border whitespace-nowrap">'+escapeHtml(campaignText)+'</td></tr>';
+                '<td class="p-2 border whitespace-nowrap harga-nett-product-sticky">'+escapeHtml(x.produk)+'</td><td class="p-2 border text-center">'+escapeHtml(x.liter)+'</td><td class="p-2 border text-right whitespace-nowrap">'+formatHargaNett(discountedPricelist)+'</td><td class="p-2 border text-right whitespace-nowrap">'+formatHargaNett(cashbackAmount)+'</td><td class="p-2 border text-right"><input type="number" min="0" step="any" value="'+(extraCashback||0)+'" aria-label="Extra Cashback '+escapeHtml(x.produk)+'" onchange="setHargaNettExtraCashback(\''+String(x.produk||'').replace(/\\/g,'\\\\').replace(/\'/g,"\\'")+'\',this.value)" class="w-28 min-w-20 px-2 py-1 border border-slate-200 rounded text-right"></td><td class="p-2 border text-right font-bold whitespace-nowrap">'+formatHargaNett(nettFinal)+'</td></tr>';
             }).join('');
         }
         function setHargaNettExtraCashback(produk, value) { hargaNettExtraCashback[String(produk||'')] = Math.max(0, Number(value)||0); renderHargaNett(); }
