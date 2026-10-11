@@ -3985,14 +3985,14 @@ body{background:
                 <div id="tabHargaNett" class="tab-content hidden space-y-3">
                     <div class="flex justify-between items-center border-b border-slate-200 pb-2">
                         <div><h2 class="text-base font-bold text-slate-800">Harga Nett</h2></div>
-                        <button type="button" onclick="loadHargaNett(true)" class="px-3 py-2 rounded-xl bg-emerald-700 text-white text-xs font-bold">↻ Muat ulang</button>
+                        <div class="flex gap-2"><button type="button" onclick="exportHargaNettPDF()" class="px-3 py-2 rounded-xl bg-slate-700 text-white text-xs font-bold">Export PDF</button><button type="button" onclick="loadHargaNett(true)" class="px-3 py-2 rounded-xl bg-emerald-700 text-white text-xs font-bold">↻ Muat ulang</button></div>
                     </div>
                     <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-3">
                         <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3 items-center">
                           <input id="searchHargaNett" oninput="renderHargaNett()" placeholder="Cari produk..." class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs">
+                          <div class="flex items-center justify-center gap-1"><button type="button" id="filterProdukPCOHargaNett" onclick="setHargaNettProductType('PCO')" class="flex-1 px-2 py-2.5 border border-slate-200 rounded-xl text-xs">PCO</button><button type="button" id="filterProdukMCOHargaNett" onclick="setHargaNettProductType('MCO-4T')" class="flex-1 px-2 py-2.5 border border-slate-200 rounded-xl text-xs">MCO-4T</button><input type="hidden" id="filterProdukHargaNett" value=""></div>
                           <input id="filterCashbackHargaNett" list="hargaNettCashbackOptions" oninput="renderHargaNett()" placeholder="Cari Cashback..." class="w-full min-w-0 px-3 py-2.5 border border-slate-200 rounded-xl text-xs"><datalist id="hargaNettCashbackOptions"></datalist>
                           <input id="filterQuarterHargaNett" list="hargaNettQuarterOptions" oninput="renderHargaNett()" placeholder="Cari Quartal..." class="w-full min-w-0 px-3 py-2.5 border border-slate-200 rounded-xl text-xs"><datalist id="hargaNettQuarterOptions"></datalist>
-                          <div class="flex items-center justify-center gap-1"><button type="button" id="filterProdukPCOHargaNett" onclick="setHargaNettProductType('PCO')" class="flex-1 px-2 py-2.5 border border-slate-200 rounded-xl text-xs">PCO</button><button type="button" id="filterProdukMCOHargaNett" onclick="setHargaNettProductType('MCO-4T')" class="flex-1 px-2 py-2.5 border border-slate-200 rounded-xl text-xs">MCO-4T</button><input type="hidden" id="filterProdukHargaNett" value=""></div>
                           <input id="discountHargaNett" type="number" min="0" max="100" step="0.01" oninput="renderHargaNett()" placeholder="Discount (%)" aria-label="Discount persen" class="w-full min-w-0 px-3 py-2.5 border border-slate-200 rounded-xl text-xs">
                         </div>
                         <div class="overflow-x-auto rounded-lg border border-slate-200"><table class="text-[10px] border-collapse" style="width:max-content;min-width:0;table-layout:auto"><thead><tr class="bg-slate-100 text-slate-700">
@@ -7933,6 +7933,29 @@ startAutoRefresh();
                 return '<tr class="odd:bg-white even:bg-slate-50">'+
                 '<td class="p-2 border whitespace-nowrap harga-nett-product-sticky">'+escapeHtml(x.produk)+'</td><td class="p-2 border text-center">'+escapeHtml(x.liter)+'</td><td class="p-2 border text-right whitespace-nowrap">'+formatHargaNett(discountedPricelist)+'</td><td class="p-2 border text-right whitespace-nowrap">'+formatHargaNett(cashbackAmount)+'</td><td class="p-2 border text-right"><input type="number" min="0" step="any" value="'+(hargaNettExtraCashback[String(x.produk||'')] == null ? '' : hargaNettExtraCashback[String(x.produk||'')])+'" aria-label="Extra Cashback '+escapeHtml(x.produk)+'" onchange="setHargaNettExtraCashback(\''+String(x.produk||'').replace(/\\/g,'\\\\').replace(/\'/g,"\\'")+'\',this.value)" class="w-28 min-w-20 px-2 py-1 border border-slate-200 rounded text-right"></td><td class="p-2 border text-right font-bold whitespace-nowrap">'+formatHargaNett(nettFinal)+'</td></tr>';
             }).join('');
+        }
+        function exportHargaNettPDF() {
+            const campaign=String((document.getElementById('filterCashbackHargaNett')||{}).value||'').trim();
+            const quarter=String((document.getElementById('filterQuarterHargaNett')||{}).value||'').trim();
+            const discPercent=Math.min(100,Math.max(0,Number((document.getElementById('discountHargaNett')||{}).value||0)));
+            const rows=(hargaNettData||[]).filter(function(x){return !/CTM/i.test(String(x.ctmProdukF||''));});
+            if(!rows.length){showModal('Export PDF','Tidak ada produk tanpa CTM untuk diekspor.');return;}
+            const esc=function(v){return escapeHtml(v==null?'':String(v));};
+            const body=rows.map(function(x){
+                const base=Number(x.pricelist||0), hasCtm=/CTM/i.test(String(x.ctmProdukF||''));
+                const pricelist=hasCtm?base:Math.max(0,base-base*discPercent/100);
+                const campaignText=(campaign||'')+(x.kategoriCashback?((campaign?' - ':'')+String(x.kategoriCashback).trim()):'')+(quarter?(((campaign||x.kategoriCashback)?' - ':'')+quarter):'');
+                const key=String(campaignText||'').trim().replace(/\s+/g,' ').toUpperCase();
+                const literText=String(x.liter==null?'':x.liter).replace(/\./g,'').replace(',','.');
+                const cashback=(campaign?Number(hargaNettCashbackMap[key]||0):0)*(Number(literText)||0);
+                const extra=Number(hargaNettExtraCashback[String(x.produk||'')]||0);
+                const nett=Math.max(0,pricelist-cashback-extra);
+                return '<tr><td>'+esc(x.produk)+'</td><td>'+esc(x.liter)+'</td><td>'+formatHargaNett(pricelist)+'</td><td>'+formatHargaNett(cashback)+'</td><td>'+formatHargaNett(extra)+'</td><td>'+formatHargaNett(nett)+'</td></tr>';
+            }).join('');
+            const win=window.open('','_blank');
+            if(!win){showModal('Export PDF','Browser memblokir jendela cetak. Izinkan pop-up untuk Export PDF.');return;}
+            win.document.write('<!doctype html><html><head><title>Harga Nett</title><style>body{font-family:Arial,sans-serif;padding:18px;color:#111}h1{font-size:18px;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #bbb;padding:5px;text-align:left}th{background:#eee}td:nth-child(n+2){white-space:nowrap}@page{size:A4 landscape;margin:10mm}</style></head><body><h1>Harga Nett</h1><table><thead><tr><th>PRODUK</th><th>LITER</th><th>PRICELIST</th><th>CASHBACK</th><th>EXTRA CASHBACK</th><th>NETT</th></tr></thead><tbody>'+body+'</tbody></table><script>window.onload=function(){window.print();};<\/script></body></html>');
+            win.document.close();
         }
         function setHargaNettProductType(type) { const el=document.getElementById('filterProdukHargaNett'); if(!el)return; el.value=(el.value===type?'':type); ['PCO','MCO-4T'].forEach(function(t){const b=document.getElementById(t==='PCO'?'filterProdukPCOHargaNett':'filterProdukMCOHargaNett');if(b){const active=el.value===t;b.classList.toggle('bg-emerald-700',active);b.classList.toggle('text-white',active);b.classList.toggle('border-emerald-700',active);}}); renderHargaNettCashbackChoices(); renderHargaNett(); }
         function setHargaNettExtraCashback(produk, value) { hargaNettExtraCashback[String(produk||'')] = Math.max(0, Number(value)||0); renderHargaNett(); }
@@ -12361,6 +12384,11 @@ function renderPencapaianCards(data) {
 </style>
 
 <style id="harga-nett-desktop-mobile-sizing-fix">
+/* LITER dan PRICELIST disembunyikan pada tabel layar saja; tetap dihitung dan masuk Export PDF */
+#tabHargaNett .overflow-x-auto table th:nth-child(2),
+#tabHargaNett .overflow-x-auto table td:nth-child(2),
+#tabHargaNett .overflow-x-auto table th:nth-child(3),
+#tabHargaNett .overflow-x-auto table td:nth-child(3) { display: none !important; }
 /* Desktop Harga Nett: gunakan ruang yang tersedia, terpisah dari aturan mobile */
 @media (min-width: 768px) {
   #tabHargaNett .overflow-x-auto table {
