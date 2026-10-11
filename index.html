@@ -12346,3 +12346,34 @@ function renderPencapaianCards(data) {
 .home-rebuild-outlet-table th.home-volume-header, .home-rebuild-outlet-table td.home-volume-cell { text-align: center !important; }
 @media (max-width: 640px) { .home-rebuild-outlet-table th.home-volume-header, .home-rebuild-outlet-table td.home-volume-cell { text-align: center !important; } }
 </style>
+
+<style id="harga-nett-desktop-mobile-sizing-fix">
+/* Desktop Harga Nett: gunakan ruang yang tersedia, terpisah dari aturan mobile */
+@media (min-width: 768px) {
+  #tabHargaNett .overflow-x-auto table {
+    width: 100% !important;
+    min-width: 100% !important;
+    table-layout: auto !important;
+    font-size: 13px !important;
+  }
+  #tabHargaNett .overflow-x-auto table th,
+  #tabHargaNett .overflow-x-auto table td {
+    padding: 8px 10px !important;
+    line-height: 1.35 !important;
+  }
+}
+/* Mobile only: tabel lebih ringkas dan input Extra Cashback lebih pendek */
+@media (max-width: 767px) {
+  #tabHargaNett .overflow-x-auto table { font-size: 8px !important; }
+  #tabHargaNett .overflow-x-auto table th { font-size: 7.5px !important; padding: 1px 3px !important; }
+  #tabHargaNett .overflow-x-auto table td { font-size: 8px !important; padding: 1px 3px !important; line-height: 1 !important; }
+  #tabHargaNett .overflow-x-auto table td input[type="number"] {
+    height: 20px !important;
+    min-height: 20px !important;
+    padding: 0 2px !important;
+    font-size: 8px !important;
+    line-height: 18px !important;
+    box-sizing: border-box !important;
+  }
+}
+</style>
