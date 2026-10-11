@@ -7889,7 +7889,7 @@ startAutoRefresh();
             if(!rows.length){body.innerHTML='<tr><td colspan="7" class="p-5 text-center text-slate-400">Tidak ada produk aktif sesuai filter.</td></tr>';return;}
             const disc=Number((document.getElementById('discountHargaNett')||{}).value||0); const discountType=String((document.getElementById('discountTypeHargaNett')||{}).value||'amount');
             body.innerHTML=rows.map(function(x){
-                const base=Number(x.pricelist||0); const discountAmount=(discountType==='percent'?base*disc/100:disc); const discountedPricelist=Math.max(0,base-discountAmount); const nett=Math.max(0,discountedPricelist-Number(x.disc||0));
+                const base=Number(x.pricelist||0); const hasCtmProdukF=/CTM/i.test(String(x.ctmProdukF||'')); const discountAmount=(discountType==='percent'?base*disc/100:disc); const discountedPricelist=hasCtmProdukF?base:Math.max(0,base-discountAmount); const nett=Math.max(0,discountedPricelist-Number(x.disc||0));
                 const campaignText=(campaign ? campaign : '') + (x.kategoriCashback ? ((campaign ? ' - ' : '') + String(x.kategoriCashback).trim()) : '') + (quarter ? (((campaign || x.kategoriCashback) ? ' - ' : '') + quarter) : '');
                 const cashbackKey=String(campaignText||'').trim().replace(/\s+/g,' ').toUpperCase();
                 const literText=String(x.liter==null?'':x.liter).replace(/\./g,'').replace(',','.'); const literValue=Number(literText)||0;
