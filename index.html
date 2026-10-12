@@ -3300,7 +3300,16 @@ body {
                 const contractTarget=Number(item.contractTarget||0);
                 const contractGap=contractVolume-contractTarget;
                 const contractAch=contractTarget>0?(contractVolume/contractTarget)*100:0;
-                const contractPeriod=(item.contractStart&&item.contractEnd) ? (item.contractStart+' s/d '+item.contractEnd) : 'Periode kontrak belum tersedia';
+                const formatContractDate = function(value) {
+                    if (!value) return '-';
+                    const raw = String(value).trim();
+                    const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+                    const d = m ? new Date(Number(m[1]), Number(m[2])-1, Number(m[3])) : new Date(raw);
+                    return isNaN(d.getTime()) ? raw : d.toLocaleDateString('id-ID', {day:'2-digit', month:'long', year:'numeric'});
+                };
+                const contractStartDisplay = formatContractDate(item.contractStart);
+                const contractEndDisplay = formatContractDate(item.contractEnd);
+                const contractPeriod=(item.contractStart&&item.contractEnd) ? (contractStartDisplay+' s/d '+contractEndDisplay) : 'Periode kontrak belum tersedia';
                 const categoryRows=allCats.slice(0,6).map(function(r){return `<div class="monitoring-category-row"><span class="cat-name">${escapeHtml(r.kategori||'Lainnya')}</span><span class="cat-number">${formatNumberID(r.volume,1)}</span><span class="cat-number">${formatNumberID(r.karton,1)}</span><span class="cat-rate">${formatNumberID(r.pointRate,1)}</span><strong>${formatNumberID(r.point,1)} pt</strong></div>`;}).join('');
                 html+=`<div class="monitoring-outlet-card">
                     <div class="monitoring-card-head"><div class="flex justify-between gap-2"><div><div class="monitoring-card-kicker">${escapeHtml(item.dayVisit||'Outlet')}</div><div class="monitoring-card-title">${escapeHtml(item.outlet||'-')}</div><div class="monitoring-card-sub">${escapeHtml(selectedQuarter)} • Actual DAMEN</div></div><div class="w-9 h-9 rounded-xl bg-white border border-emerald-100 flex items-center justify-center text-lg">🏪</div></div></div>
@@ -3345,6 +3354,11 @@ body {
                                     <div class="text-[8px] font-bold text-slate-400 uppercase">Ach %</div>
                                     <div class="text-[11px] font-extrabold text-slate-800 mt-0.5">${contractTarget>0?formatPercentID(contractAch):'-'}</div>
                                 </div>
+                            </div>
+                            <div class="mt-2 rounded-lg bg-white/80 border border-emerald-100 px-2.5 py-2 text-[9px] text-slate-600">
+                                <span class="font-bold text-slate-500">Start</span> ${escapeHtml(contractStartDisplay)}
+                                <span class="mx-1 text-slate-400">s/d</span>
+                                <span class="font-bold text-slate-500">End</span> ${escapeHtml(contractEndDisplay)}
                             </div>
                             <div class="text-[8px] text-slate-500 mt-2"></div>
                         </div>
