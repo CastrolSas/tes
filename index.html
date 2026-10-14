@@ -12617,3 +12617,57 @@ function renderPencapaianCards(data) {
   }
 }
 </style>
+<style id="harga-nett-mobile-no-overlap-final">
+/* Khusus mobile Harga Nett: seluruh kolom tetap dalam layar dan tidak saling menimpa. */
+@media (max-width: 767px) {
+  #tabHargaNett #hargaNettTableView .overflow-x-auto {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+  }
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table th,
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table td {
+    box-sizing: border-box !important;
+    padding: 4px 2px !important;
+    font-size: 6.5px !important;
+    line-height: 1.2 !important;
+    vertical-align: middle !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table th:first-child,
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table td:first-child {
+    width: 39% !important;
+    max-width: 39% !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table th:nth-child(2),
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table td:nth-child(2) { width: 16% !important; }
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table th:nth-child(3),
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table td:nth-child(3) { width: 13% !important; }
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table th:nth-child(4),
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table td:nth-child(4) { width: 18% !important; }
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table th:nth-child(5),
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table td:nth-child(5) { width: 14% !important; }
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table td input[type="number"] {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 2px !important;
+    font-size: 8px !important;
+    box-sizing: border-box !important;
+  }
+}
+</style>
