@@ -12687,3 +12687,26 @@ function renderPencapaianCards(data) {
   }
 }
 </style>
+
+
+<style id="harga-nett-mobile-horizontal-scroll">
+/* Mobile: tabel Harga Nett dibuat lebih lebar dan dapat digeser horizontal. */
+@media (max-width: 767px) {
+  #tabHargaNett #hargaNettTableView .overflow-x-auto {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x pan-y !important;
+    overscroll-behavior-x: contain !important;
+  }
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table {
+    width: 760px !important;
+    min-width: 760px !important;
+    max-width: none !important;
+    table-layout: fixed !important;
+  }
+}
+</style>
