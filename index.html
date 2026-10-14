@@ -4007,18 +4007,61 @@ body{background:
                         <th class="p-2 border harga-nett-product-sticky">PRODUK</th><th class="p-2 border">PRICELIST</th><th class="p-2 border">LITER</th><th class="p-2 border">CASHBACK</th><th class="p-2 border">EXTRA CASHBACK</th><th class="p-2 border">NETT</th>
                         </tr></thead><tbody id="hargaNettBody"><tr><td colspan="6" class="p-5 text-center text-slate-400">Klik menu Harga Nett untuk memuat data.</td></tr></tbody></table></div>
                         <div id="hargaNettInvoiceView" class="hidden mt-1">
-                          <div class="mx-auto max-w-4xl border border-slate-200 rounded-xl bg-white shadow-sm overflow-hidden">
-                            <div class="bg-slate-800 text-white px-5 py-4 flex flex-wrap items-start justify-between gap-3">
-                              <div><div class="text-lg font-extrabold tracking-wide">SIMULASI INVOICE</div><div class="text-xs text-slate-300 mt-1">Preview berdasarkan data Harga Nett yang sedang ditampilkan</div></div>
-                              <div class="text-right"><div class="text-xs text-slate-300">STATUS</div><div class="inline-block mt-1 px-2 py-1 rounded-md bg-amber-400 text-slate-900 text-[10px] font-extrabold">SIMULASI</div></div>
+                          <div id="hargaNettInvoicePaper" class="mx-auto max-w-5xl border border-slate-200 rounded-xl bg-white shadow-sm overflow-hidden">
+                            <div class="bg-emerald-900 text-white px-4 sm:px-5 py-4 flex flex-wrap items-start justify-between gap-3">
+                              <div><div class="text-lg font-extrabold tracking-wide">SIMULASI INVOICE</div><div class="text-xs text-emerald-100 mt-1">Pratinjau perhitungan berdasarkan data Harga Nett</div></div>
+                              <div class="text-right"><div class="text-xs text-emerald-100">STATUS</div><div class="inline-block mt-1 px-2 py-1 rounded-md bg-amber-300 text-slate-900 text-[10px] font-extrabold">SIMULASI</div></div>
                             </div>
-                            <div class="p-4 sm:p-5">
-                              <div class="grid grid-cols-2 gap-3 mb-4 text-xs">
-                                <div class="rounded-lg bg-slate-50 border border-slate-100 p-3"><div class="text-slate-400 uppercase text-[9px] font-bold tracking-wide">Tanggal Simulasi</div><div id="hargaNettInvoiceDate" class="font-bold text-slate-700 mt-1">-</div></div>
-                                <div class="rounded-lg bg-slate-50 border border-slate-100 p-3"><div class="text-slate-400 uppercase text-[9px] font-bold tracking-wide">Jumlah Produk Ditampilkan</div><div id="hargaNettInvoiceCount" class="font-bold text-slate-700 mt-1">0 produk</div></div>
+                            <div class="p-3 sm:p-5 space-y-3">
+                              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div class="border border-slate-200 rounded-xl overflow-hidden">
+                                  <div class="px-3 py-2.5 bg-slate-50 border-b border-slate-200 font-bold text-xs text-slate-700">1. Informasi Invoice & Pelanggan</div>
+                                  <div class="p-3 grid grid-cols-2 gap-2">
+                                    <div><label class="block text-[10px] font-bold text-slate-500 mb-1">No. Invoice</label><input id="hnInvNo" class="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs" value="INV-SIM-001"></div>
+                                    <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Tanggal</label><input id="hnInvDate" type="date" class="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs"></div>
+                                    <div class="col-span-2"><label class="block text-[10px] font-bold text-slate-500 mb-1">Nama Toko / Pelanggan</label><input id="hnCustomer" class="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs" placeholder="Masukkan nama toko / pelanggan"></div>
+                                    <div class="col-span-2"><label class="block text-[10px] font-bold text-slate-500 mb-1">Channel Cashback</label><select id="hnChannelSelect" onchange="onHargaNettInvoiceChannelChange(this.value)" class="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs"><option value="">Pilih Channel Cashback...</option></select><p class="text-[9px] text-slate-400 mt-1">Quartal dan Discount tetap mengikuti filter Harga Nett di atas.</p></div>
+                                  </div>
+                                </div>
+                                <div class="border border-slate-200 rounded-xl overflow-hidden">
+                                  <div class="px-3 py-2.5 bg-slate-50 border-b border-slate-200 font-bold text-xs text-slate-700">2. Tambah Item Produk</div>
+                                  <div class="p-3 space-y-2">
+                                    <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Pilih Produk</label><select id="hnProductSelect" class="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs" onchange="updateHargaNettInvoiceProduct()"><option value="">Pilih produk...</option></select></div>
+                                    <div class="grid grid-cols-3 gap-2">
+                                      <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Satuan</label><select id="hnUnit" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-xs" onchange="updateHargaNettInvoiceProduct()"><option value="DUS">Dus</option><option value="PCS">Pcs</option></select></div>
+                                      <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Jumlah</label><input id="hnQty" type="number" min="1" value="1" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-xs" oninput="updateHargaNettInvoiceProduct()"></div>
+                                      <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Diskon (%)</label><input id="hnDisc" type="number" min="0" max="100" step="0.1" value="0" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-xs" oninput="updateHargaNettInvoiceProduct()"></div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                      <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Extra Cashback (Rp/Pcs)</label><input id="hnExtra" type="number" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-xs" oninput="updateHargaNettInvoiceProduct()"></div>
+                                      <div class="rounded-lg bg-slate-50 border border-slate-100 p-2"><div class="text-[9px] text-slate-400">Harga Nett / Pcs</div><div id="hnNettPreview" class="text-sm font-extrabold text-emerald-800 mt-1">Rp 0</div></div>
+                                    </div>
+                                    <div id="hnProductNotice" class="text-[9px] text-amber-700"></div>
+                                    <button type="button" onclick="addHargaNettInvoiceItem()" class="w-full rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-2.5">＋ Tambahkan Item ke Invoice</button>
+                                  </div>
+                                </div>
                               </div>
-                              <div class="overflow-x-auto border border-slate-200 rounded-lg"><table class="w-full text-xs border-collapse"><thead><tr class="bg-slate-100 text-slate-700"><th class="p-2 text-left border-b border-slate-200">Produk</th><th class="p-2 text-center border-b border-slate-200">Liter</th><th class="p-2 text-right border-b border-slate-200">Pricelist</th><th class="p-2 text-right border-b border-slate-200">Cashback</th><th class="p-2 text-right border-b border-slate-200">Extra Cashback</th><th class="p-2 text-right border-b border-slate-200">Nett</th></tr></thead><tbody id="hargaNettInvoiceBody"><tr><td colspan="6" class="p-5 text-center text-slate-400">Data belum dimuat.</td></tr></tbody></table></div>
-                              <div class="mt-3 text-[10px] text-slate-400">Catatan: ini hanya tampilan simulasi dari daftar Harga Nett, bukan invoice transaksi atau dokumen pajak.</div>
+                              <div class="border border-slate-200 rounded-xl overflow-hidden">
+                                <div class="px-3 py-2.5 bg-slate-50 border-b border-slate-200 flex justify-between items-center gap-2"><span class="font-bold text-xs text-slate-700">3. Rincian Invoice Detail</span><span id="hnItemCount" class="rounded-full bg-white border border-slate-200 px-2 py-1 text-[10px] text-slate-600">0 Item</span></div>
+                                <div class="overflow-x-auto">
+                                  <table class="w-full min-w-[760px] text-xs border-collapse">
+                                    <thead><tr class="bg-slate-100 text-slate-600"><th class="p-2 text-left border-b border-slate-200">SKU / Produk</th><th class="p-2 text-center border-b border-slate-200">Qty</th><th class="p-2 text-right border-b border-slate-200">Harga Unit</th><th class="p-2 text-right border-b border-slate-200">Subtotal</th><th class="p-2 text-right border-b border-slate-200">Diskon</th><th class="p-2 text-right border-b border-slate-200">Cashback</th><th class="p-2 text-right border-b border-slate-200">Extra Cashback</th><th class="p-2 text-right border-b border-slate-200">Nett Subtotal</th><th class="p-2 text-center border-b border-slate-200"> </th></tr></thead>
+                                    <tbody id="hnCartBody"><tr><td colspan="9" class="p-5 text-center text-slate-400">Belum ada item ditambahkan.</td></tr></tbody>
+                                  </table>
+                                </div>
+                                <div class="p-3 bg-slate-50 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                  <div class="text-[10px] text-slate-500"><div class="font-bold text-slate-700 mb-1">Catatan Pembayaran / Keterangan</div><p class="mb-1">1. Nilai cashback mengikuti pilihan Cashback dan Quartal.</p><p>2. Ini hanya simulasi; belum menyimpan transaksi ke Spreadsheet.</p></div>
+                                  <div class="bg-white border border-slate-200 rounded-lg p-3 space-y-2">
+                                    <div class="flex justify-between gap-3 text-xs text-slate-500"><span>Subtotal Pricelist</span><strong id="hnGross" class="text-slate-800">Rp 0</strong></div>
+                                    <div class="flex justify-between gap-3 text-xs text-red-600"><span>Total Diskon Produk</span><strong id="hnDiscountTotal">-Rp 0</strong></div>
+                                    <div class="flex justify-between gap-3 text-xs text-emerald-700"><span>Total Cashback</span><strong id="hnCashbackTotal">-Rp 0</strong></div>
+                                    <div class="flex justify-between gap-3 text-xs text-blue-700"><span>Total Extra Cashback</span><strong id="hnExtraTotal">-Rp 0</strong></div>
+                                    <div class="flex justify-between items-center gap-3 border-t border-slate-200 pt-2"><label for="hnBonus" class="text-xs text-slate-500">Bonus Cashback (Rp)</label><input id="hnBonus" type="number" min="0" value="0" class="w-28 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-right" oninput="renderHargaNettInvoiceCart()"></div>
+                                    <div class="flex justify-between items-center gap-3 border-t border-slate-200 pt-2"><span class="font-extrabold text-sm text-slate-800">Grand Total Nett</span><strong id="hnGrandTotal" class="text-lg font-extrabold text-emerald-800">Rp 0</strong></div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="flex flex-wrap justify-end gap-2 no-print"><button type="button" onclick="clearHargaNettInvoiceCart()" class="px-3 py-2 rounded-lg border border-slate-200 text-slate-600 text-xs font-bold">Kosongkan Item</button><button type="button" onclick="printHargaNettInvoice()" class="px-3 py-2 rounded-lg bg-slate-800 text-white text-xs font-bold">🖨 Cetak / Print</button></div>
                             </div>
                           </div>
                         </div>
@@ -7873,27 +7916,150 @@ startAutoRefresh();
             if(tableBtn){tableBtn.classList.toggle('bg-emerald-700',!invoice);tableBtn.classList.toggle('text-white',!invoice);tableBtn.classList.toggle('text-slate-600',invoice);tableBtn.setAttribute('aria-pressed',String(!invoice));}
             if(invoiceBtn){invoiceBtn.classList.toggle('bg-emerald-700',invoice);invoiceBtn.classList.toggle('text-white',invoice);invoiceBtn.classList.toggle('text-slate-600',!invoice);invoiceBtn.setAttribute('aria-pressed',String(invoice));}
         }
+        let hargaNettInvoiceCart = [];
+        function getHargaNettInvoiceContext(prod) {
+            const campaign=String((document.getElementById('filterCashbackHargaNett')||{}).value||'').trim();
+            const quarter=String((document.getElementById('filterQuarterHargaNett')||{}).value||'').trim();
+            const discPercent=Math.min(100,Math.max(0,Number((document.getElementById('discountHargaNett')||{}).value||0)));
+            const campaignText=(campaign||'')+(prod && prod.kategoriCashback?((campaign?' - ':'')+String(prod.kategoriCashback).trim()):'')+(quarter?(((campaign||prod && prod.kategoriCashback)?' - ':'')+quarter):'');
+            const cashbackKey=String(campaignText||'').trim().replace(/\s+/g,' ').toUpperCase();
+            const literText=String(prod && prod.liter!=null?prod.liter:'').replace(/\./g,'').replace(',','.');
+            const liter=Number(literText)||0;
+            const base=Number(prod && prod.pricelist||0);
+            const isCtm=/CTM/i.test(String(prod && (prod.ctmProdukF||prod.produk)||''));
+            const grossPcs=isCtm?base:Math.max(0,base-base*discPercent/100);
+            const cbPerLiter=campaign?Number(hargaNettCashbackMap[cashbackKey]||0):0;
+            const cashbackPerPcs=cbPerLiter*liter;
+            return {campaign,quarter,discPercent,liter,base,grossPcs,cashbackPerPcs,isCtm};
+        }
+        function parseHargaNettPack(prod) {
+            const raw=String(prod && prod.pack!=null?prod.pack:'').trim().replace(/\./g,'').replace(',','.');
+            const pack=Number(raw);
+            return pack>0?pack:1;
+        }
         function renderHargaNettInvoice(rows,campaign,quarter,discPercent) {
-            const invoiceBody=document.getElementById('hargaNettInvoiceBody');
-            const count=document.getElementById('hargaNettInvoiceCount');
-            const date=document.getElementById('hargaNettInvoiceDate');
-            if(date)date.textContent=new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
-            if(count)count.textContent=(rows||[]).length+' produk';
-            if(!invoiceBody)return;
-            if(!rows||!rows.length){invoiceBody.innerHTML='<tr><td colspan="6" class="p-5 text-center text-slate-400">Tidak ada produk sesuai filter.</td></tr>';return;}
-            const esc=function(v){return escapeHtml(v==null?'':String(v));};
-            invoiceBody.innerHTML=rows.map(function(x){
-                const base=Number(x.pricelist||0), hasCtmProdukF=/CTM/i.test(String(x.ctmProdukF||''));
-                const discountedPricelist=hasCtmProdukF?base:Math.max(0,base-(base*(Number(discPercent)||0)/100));
-                const campaignText=(campaign?campaign:'')+(x.kategoriCashback?((campaign?' - ':'')+String(x.kategoriCashback).trim()):'')+(quarter?(((campaign||x.kategoriCashback)?' - ':'')+quarter):'');
-                const cashbackKey=String(campaignText||'').trim().replace(/\s+/g,' ').toUpperCase();
-                const literText=String(x.liter==null?'':x.liter).replace(/\./g,'').replace(',','.');
-                const cashback=(campaign?Number(hargaNettCashbackMap[cashbackKey]||0):0)*(Number(literText)||0);
-                const extra=Number(hargaNettExtraCashback[String(x.produk||'')]||0);
-                const nett=Math.max(0,discountedPricelist-cashback-extra);
-                const star=(hasCtmProdukF||/CTM/i.test(String(x.produk||'')))?' <span style="color:#eab308;font-weight:700" aria-label="Produk CTM">★</span>':'';
-                return '<tr class="border-b border-slate-100 last:border-0"><td class="p-2 font-semibold text-slate-700">'+esc(x.produk)+star+'</td><td class="p-2 text-center text-slate-600">'+esc(x.liter)+'</td><td class="p-2 text-right whitespace-nowrap">'+formatHargaNett(discountedPricelist)+'</td><td class="p-2 text-right whitespace-nowrap">'+formatHargaNett(cashback)+'</td><td class="p-2 text-right whitespace-nowrap">'+formatHargaNett(extra)+'</td><td class="p-2 text-right font-extrabold whitespace-nowrap">'+formatHargaNett(nett)+'</td></tr>';
+            const select=document.getElementById('hnProductSelect');
+            const channel=document.getElementById('hnChannelSelect');
+            const date=document.getElementById('hnInvDate');
+            if(date&&!date.value){const now=new Date();date.value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');}
+            if(channel){
+                const current=String(campaign||'');
+                channel.innerHTML='<option value="">Pilih Channel Cashback...</option>'+(hargaNettCashbackChoices||[]).map(function(item){return '<option value="'+escapeHtml(item.value)+'">'+escapeHtml(item.label||item.value)+'</option>';}).join('');
+                channel.value=current;
+            }
+            if(select){
+                const previous=select.value;
+                const products=(rows||[]).slice().sort((a,b)=>String(a.produk||'').localeCompare(String(b.produk||''),'id',{sensitivity:'base'}));
+                select.innerHTML='<option value="">Pilih produk...</option>'+products.map(function(x){return '<option value="'+escapeHtml(String(x.kode||x.produk||''))+'">'+escapeHtml(x.produk||'')+( /CTM/i.test(String(x.ctmProdukF||x.produk||''))?' ★':'')+'</option>';}).join('');
+                if(products.some(function(x){return String(x.kode||x.produk||'')===previous;}))select.value=previous;
+            }
+            recalculateHargaNettInvoiceCart();
+            updateHargaNettInvoiceProduct();
+            renderHargaNettInvoiceCart();
+        }
+        function onHargaNettInvoiceChannelChange(value) {
+            const input=document.getElementById('filterCashbackHargaNett');
+            if(input)input.value=String(value||'');
+            renderHargaNettCashbackChoices();
+            renderHargaNett();
+        }
+        function recalculateHargaNettInvoiceCart() {
+            hargaNettInvoiceCart.forEach(function(item){
+                const prod=hargaNettData.find(function(x){return String(x.kode||x.produk||'')===item.key;});
+                if(!prod)return;
+                const ctx=getHargaNettInvoiceContext(prod);
+                const pack=parseHargaNettPack(prod);
+                const totalPcs=item.unit==='PCS'?item.qty:item.qty*pack;
+                const discPercent=ctx.isCtm?0:Math.min(100,Math.max(0,Number(item.discPercent)||0));
+                const grossPcs=ctx.isCtm?ctx.base:Math.max(0,ctx.base-ctx.base*discPercent/100);
+                item.pack=pack;item.totalPcs=totalPcs;item.liter=ctx.liter;item.price=ctx.base;
+                item.isCtm=ctx.isCtm;item.subtotalGross=ctx.base*totalPcs;
+                item.totalDisc=(ctx.base-grossPcs)*totalPcs;
+                item.cashbackPerPcs=ctx.cashbackPerPcs;item.totalCashback=ctx.cashbackPerPcs*totalPcs;
+                item.totalExtra=Math.max(0,Number(item.extraPerPcs)||0)*totalPcs;
+                item.nettSubtotal=Math.max(0,item.subtotalGross-item.totalDisc-item.totalCashback-item.totalExtra);
+            });
+        }
+        function getHargaNettInvoiceSelectedProduct() {
+            const key=String((document.getElementById('hnProductSelect')||{}).value||'');
+            return hargaNettData.find(function(x){return String(x.kode||x.produk||'')===key;})||null;
+        }
+        function updateHargaNettInvoiceProduct() {
+            const prod=getHargaNettInvoiceSelectedProduct();
+            const notice=document.getElementById('hnProductNotice');
+            const preview=document.getElementById('hnNettPreview');
+            const discInput=document.getElementById('hnDisc');
+            if(!prod){if(notice)notice.textContent='';if(preview)preview.textContent='Rp 0';return;}
+            const ctx=getHargaNettInvoiceContext(prod);
+            if(discInput&&ctx.isCtm){discInput.value='0';discInput.disabled=true;if(notice)notice.textContent='★ Produk CTM: diskon tidak diterapkan.';}
+            else {if(discInput)discInput.disabled=false;if(notice)notice.textContent='';}
+            const disc=Math.min(100,Math.max(0,Number((discInput||{}).value||0)));
+            const extra=Math.max(0,Number((document.getElementById('hnExtra')||{}).value||0));
+            const gross=ctx.isCtm?ctx.base:Math.max(0,ctx.base-ctx.base*disc/100);
+            if(preview)preview.textContent=formatHargaNett(Math.max(0,gross-ctx.cashbackPerPcs-extra));
+        }
+        function addHargaNettInvoiceItem() {
+            const prod=getHargaNettInvoiceSelectedProduct();
+            const qty=Math.max(0,Number((document.getElementById('hnQty')||{}).value||0));
+            if(!prod||qty<=0){showModal('Simulasi Invoice','Pilih produk dan masukkan jumlah yang valid.');return;}
+            const unit=String((document.getElementById('hnUnit')||{}).value||'DUS');
+            const ctx=getHargaNettInvoiceContext(prod);
+            const pack=parseHargaNettPack(prod);
+            const totalPcs=unit==='PCS'?qty:qty*pack;
+            const discInput=document.getElementById('hnDisc');
+            const discPercent=ctx.isCtm?0:Math.min(100,Math.max(0,Number((discInput||{}).value||0)));
+            const extraPerPcs=Math.max(0,Number((document.getElementById('hnExtra')||{}).value||0));
+            const grossPcs=ctx.isCtm?ctx.base:Math.max(0,ctx.base-ctx.base*discPercent/100);
+            const subtotalGross=ctx.base*totalPcs;
+            const totalDisc=(ctx.base-grossPcs)*totalPcs;
+            const totalCashback=ctx.cashbackPerPcs*totalPcs;
+            const totalExtra=extraPerPcs*totalPcs;
+            const nettSubtotal=Math.max(0,subtotalGross-totalDisc-totalCashback-totalExtra);
+            hargaNettInvoiceCart.push({key:String(prod.kode||prod.produk||''),produk:prod.produk,unit:unit,qty:qty,totalPcs:totalPcs,pack:pack,liter:ctx.liter,price:ctx.base,discPercent:discPercent,subtotalGross:subtotalGross,totalDisc:totalDisc,cashbackPerPcs:ctx.cashbackPerPcs,totalCashback:totalCashback,extraPerPcs:extraPerPcs,totalExtra:totalExtra,nettSubtotal:nettSubtotal,isCtm:ctx.isCtm});
+            renderHargaNettInvoiceCart();
+            document.getElementById('hnExtra').value='0';
+        }
+        function removeHargaNettInvoiceItem(index) {
+            hargaNettInvoiceCart.splice(index,1);
+            renderHargaNettInvoiceCart();
+        }
+        function clearHargaNettInvoiceCart() {
+            hargaNettInvoiceCart=[];
+            const bonus=document.getElementById('hnBonus');if(bonus)bonus.value='0';
+            renderHargaNettInvoiceCart();
+        }
+        function renderHargaNettInvoiceCart() {
+            const body=document.getElementById('hnCartBody');if(!body)return;
+            const count=document.getElementById('hnItemCount');
+            if(count)count.textContent=hargaNettInvoiceCart.length+' Item';
+            let gross=0,disc=0,cashback=0,extra=0,net=0;
+            if(!hargaNettInvoiceCart.length)body.innerHTML='<tr><td colspan="9" class="p-5 text-center text-slate-400">Belum ada item ditambahkan.</td></tr>';
+            else body.innerHTML=hargaNettInvoiceCart.map(function(item,index){
+                gross+=item.subtotalGross;disc+=item.totalDisc;cashback+=item.totalCashback;extra+=item.totalExtra;net+=item.nettSubtotal;
+                const qtyLabel=item.unit==='PCS'?item.qty+' Pcs':item.qty+' Dus ('+item.totalPcs+' Pcs)';
+                const star=item.isCtm?' <span style="color:#eab308;font-weight:700">★</span>':'';
+                return '<tr class="border-b border-slate-100 last:border-0"><td class="p-2 font-semibold text-slate-700">'+escapeHtml(item.produk)+star+'</td><td class="p-2 text-center">'+escapeHtml(qtyLabel)+'</td><td class="p-2 text-right whitespace-nowrap">'+formatHargaNett(item.price)+'</td><td class="p-2 text-right whitespace-nowrap">'+formatHargaNett(item.subtotalGross)+'</td><td class="p-2 text-right whitespace-nowrap text-red-600">-'+formatHargaNett(item.totalDisc)+'</td><td class="p-2 text-right whitespace-nowrap text-emerald-700">-'+formatHargaNett(item.totalCashback)+'</td><td class="p-2 text-right whitespace-nowrap text-blue-700">-'+formatHargaNett(item.totalExtra)+'</td><td class="p-2 text-right whitespace-nowrap font-extrabold">'+formatHargaNett(item.nettSubtotal)+'</td><td class="p-2 text-center"><button type="button" onclick="removeHargaNettInvoiceItem('+index+')" class="text-red-500 font-bold px-1" aria-label="Hapus item">×</button></td></tr>';
             }).join('');
+            const bonus=Math.max(0,Number((document.getElementById('hnBonus')||{}).value||0));
+            const set=function(id,value){const el=document.getElementById(id);if(el)el.textContent=value;};
+            set('hnGross',formatHargaNett(gross));
+            set('hnDiscountTotal','-'+formatHargaNett(disc));
+            set('hnCashbackTotal','-'+formatHargaNett(cashback));
+            set('hnExtraTotal','-'+formatHargaNett(extra));
+            set('hnGrandTotal',formatHargaNett(Math.max(0,net-bonus)));
+        }
+        function printHargaNettInvoice() {
+            const paper=document.getElementById('hargaNettInvoicePaper');
+            if(!paper){window.print();return;}
+            const win=window.open('','_blank');
+            if(!win){showModal('Cetak Invoice','Browser memblokir jendela cetak. Izinkan pop-up untuk mencetak invoice.');return;}
+            const content=paper.cloneNode(true);
+            content.querySelectorAll('.no-print,button,input,select').forEach(function(el){
+                if(el.tagName==='INPUT'||el.tagName==='SELECT'){const value=el.value;const span=document.createElement('span');span.textContent=value||'-';span.className='print-field';el.replaceWith(span);}
+                else el.remove();
+            });
+            win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Simulasi Invoice</title><style>body{font-family:Arial,sans-serif;color:#111;padding:18px;font-size:11px}*{box-sizing:border-box}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #ddd;padding:6px;text-align:left}th{background:#f1f5f9}.print-field{font-weight:bold}@page{size:A4 portrait;margin:10mm}</style></head><body>'+content.outerHTML+'<script>window.onload=function(){window.print();};<\\/script></body></html>');
+            win.document.close();
         }
         function exportHargaNettPDF() {
             const campaign=String((document.getElementById('filterCashbackHargaNett')||{}).value||'').trim();
