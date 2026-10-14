@@ -12329,9 +12329,7 @@ function renderPencapaianCards(data) {
 </style>
 
 <style id="harga-nett-desktop-mobile-sizing-fix">
-/* LITER dan PRICELIST disembunyikan pada tabel layar saja; tetap dihitung dan masuk Export PDF */
-#tabHargaNett .overflow-x-auto table th:nth-child(2),
-#tabHargaNett .overflow-x-auto table td:nth-child(2),
+/* Kolom PRICELIST ditampilkan setelah PRODUK; kolom LITER tetap disembunyikan pada tabel layar. */
 #tabHargaNett .overflow-x-auto table th:nth-child(3),
 #tabHargaNett .overflow-x-auto table td:nth-child(3) { display: none !important; }
 /* Desktop Harga Nett: gunakan ruang yang tersedia, terpisah dari aturan mobile */
