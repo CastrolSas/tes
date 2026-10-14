@@ -12671,3 +12671,19 @@ function renderPencapaianCards(data) {
   }
 }
 </style>
+
+
+<style id="harga-nett-mobile-pricelist-cashback-spacing">
+/* Mobile only: beri jarak visual antara kolom Pricelist dan Cashback. */
+@media (max-width: 767px) {
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table th:nth-child(2),
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table td:nth-child(2) {
+    padding-right: 5px !important;
+    border-right: 1px solid #d8e1eb !important;
+  }
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table th:nth-child(4),
+  #tabHargaNett #hargaNettTableView .overflow-x-auto table td:nth-child(4) {
+    padding-left: 5px !important;
+  }
+}
+</style>
