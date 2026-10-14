@@ -4013,18 +4013,9 @@ body{background:
                               <div class="text-right"><div class="text-xs text-emerald-100">STATUS</div><div class="inline-block mt-1 px-2 py-1 rounded-md bg-amber-300 text-slate-900 text-[10px] font-extrabold">SIMULASI</div></div>
                             </div>
                             <div class="p-3 sm:p-5 space-y-3">
-                              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <div class="grid grid-cols-1 gap-3">
                                 <div class="border border-slate-200 rounded-xl overflow-hidden">
-                                  <div class="px-3 py-2.5 bg-slate-50 border-b border-slate-200 font-bold text-xs text-slate-700">1. Informasi Invoice & Pelanggan</div>
-                                  <div class="p-3 grid grid-cols-2 gap-2">
-                                    <div><label class="block text-[10px] font-bold text-slate-500 mb-1">No. Invoice</label><input id="hnInvNo" class="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs" value="INV-SIM-001"></div>
-                                    <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Tanggal</label><input id="hnInvDate" type="date" class="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs"></div>
-                                    <div class="col-span-2"><label class="block text-[10px] font-bold text-slate-500 mb-1">Nama Toko / Pelanggan</label><input id="hnCustomer" class="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs" placeholder="Masukkan nama toko / pelanggan"></div>
-                                    <div class="col-span-2"><label class="block text-[10px] font-bold text-slate-500 mb-1">Channel Cashback</label><select id="hnChannelSelect" onchange="onHargaNettInvoiceChannelChange(this.value)" class="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs"><option value="">Pilih Channel Cashback...</option></select><p class="text-[9px] text-slate-400 mt-1">Quartal dan Discount tetap mengikuti filter Harga Nett di atas.</p></div>
-                                  </div>
-                                </div>
-                                <div class="border border-slate-200 rounded-xl overflow-hidden">
-                                  <div class="px-3 py-2.5 bg-slate-50 border-b border-slate-200 font-bold text-xs text-slate-700">2. Tambah Item Produk</div>
+                                  <div class="px-3 py-2.5 bg-slate-50 border-b border-slate-200 font-bold text-xs text-slate-700">Tambah Item Produk</div>
                                   <div class="p-3 space-y-2">
                                     <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Pilih Produk</label><select id="hnProductSelect" class="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs" onchange="updateHargaNettInvoiceProduct()"><option value="">Pilih produk...</option></select></div>
                                     <div class="grid grid-cols-3 gap-2">
@@ -7939,14 +7930,6 @@ startAutoRefresh();
         }
         function renderHargaNettInvoice(rows,campaign,quarter,discPercent) {
             const select=document.getElementById('hnProductSelect');
-            const channel=document.getElementById('hnChannelSelect');
-            const date=document.getElementById('hnInvDate');
-            if(date&&!date.value){const now=new Date();date.value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');}
-            if(channel){
-                const current=String(campaign||'');
-                channel.innerHTML='<option value="">Pilih Channel Cashback...</option>'+(hargaNettCashbackChoices||[]).map(function(item){return '<option value="'+escapeHtml(item.value)+'">'+escapeHtml(item.label||item.value)+'</option>';}).join('');
-                channel.value=current;
-            }
             if(select){
                 const previous=select.value;
                 const products=(rows||[]).slice().sort((a,b)=>String(a.produk||'').localeCompare(String(b.produk||''),'id',{sensitivity:'base'}));
@@ -7956,12 +7939,6 @@ startAutoRefresh();
             recalculateHargaNettInvoiceCart();
             updateHargaNettInvoiceProduct();
             renderHargaNettInvoiceCart();
-        }
-        function onHargaNettInvoiceChannelChange(value) {
-            const input=document.getElementById('filterCashbackHargaNett');
-            if(input)input.value=String(value||'');
-            renderHargaNettCashbackChoices();
-            renderHargaNett();
         }
         function recalculateHargaNettInvoiceCart() {
             hargaNettInvoiceCart.forEach(function(item){
