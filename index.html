@@ -12671,3 +12671,9 @@ function renderPencapaianCards(data) {
   }
 }
 </style>
+
+<style id="harga-nett-hide-pricelist-column-only">
+/* Hanya sembunyikan kolom Pricelist pada tabel Harga Nett; Simulasi Invoice tidak diubah. */
+#tabHargaNett #hargaNettTableView table thead th:nth-child(2),
+#tabHargaNett #hargaNettTableView table tbody td:nth-child(2) { display: none !important; }
+</style>
