@@ -4014,10 +4014,9 @@ body{background:
                                   <div class="px-3 py-2.5 bg-slate-50 border-b border-slate-200 font-bold text-xs text-slate-700">Tambah Item Produk</div>
                                   <div class="p-3 space-y-2">
                                     <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Pilih Produk</label><select id="hnProductSelect" class="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-xs" onchange="updateHargaNettInvoiceProduct()"><option value="">Pilih produk...</option></select></div>
-                                    <div class="grid grid-cols-3 gap-2">
+                                    <div class="grid grid-cols-2 gap-2">
                                       <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Satuan</label><select id="hnUnit" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-xs" onchange="updateHargaNettInvoiceProduct()"><option value="DUS">Dus</option><option value="PCS">Pcs</option></select></div>
                                       <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Jumlah</label><input id="hnQty" type="number" min="1" value="1" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-xs" oninput="updateHargaNettInvoiceProduct()"></div>
-                                      <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Diskon (%)</label><input id="hnDisc" type="number" min="0" max="100" step="0.1" value="0" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-xs" oninput="updateHargaNettInvoiceProduct()"></div>
                                     </div>
                                     <div class="grid grid-cols-2 gap-2">
                                       <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Extra Cashback (Rp/Pcs)</label><input id="hnExtra" type="number" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-xs" oninput="updateHargaNettInvoiceProduct()"></div>
@@ -7942,7 +7941,7 @@ startAutoRefresh();
                 const ctx=getHargaNettInvoiceContext(prod);
                 const pack=parseHargaNettPack(prod);
                 const totalPcs=item.unit==='PCS'?item.qty:item.qty*pack;
-                const discPercent=ctx.isCtm?0:Math.min(100,Math.max(0,Number(item.discPercent)||0));
+                const discPercent=ctx.isCtm?0:ctx.discPercent;
                 const grossPcs=ctx.isCtm?ctx.base:Math.max(0,ctx.base-ctx.base*discPercent/100);
                 item.pack=pack;item.totalPcs=totalPcs;item.liter=ctx.liter;item.price=ctx.base;
                 item.isCtm=ctx.isCtm;item.subtotalGross=ctx.base*totalPcs;
@@ -7960,12 +7959,10 @@ startAutoRefresh();
             const prod=getHargaNettInvoiceSelectedProduct();
             const notice=document.getElementById('hnProductNotice');
             const preview=document.getElementById('hnNettPreview');
-            const discInput=document.getElementById('hnDisc');
             if(!prod){if(notice)notice.textContent='';if(preview)preview.textContent='Rp 0';return;}
             const ctx=getHargaNettInvoiceContext(prod);
-            if(discInput&&ctx.isCtm){discInput.value='0';discInput.disabled=true;if(notice)notice.textContent='★ Produk CTM: diskon tidak diterapkan.';}
-            else {if(discInput)discInput.disabled=false;if(notice)notice.textContent='';}
-            const disc=Math.min(100,Math.max(0,Number((discInput||{}).value||0)));
+            if(notice)notice.textContent=ctx.isCtm?'★ Produk CTM: diskon tidak diterapkan.':'';
+            const disc=ctx.isCtm?0:ctx.discPercent;
             const extra=Math.max(0,Number((document.getElementById('hnExtra')||{}).value||0));
             const gross=ctx.isCtm?ctx.base:Math.max(0,ctx.base-ctx.base*disc/100);
             if(preview)preview.textContent=formatHargaNett(Math.max(0,gross-ctx.cashbackPerPcs-extra));
@@ -7978,8 +7975,7 @@ startAutoRefresh();
             const ctx=getHargaNettInvoiceContext(prod);
             const pack=parseHargaNettPack(prod);
             const totalPcs=unit==='PCS'?qty:qty*pack;
-            const discInput=document.getElementById('hnDisc');
-            const discPercent=ctx.isCtm?0:Math.min(100,Math.max(0,Number((discInput||{}).value||0)));
+            const discPercent=ctx.isCtm?0:ctx.discPercent;
             const extraPerPcs=Math.max(0,Number((document.getElementById('hnExtra')||{}).value||0));
             const grossPcs=ctx.isCtm?ctx.base:Math.max(0,ctx.base-ctx.base*discPercent/100);
             const subtotalGross=ctx.base*totalPcs;
