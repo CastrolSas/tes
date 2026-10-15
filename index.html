@@ -7449,7 +7449,7 @@ startAutoRefresh();
                     '<td class="px-3 py-2.5"><input type="checkbox" class="riwayat-select-checkbox w-4 h-4 accent-emerald-600 cursor-pointer" data-order-id="'+id+'" '+selected+' onclick="event.stopPropagation()" onchange="toggleRiwayatSelection(this)" title="Pilih transaksi"></td>' +
                     '<td class="px-3 py-2.5 font-bold text-slate-500">#'+number+'</td>' +
                     '<td class="px-3 py-2.5 whitespace-nowrap">'+escapeHtml(item.tanggal || '-')+'</td>' +
-                    '<td class="px-3 py-2.5 font-bold text-slate-700">'+escapeHtml(item.outlet || '-')+(isAdmin ? '<div class="text-[9px] text-slate-400 font-normal">DSR: '+escapeHtml(item.dsr || '-')+'</div>' : '')+'</td>' +
+                    '<td class="px-3 py-2.5 font-bold text-slate-700">'+escapeHtml(item.outlet || '-')+'<div class="mt-1"><span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[9px] font-bold '+(item.outletStatus === 'Outlet aktif' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200')+'">'+escapeHtml(item.outletStatus || 'NOO/Reaktifasi')+'</span></div>'+(isAdmin ? '<div class="text-[9px] text-slate-400 font-normal">DSR: '+escapeHtml(item.dsr || '-')+'</div>' : '')+'</td>' +
                     '<td class="px-3 py-2.5 text-slate-600">'+productText+'</td>' +
                     '<td class="px-3 py-2.5 text-right font-semibold">'+escapeHtml(item.volume || '0')+' L</td>' +
                     '<td class="px-3 py-2.5 text-right font-semibold">Rp '+Number(item.value || 0).toLocaleString('id-ID')+'</td>' +
@@ -11604,6 +11604,7 @@ function renderRiwayatCards(data) {
                         <div class="min-w-0">
                             <div class="flex flex-wrap items-center gap-2"><span class="riwayat-card-number">#${number}</span><span class="text-[10px] text-slate-400 font-medium">${escapeHtml(item.tanggal || '-')}</span></div>
                             <div class="riwayat-card-outlet mt-1">${escapeHtml(item.outlet || '-')}</div>
+                            <div class="mt-1"><span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[9px] font-bold ${item.outletStatus === 'Outlet aktif' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200'}">${escapeHtml(item.outletStatus || 'NOO/Reaktifasi')}</span></div>
                             ${isAdmin ? `<div class="text-[9px] text-slate-400 mt-0.5">DSR: ${escapeHtml(item.dsr || '-')}</div>` : ''}
                         </div>
                     </div>
