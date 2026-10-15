@@ -7305,9 +7305,8 @@ startAutoRefresh();
             const qWidth = Math.max(0, Math.min(qPct, 100));
             const qColor = qPct >= 100 ? 'bg-emerald-600' : qPct >= 80 ? 'bg-amber-500' : 'bg-red-500';
 
-            const detailAttrs = type === 'noo' ? '' : `cursor-pointer hover:border-emerald-300 hover:shadow-md transition" role="button" tabindex="0" onclick="openPencapaianDetail('${escapeHtml(categoryKeyForDetail(type))}', '${escapeHtml(sales || '')}')" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); openPencapaianDetail('${escapeHtml(categoryKeyForDetail(type))}', '${escapeHtml(sales || '')}'); }`;
             return `
-                <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm ${detailAttrs}">
+                <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm cursor-pointer hover:border-emerald-300 hover:shadow-md transition" role="button" tabindex="0" onclick="openPencapaianDetail('${escapeHtml(categoryKeyForDetail(type))}', '${escapeHtml(sales || '')}')" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); openPencapaianDetail('${escapeHtml(categoryKeyForDetail(type))}', '${escapeHtml(sales || '')}'); }">
                     <div class="flex items-center gap-2 mb-2">
                         <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-lg shrink-0">${icon}</div>
                         <div>
@@ -7387,7 +7386,7 @@ startAutoRefresh();
                             ${renderPencapaianCategory('Active Outlet', '🏪', item.categories && item.categories.active, 'active', item.sales)}
                             ${renderPencapaianCategory('Produk Fokus', '🎯', item.categories && item.categories.product, 'product', item.sales)}
                             ${renderPencapaianCategory('Power Brand', '🏆', item.categories && item.categories.powerBrand, 'powerBrand', item.sales)}
-                            ${renderPencapaianCategory('NOO/Reaktivasi', '🔄', item.categories && item.categories.noo, 'noo', item.sales)}
+                            ${renderPencapaianCategory('NOO/Reaktifasi', '🔄', item.categories && item.categories.noo, 'noo', item.sales)}
                         </div>
                     </div>`;
             }).join('');
@@ -7492,7 +7491,7 @@ startAutoRefresh();
         function renderPencapaianTable(data) {
             const container = document.getElementById('pencapaianSalesList');
             if (!container) return;
-            const cats = [{key:'value',label:'Value',type:'value'},{key:'volume',label:'Volume',type:'volume'},{key:'active',label:'Active Outlet',type:'active'},{key:'product',label:'Produk Fokus',type:'product'},{key:'powerBrand',label:'Power Brand',type:'powerBrand'},{key:'noo',label:'NOO/Reaktivasi',type:'noo'}];
+            const cats = [{key:'value',label:'Value',type:'value'},{key:'volume',label:'Volume',type:'volume'},{key:'active',label:'Active Outlet',type:'active'},{key:'product',label:'Produk Fokus',type:'product'},{key:'powerBrand',label:'Power Brand',type:'powerBrand'},{key:'noo',label:'NOO/Reaktifasi',type:'noo'}];
             let rows='';
             data.forEach(function(item){
                 cats.forEach(function(c, index){
@@ -7500,7 +7499,7 @@ startAutoRefresh();
                     const salesCell = index === 0
                         ? '<td class="px-3 py-2.5 font-bold text-slate-700 align-top border-r border-slate-100" rowspan="'+cats.length+'">'+escapeHtml(item.sales||'-')+'</td>'
                         : '';
-                    rows += '<tr class="border-b border-slate-100 '+(c.type === 'noo' ? '' : 'hover:bg-emerald-50/50 cursor-pointer')+'" '+(c.type === 'noo' ? '' : 'onclick="openPencapaianDetail(\''+escapeHtml(categoryKeyForDetail(c.type))+'\', \''+escapeHtml(item.sales||'')+'\')"')+'>'+salesCell+'<td class="px-3 py-2.5">'+escapeHtml(c.label)+'</td><td class="px-3 py-2.5 text-right">'+formatPencapaianValue(q.target,c.type)+'</td><td class="px-3 py-2.5 text-right font-bold">'+formatPencapaianValue(q.actual,c.type)+'</td><td class="px-3 py-2.5 text-right font-bold '+(Number(q.gap||0)>=0?'text-emerald-700':'text-red-600')+'">'+formatPencapaianValue(q.gap||0,c.type)+'</td><td class="px-3 py-2.5 text-right font-extrabold">'+formatPercentID(q.percentage||0)+'</td></tr>';
+                    rows += '<tr class="border-b border-slate-100 hover:bg-emerald-50/50 cursor-pointer" onclick="openPencapaianDetail(\''+escapeHtml(categoryKeyForDetail(c.type))+'\', \''+escapeHtml(item.sales||'')+'\')">'+salesCell+'<td class="px-3 py-2.5">'+escapeHtml(c.label)+'</td><td class="px-3 py-2.5 text-right">'+formatPencapaianValue(q.target,c.type)+'</td><td class="px-3 py-2.5 text-right font-bold">'+formatPencapaianValue(q.actual,c.type)+'</td><td class="px-3 py-2.5 text-right font-bold '+(Number(q.gap||0)>=0?'text-emerald-700':'text-red-600')+'">'+formatPencapaianValue(q.gap||0,c.type)+'</td><td class="px-3 py-2.5 text-right font-extrabold">'+formatPercentID(q.percentage||0)+'</td></tr>';
                 });
             });
             let totalSummaryHtml = '';
@@ -7535,7 +7534,7 @@ startAutoRefresh();
         function renderPencapaianChart(data) {
             const container = document.getElementById('pencapaianSalesList');
             if (!container) return;
-            const cats = [{key:'value',label:'Value'},{key:'volume',label:'Volume'},{key:'active',label:'Active Outlet'},{key:'product',label:'Produk Fokus'},{key:'powerBrand',label:'Power Brand'},{key:'noo',label:'NOO/Reaktivasi'}];
+            const cats = [{key:'value',label:'Value'},{key:'volume',label:'Volume'},{key:'active',label:'Active Outlet'},{key:'product',label:'Produk Fokus'},{key:'powerBrand',label:'Power Brand'},{key:'noo',label:'NOO/Reaktifasi'}];
             const blocks=data.map(function(item){
                 const bars=cats.map(function(c){ const q=(item.categories&&item.categories[c.key]&&item.categories[c.key].quarter)||{}; const pct=Math.max(0,Math.min(Number(q.percentage||0),100)); return '<div class="mb-2"><div class="flex justify-between text-[9px] font-bold text-slate-600 mb-1"><span>'+c.label+'</span><span>'+formatPercentID(q.percentage||0)+'</span></div><div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full '+(Number(q.percentage||0)>=100?'bg-emerald-600':Number(q.percentage||0)>=80?'bg-amber-500':'bg-red-500')+'" style="width:'+Math.max(2,pct)+'%"></div></div></div>'; }).join('');
                 return '<div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm"><div class="flex items-center justify-between mb-3"><div class="text-sm font-extrabold text-slate-800">'+escapeHtml(item.sales||'-')+'</div><span class="text-[9px] text-slate-400">'+escapeHtml(item.periode||'')+'</span></div>'+bars+'</div>';
@@ -7560,7 +7559,7 @@ startAutoRefresh();
             const selectedPeriod = periodSelect && periodSelect.value ? periodSelect.value : '';
             const titleMap = {
                 value: 'Value', volume: 'Volume', active: 'Active Outlet',
-                product: 'Produk Fokus', powerbrand: 'Power Brand'
+                product: 'Produk Fokus', powerbrand: 'Power Brand', noo: 'NOO/Reaktifasi'
             };
             const title = titleMap[String(category || '').toLowerCase()] || category;
             const cacheKey = String(currentUsernameInput || '').toLowerCase() + '|' +
@@ -11662,7 +11661,7 @@ function renderPencapaianCards(data) {
                     ${renderPencapaianCategory('Active Outlet', '🏪', item.categories && item.categories.active, 'active', item.sales)}
                     ${renderPencapaianCategory('Produk Fokus', '🎯', item.categories && item.categories.product, 'product', item.sales)}
                     ${renderPencapaianCategory('Power Brand', '🏆', item.categories && item.categories.powerBrand, 'powerBrand', item.sales)}
-                    ${renderPencapaianCategory('NOO/Reaktivasi', '🔄', item.categories && item.categories.noo, 'noo', item.sales)}
+                    ${renderPencapaianCategory('NOO/Reaktifasi', '🔄', item.categories && item.categories.noo, 'noo', item.sales)}
                 </div>
             </div>`;
     }).join('');
