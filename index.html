@@ -7888,7 +7888,8 @@ startAutoRefresh();
                 if (periodeEl) { let txt='Periode: '+(res.periode || '-'); if(res.volumeQuarter) txt+=' · Volume: '+res.volumeQuarter; periodeEl.textContent=txt; }
                 renderPencapaianSales(Array.isArray(res.data) ? res.data : []);
                 prefetchPencapaianDetailData(isAdminLogin ? selectedSales : currentUser, actualPeriod);
-                prefetchPencapaianPeriods(periods, actualPeriod, loadAllSales);
+                // Jangan memuat seluruh kuartal lain secara otomatis saat halaman pertama dibuka.
+                // Kuartal lain akan dimuat saat pengguna memilih periodenya, sehingga server tidak terbebani request paralel.
             }).withFailureHandler(function(err) {
                 if (requestId !== pencapaianRequestSeq) return;
                 pencapaianLoading = false;
