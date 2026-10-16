@@ -1519,7 +1519,6 @@ html,body{height:100%;}
         var p = pending[msg.id];
         if (!p) return;
         delete pending[msg.id];
-        if (p.timer) window.clearTimeout(p.timer);
         cleanup(p);
 
         if (msg.ok) {
@@ -1556,26 +1555,14 @@ html,body{height:100%;}
             form: form,
             success: typeof success === 'function' ? success : null,
             failure: typeof failure === 'function' ? failure : null,
-            userObject: userObject,
-            timer: null
+            userObject: userObject
         };
 
-        // Jangan biarkan tombol/form login menggantung selamanya jika deployment
-        // Apps Script tidak menerima POST bridge atau tidak mengirim balasan.
-        p.timer = window.setTimeout(function () {
-            if (!pending[id]) return;
-            delete pending[id];
-            cleanup(p);
-            if (p.failure) p.failure(new Error(
-                'Server Apps Script tidak merespons. Pastikan Code.gs terbaru sudah di-deploy sebagai Web App dan aksesnya mengizinkan pengguna GitHub Pages.'
-            ), p.userObject);
-        }, 25000);
 
         try {
             form.submit();
         } catch (err) {
             delete pending[id];
-            if (p.timer) window.clearTimeout(p.timer);
             cleanup(p);
             if (p.failure) p.failure(err, p.userObject);
         }
@@ -3174,43 +3161,6 @@ body{background:
 /* Sembunyikan menu dan halaman Pricelist tanpa menghapus sumber data/fungsi yang mungkin dipakai fitur lain. */
 #navPricelist, #tabPricelist { display: none !important; }
 </style>
-<style id="pencapaian-sales-mobile-table-fit">
-/* Khusus mobile: tabel Pencapaian Sales menyesuaikan lebar layar. Desktop tidak diubah. */
-@media (max-width: 767px) {
-  #tabPencapaian #pencapaianSalesList .overflow-x-auto {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-  }
-  #tabPencapaian #pencapaianSalesList table {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    table-layout: fixed !important;
-    border-collapse: collapse !important;
-  }
-  #tabPencapaian #pencapaianSalesList table th,
-  #tabPencapaian #pencapaianSalesList table td {
-    box-sizing: border-box !important;
-    padding: 5px 3px !important;
-    font-size: 8px !important;
-    line-height: 1.25 !important;
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-    word-break: normal !important;
-    vertical-align: middle !important;
-  }
-  #tabPencapaian #pencapaianSalesList table th:first-child,
-  #tabPencapaian #pencapaianSalesList table td:first-child {
-    width: 23% !important;
-  }
-  #tabPencapaian #pencapaianSalesList table th:nth-child(n+2),
-  #tabPencapaian #pencapaianSalesList table td:nth-child(n+2) {
-    width: 19.25% !important;
-  }
-}
-</style>
-
 </head>
 <body class="bg-slate-50 font-sans">
 
@@ -4657,12 +4607,7 @@ startAutoRefresh();
         function handleLogin(e) {
             e.preventDefault();
             currentUsernameInput = document.getElementById('loginUser').value.trim();
-            const loginPassword = document.getElementById('loginPass').value;
             const loginBtn = document.getElementById('loginSubmitBtn');
-            if (!currentUsernameInput || !loginPassword) {
-                showModal('Login Gagal', 'Masukkan username dan password terlebih dahulu.');
-                return;
-            }
             if (loginBtn) {
                 loginBtn.classList.add('login-processing');
                 loginBtn.setAttribute('aria-busy', 'true');
@@ -4675,10 +4620,6 @@ startAutoRefresh();
                     loginBtn.classList.remove('login-processing');
                     loginBtn.removeAttribute('aria-busy');
                     loginBtn.disabled = false;
-                }
-                if (!res || typeof res.success !== 'boolean') {
-                    showModal('Login Gagal', 'Respons server tidak valid. Periksa deployment Web App Apps Script lalu coba lagi.');
-                    return;
                 }
                 if (res.success) {
                     currentUser = res.sales;
@@ -4715,7 +4656,7 @@ startAutoRefresh();
                     loginBtn.disabled = false;
                 }
                 showModal("Login Gagal", err && err.message ? err.message : "Terjadi kesalahan saat proses login.");
-            }).prosesLogin(currentUsernameInput, loginPassword);
+            }).prosesLogin(currentUsernameInput, document.getElementById('loginPass').value);
         }
 
         function loadOutletForSales(sales, usernameInput) {
