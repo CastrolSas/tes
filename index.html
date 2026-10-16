@@ -7764,6 +7764,8 @@ startAutoRefresh();
             }
             select.classList.remove('hidden');
             const current = select.value || '';
+            const periodSelect = document.getElementById('pencapaianPeriodSelect');
+            const selectedPeriod = periodSelect && periodSelect.value ? periodSelect.value : '';
             google.script.run.withSuccessHandler(function(list) {
                 const salesList = Array.isArray(list) ? list : [];
                 select.innerHTML = '<option value="">Semua Sales</option>' +
@@ -7773,7 +7775,7 @@ startAutoRefresh();
                 if (salesList.indexOf(current) !== -1) select.value = current;
             }).withFailureHandler(function() {
                 select.innerHTML = '<option value="">Semua Sales</option>';
-            }).getListSalesOptions();
+            }).getListSalesOptions(selectedPeriod);
         }
 
         function prefetchPencapaianDetailData(sales, period) {
@@ -7826,6 +7828,9 @@ startAutoRefresh();
             const selectedPeriod = periodSelect && periodSelect.value ? periodSelect.value : '';
             const selectedSales = isAdminLogin && salesFilter && salesFilter.value ? salesFilter.value : '';
             const cacheKey = pencapaianCacheKeyFor(selectedPeriod, isAdminLogin);
+
+            // Sinkronkan opsi Sales dengan kolom A dan periode kolom F pada TARGET PER SALES.
+            if (isAdminLogin) loadPencapaianSalesFilter();
 
             // Filter Sales admin hanya mengubah tampilan dari data kwartal yang sudah dimuat.
             if (!forceReloadPeriods && isAdminLogin && pencapaianCache[cacheKey]) {
