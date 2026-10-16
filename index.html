@@ -8034,7 +8034,36 @@ startAutoRefresh();
             const campaign=String((document.getElementById('filterCashbackHargaNett')||{}).selectedOptions?.[0]?.textContent||'').trim();
             win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Simulasi Invoice</title><style>'+
               '*{box-sizing:border-box}body{margin:0;background:#eef2f7;font-family:Arial,Helvetica,sans-serif;color:#172033;font-size:11px;-webkit-print-color-adjust:exact;print-color-adjust:exact}.sheet{max-width:1100px;margin:24px auto;background:#fff;padding:34px 38px;border-radius:14px;box-shadow:0 8px 30px #18243a14}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:22px;border-bottom:3px solid #173b68}.eyebrow{font-size:10px;font-weight:700;letter-spacing:2px;color:#64748b;text-transform:uppercase;margin-bottom:8px}.title{font-size:27px;letter-spacing:-.5px;font-weight:800;color:#173b68;margin:0}.subtitle{color:#64748b;margin-top:7px;font-size:11px}.badge{background:#e8f1ff;color:#174a83;padding:9px 13px;border-radius:8px;font-size:10px;font-weight:700;white-space:nowrap}.meta{display:flex;gap:12px;margin:20px 0}.meta-card{flex:1;background:#f6f8fb;border:1px solid #e5eaf1;border-radius:9px;padding:12px 14px;min-width:0}.label{font-size:9px;color:#718096;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}.value{font-size:12px;font-weight:700;overflow-wrap:anywhere}.section-title{font-size:13px;font-weight:800;margin:24px 0 10px;color:#1c2c43}.table-wrap{border:1px solid #e3e8ef;border-radius:9px;overflow:hidden}table{width:100%;border-collapse:collapse;font-size:10px}thead{display:table-header-group}th{background:#173b68;color:#fff;text-align:left;font-size:9px;letter-spacing:.3px;padding:11px 8px;white-space:nowrap}td{padding:11px 8px;border-bottom:1px solid #e8edf3;vertical-align:top}tbody tr:nth-child(even){background:#f8fafc}tbody tr:last-child td{border-bottom:0}.num{color:#94a3b8;width:30px}.product{font-weight:700;color:#1e293b;line-height:1.4}.muted{font-size:9px;color:#94a3b8;margin-top:4px}.center{text-align:center;white-space:nowrap}.right{text-align:right;white-space:nowrap}.strong{font-weight:800;color:#173b68}.negative{color:#dc4b4b}.cashback{color:#0b896b}.star{font-size:9px;color:#b77905;white-space:nowrap}.bottom{display:flex;justify-content:flex-end;margin-top:18px}.summary{width:360px;border:1px solid #e3e8ef;border-radius:10px;padding:8px 15px;background:#fbfcfe}.sumrow{display:flex;justify-content:space-between;gap:18px;padding:8px 0;color:#596579;border-bottom:1px solid #edf0f4}.sumrow b{color:#25334a;white-space:nowrap}.sumrow.total{border:0;border-top:2px solid #173b68;margin-top:5px;padding-top:13px;color:#173b68;font-size:13px;font-weight:800}.sumrow.total b{font-size:17px;color:#173b68}.foot{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #e5eaf1;margin-top:24px;padding-top:12px;color:#94a3b8;font-size:9px}.foot strong{color:#64748b}@page{size:A4 landscape;margin:9mm}@media print{body{background:#fff}.sheet{max-width:none;margin:0;padding:8px;border-radius:0;box-shadow:none}.meta{margin:14px 0}.section-title{margin-top:18px}th,td{padding:8px 6px}.summary{width:330px}.foot{margin-top:16px}}'+
-              '</style></head><body><main class="sheet"><header class="top"><div><div class="eyebrow">Dokumen Perhitungan</div><h1 class="title">Simulasi Invoice</h1><div class="subtitle">Rincian produk dan perhitungan harga nett</div></div><div class="badge">SIMULASI • BUKAN TRANSAKSI FINAL</div></header><section class="meta"><div class="meta-card"><div class="label">Tanggal Cetak</div><div class="value">'+escapeHtml(new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}))+'</div></div><div class="meta-card"><div class="label">Filter Cashback</div><div class="value">'+escapeHtml(campaign||'-')+'</div></div><div class="meta-card"><div class="label">Jumlah Item</div><div class="value">'+hargaNettInvoiceCart.length+' produk</div></div></section><div class="section-title">Rincian Produk</div><div class="table-wrap"><table><thead><tr><th>No.</th><th>SKU / Produk</th><th>Qty</th><th>Harga Unit</th><th>Subtotal</th><th>Diskon</th><th>Cashback</th><th>Nett Subtotal</th></tr></thead><tbody>'+rows+'</tbody></table></div><section class="bottom"><div class="summary"><div class="sumrow"><span>Subtotal Pricelist</span><b>'+formatHargaNett(gross)+'</b></div><div class="sumrow"><span>Total Diskon Produk</span><b class="negative">-'+formatHargaNett(disc)+'</b></div><div class="sumrow"><span>Total Cashback</span><b class="cashback">-'+formatHargaNett(cashback)+'</b></div><div class="sumrow"><span>Total Extra Cashback</span><b class="cashback">-'+formatHargaNett(extra)+'</b></div><div class="sumrow"><span>Bonus Cashback</span><b>-'+formatHargaNett(bonus)+'</b></div><div class="sumrow total"><span>Grand Total Nett</span><b>'+formatHargaNett(grand)+'</b></div></div></section><footer class="foot"><span><strong>Simulasi Invoice</strong> · Mohon periksa kembali rincian sebelum digunakan.</span><span>Dicetak '+escapeHtml(new Date().toLocaleString('id-ID'))+'</span></footer></main></body></html>');
+              '</style></head><body><main class="sheet"><header class="top"><div><div class="eyebrow">Dokumen Perhitungan</div><h1 class="title">Simulasi Invoice</h1><div class="subtitle">Rincian produk dan perhitungan harga nett</div></div><div class="badge">SIMULASI • BUKAN TRANSAKSI FINAL</div></header><section class="meta"><div class="meta-card"><div class="label">Tanggal Cetak</div><div class="value">'+escapeHtml(new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}))+'</div></div><div class="meta-card"><div class="label">Filter Cashback</div><div class="value">'+escapeHtml(campaign||'-')+'</div></div><div class="meta-card"><div class="label">Jumlah Item</div><div class="value">'+hargaNettInvoiceCart.length+' produk</div></div></section><div class="section-title">Rincian Produk</div><div class="table-wrap"><table><thead><tr><th>No.</th><th>SKU / Produk</th><th>Qty</th><th>Harga Unit</th><th>Subtotal</th><th>Diskon</th><th>Cashback</th><th>Nett Subtotal</th></tr></thead><tbody>'+rows+'</tbody></table></div><section class="bottom"><div class="summary"><div class="sumrow"><span>Subtotal Pricelist</span><b>'+formatHargaNett(gross)+'</b></div><div class="sumrow"><span>Total Diskon Produk</span><b class="negative">-'+formatHargaNett(disc)+'</b></div><div class="sumrow"><span>Total Cashback</span><b class="cashback">-'+formatHargaNett(cashback)+'</b></div><div class="sumrow"><span>Total Extra Cashback</span><b class="cashback">-'+formatHargaNett(extra)+'</b></div><div class="sumrow"><span>Bonus Cashback</span><b>-'+formatHargaNett(bonus)+'</b></div><div class="sumrow total"><span>Grand Total Nett</span><b>'+formatHargaNett(grand)+'</b></div></div></section><footer class="foot"><span><strong>Simulasi Invoice</strong> · Mohon periksa kembali rincian sebelum digunakan.</span><span>Dicetak '+escapeHtml(new Date().toLocaleString('id-ID'))+'</span></footer></main>
+<style id="castrol-header-marquee-contrast-fix">
+/* Perbaikan kontras header/pengumuman berjalan: teks harus terbaca di atas latar terang. */
+#mainHeader .pengumuman-main-header-marquee{
+  background:rgba(255,255,255,.98)!important;
+  border:1px solid #dce8e0!important;
+  border-radius:10px!important;
+  box-shadow:0 2px 8px rgba(18,55,35,.06)!important;
+  padding:7px 0!important;
+}
+#mainHeader .pengumuman-marquee-text{
+  color:#075d35!important;
+  font-weight:750!important;
+  text-shadow:none!important;
+}
+#mainHeader{
+  color:#173b29!important;
+}
+#mainHeader .pengumuman-main-header-marquee::before{
+  content:"";
+  display:inline-block;
+  width:7px;height:7px;border-radius:50%;
+  background:#0b8f53;
+}
+@media(max-width:767px){
+  #mainHeader .pengumuman-marquee-text{font-size:11px!important;color:#075d35!important}
+}
+</style>
+
+</body></html>');
             win.document.close();
             win.focus();
             setTimeout(function(){ try { win.print(); } catch(e) { showModal('Cetak PDF','Gunakan Ctrl+P pada jendela invoice, lalu pilih Simpan sebagai PDF.'); } },600);
@@ -8073,7 +8102,36 @@ startAutoRefresh();
             }).join('');
             const win=window.open('','_blank');
             if(!win){showModal('Export PDF','Browser memblokir jendela cetak. Izinkan pop-up untuk Export PDF.');return;}
-            win.document.write('<!doctype html><html><head><title>Harga Nett</title><style>body{font-family:Arial,sans-serif;padding:18px;color:#111}h1{font-size:18px;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #bbb;padding:5px;text-align:left}th{background:#eee}td:nth-child(n+2){white-space:nowrap}@page{size:A4 landscape;margin:10mm}</style></head><body><h1>Harga Nett</h1><table><thead><tr><th>PRODUK</th><th>PRICELIST</th><th>LITER</th><th>CASHBACK</th><th>EXTRA CASHBACK</th><th>NETT</th></tr></thead><tbody>'+body+'</tbody></table><script>window.onload=function(){window.print();};<\/script></body></html>');
+            win.document.write('<!doctype html><html><head><title>Harga Nett</title><style>body{font-family:Arial,sans-serif;padding:18px;color:#111}h1{font-size:18px;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #bbb;padding:5px;text-align:left}th{background:#eee}td:nth-child(n+2){white-space:nowrap}@page{size:A4 landscape;margin:10mm}</style></head><body><h1>Harga Nett</h1><table><thead><tr><th>PRODUK</th><th>PRICELIST</th><th>LITER</th><th>CASHBACK</th><th>EXTRA CASHBACK</th><th>NETT</th></tr></thead><tbody>'+body+'</tbody></table><script>window.onload=function(){window.print();};<\/script>
+<style id="castrol-header-marquee-contrast-fix">
+/* Perbaikan kontras header/pengumuman berjalan: teks harus terbaca di atas latar terang. */
+#mainHeader .pengumuman-main-header-marquee{
+  background:rgba(255,255,255,.98)!important;
+  border:1px solid #dce8e0!important;
+  border-radius:10px!important;
+  box-shadow:0 2px 8px rgba(18,55,35,.06)!important;
+  padding:7px 0!important;
+}
+#mainHeader .pengumuman-marquee-text{
+  color:#075d35!important;
+  font-weight:750!important;
+  text-shadow:none!important;
+}
+#mainHeader{
+  color:#173b29!important;
+}
+#mainHeader .pengumuman-main-header-marquee::before{
+  content:"";
+  display:inline-block;
+  width:7px;height:7px;border-radius:50%;
+  background:#0b8f53;
+}
+@media(max-width:767px){
+  #mainHeader .pengumuman-marquee-text{font-size:11px!important;color:#075d35!important}
+}
+</style>
+
+</body></html>');
             win.document.close();
         }
         function setHargaNettProductType(type) { const el=document.getElementById('filterProdukHargaNett'); if(!el)return; el.value=(el.value===type?'':type); ['PCO','MCO-4T'].forEach(function(t){const b=document.getElementById(t==='PCO'?'filterProdukPCOHargaNett':'filterProdukMCOHargaNett');if(b){const active=el.value===t;b.classList.toggle('bg-emerald-700',active);b.classList.toggle('text-white',active);b.classList.toggle('border-emerald-700',active);}}); renderHargaNettCashbackChoices(); renderHargaNett(); }
@@ -8193,7 +8251,36 @@ startAutoRefresh();
             const rows=data.map(function(item,i){return '<tr><td>'+(i+1)+'</td><td>'+escapeHtml(item.nama||'-')+'</td><td style="text-align:right">'+formatRupiah(item.harga||0)+'</td></tr>';}).join('');
             const win=window.open('','_blank');
             if(!win){showModal('Export PDF','Browser memblokir jendela cetak. Izinkan pop-up untuk Export PDF.');return;}
-            win.document.write('<!doctype html><html><head><title>Pricelist Castrol</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111}h1{font-size:20px;margin:0 0 6px}p{font-size:11px;color:#666;margin:0 0 16px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #ccc;padding:7px}th{text-align:left;background:#f1f5f9}@media print{body{padding:10px}}</style></head><body><h1>Pricelist Castrol</h1><p>'+escapeHtml(filterText)+'</p><table><thead><tr><th style="width:50px">No</th><th>Produk</th><th style="width:160px;text-align:right">Harga</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>');
+            win.document.write('<!doctype html><html><head><title>Pricelist Castrol</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111}h1{font-size:20px;margin:0 0 6px}p{font-size:11px;color:#666;margin:0 0 16px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #ccc;padding:7px}th{text-align:left;background:#f1f5f9}@media print{body{padding:10px}}</style></head><body><h1>Pricelist Castrol</h1><p>'+escapeHtml(filterText)+'</p><table><thead><tr><th style="width:50px">No</th><th>Produk</th><th style="width:160px;text-align:right">Harga</th></tr></thead><tbody>'+rows+'</tbody></table>
+<style id="castrol-header-marquee-contrast-fix">
+/* Perbaikan kontras header/pengumuman berjalan: teks harus terbaca di atas latar terang. */
+#mainHeader .pengumuman-main-header-marquee{
+  background:rgba(255,255,255,.98)!important;
+  border:1px solid #dce8e0!important;
+  border-radius:10px!important;
+  box-shadow:0 2px 8px rgba(18,55,35,.06)!important;
+  padding:7px 0!important;
+}
+#mainHeader .pengumuman-marquee-text{
+  color:#075d35!important;
+  font-weight:750!important;
+  text-shadow:none!important;
+}
+#mainHeader{
+  color:#173b29!important;
+}
+#mainHeader .pengumuman-main-header-marquee::before{
+  content:"";
+  display:inline-block;
+  width:7px;height:7px;border-radius:50%;
+  background:#0b8f53;
+}
+@media(max-width:767px){
+  #mainHeader .pengumuman-marquee-text{font-size:11px!important;color:#075d35!important}
+}
+</style>
+
+</body></html>');
             win.document.close();win.focus();setTimeout(function(){win.print();},250);
         }
 
@@ -11706,6 +11793,35 @@ function renderPencapaianCards(data) {
   }
 }
 </style>
+
+<style id="castrol-header-marquee-contrast-fix">
+/* Perbaikan kontras header/pengumuman berjalan: teks harus terbaca di atas latar terang. */
+#mainHeader .pengumuman-main-header-marquee{
+  background:rgba(255,255,255,.98)!important;
+  border:1px solid #dce8e0!important;
+  border-radius:10px!important;
+  box-shadow:0 2px 8px rgba(18,55,35,.06)!important;
+  padding:7px 0!important;
+}
+#mainHeader .pengumuman-marquee-text{
+  color:#075d35!important;
+  font-weight:750!important;
+  text-shadow:none!important;
+}
+#mainHeader{
+  color:#173b29!important;
+}
+#mainHeader .pengumuman-main-header-marquee::before{
+  content:"";
+  display:inline-block;
+  width:7px;height:7px;border-radius:50%;
+  background:#0b8f53;
+}
+@media(max-width:767px){
+  #mainHeader .pengumuman-marquee-text{font-size:11px!important;color:#075d35!important}
+}
+</style>
+
 </body>
 </html>
 <style id="mobile-monitoring-pricelist-bottom-fix">
