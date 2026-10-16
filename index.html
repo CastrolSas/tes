@@ -4459,7 +4459,7 @@ body{background:
                 if (adminTools) adminTools.classList.toggle('hidden', !isAdminLogin);
 
                 loadOutletForSales(currentUser, currentUsernameInput);
-                if (isAdminLogin) loadPencapaianSalesFilter();
+                if (isPencapaianSalesFilterAllowed()) loadPencapaianSalesFilter();
                 loadRiwayat(true, true);
                 loadInputMasterData();
                 preloadAppDataInBackground();
@@ -4640,7 +4640,7 @@ startAutoRefresh();
                     if (adminTools) adminTools.classList.toggle('hidden', !isAdminLogin);
                     saveAuthState();
                     loadOutletForSales(currentUser, currentUsernameInput);
-                    if (isAdminLogin) loadPencapaianSalesFilter();
+                    if (isPencapaianSalesFilterAllowed()) loadPencapaianSalesFilter();
                     loadRiwayat(true, true);
                     loadInputMasterData();
                     preloadAppDataInBackground();
@@ -7349,8 +7349,8 @@ startAutoRefresh();
             if (loading) loading.classList.add('hidden');
             if (!container) return;
             // Pencapaian Sales: keluarkan SETYO dari semua tampilan dan perhitungan tab ini saja.
-            const isAdminPencapaian = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
-            const selectedSalesPencapaian = isAdminPencapaian ? String((document.getElementById('pencapaianSalesFilter') || {}).value || '').trim().toUpperCase() : '';
+            const canFilterSalesPencapaian = isPencapaianSalesFilterAllowed();
+            const selectedSalesPencapaian = canFilterSalesPencapaian ? String((document.getElementById('pencapaianSalesFilter') || {}).value || '').trim().toUpperCase() : '';
             data = (Array.isArray(data) ? data : []).filter(function(item) {
                 const name = String(item && item.sales || '').trim().toUpperCase();
                 return name !== 'SETYO' && (!selectedSalesPencapaian || name === selectedSalesPencapaian);
@@ -7415,10 +7415,10 @@ startAutoRefresh();
             pencapaianViewMode = mode === 'chart' ? 'chart' : 'table';
             const periodSelect = document.getElementById('pencapaianPeriodSelect');
             const selectedPeriod = periodSelect && periodSelect.value ? periodSelect.value : '';
-            const isAdmin = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
+            const canFilterSales = isPencapaianSalesFilterAllowed();
             const salesFilter = document.getElementById('pencapaianSalesFilter');
-            const selectedSales = isAdmin && salesFilter && salesFilter.value ? salesFilter.value : '';
-            const cacheKey = (currentUsernameInput || 'admin').toLowerCase() + '|' + selectedSales + '|' + selectedPeriod;
+            const selectedSales = canFilterSales && salesFilter && salesFilter.value ? salesFilter.value : '';
+            const cacheKey = (currentUsernameInput || 'admin').toLowerCase() + '|' + (canFilterSales ? '' : String(currentUser || '').trim().toUpperCase()) + '|' + selectedPeriod;
             const cached = pencapaianCache[cacheKey];
             if (cached && Array.isArray(cached.data)) {
                 renderPencapaianSales(cached.data);
@@ -7754,11 +7754,17 @@ startAutoRefresh();
             requestDetail();
         }
 
+        function isPencapaianSalesFilterAllowed() {
+            return String(currentUsernameInput || '').trim().toLowerCase() === 'admin' ||
+                !String(currentUsernameInput || '').trim() ||
+                !String(currentUser || '').trim();
+        }
+
         function loadPencapaianSalesFilter() {
             const select = document.getElementById('pencapaianSalesFilter');
             if (!select) return;
-            const isAdminLogin = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
-            if (!isAdminLogin) {
+            const canFilterSales = isPencapaianSalesFilterAllowed();
+            if (!canFilterSales) {
                 select.classList.add('hidden');
                 return;
             }
@@ -7823,12 +7829,14 @@ startAutoRefresh();
             const periodSelect = document.getElementById('pencapaianPeriodSelect');
             const salesFilter = document.getElementById('pencapaianSalesFilter');
             const isAdminLogin = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
+            const canFilterSales = isPencapaianSalesFilterAllowed();
+            const loadAllSales = canFilterSales;
             const selectedPeriod = periodSelect && periodSelect.value ? periodSelect.value : '';
-            const selectedSales = isAdminLogin && salesFilter && salesFilter.value ? salesFilter.value : '';
-            const cacheKey = pencapaianCacheKeyFor(selectedPeriod, isAdminLogin);
+            const selectedSales = canFilterSales && salesFilter && salesFilter.value ? salesFilter.value : '';
+            const cacheKey = pencapaianCacheKeyFor(selectedPeriod, loadAllSales);
 
-            // Filter Sales admin hanya mengubah tampilan dari data kwartal yang sudah dimuat.
-            if (!forceReloadPeriods && isAdminLogin && pencapaianCache[cacheKey]) {
+            // Filter Sales untuk admin/nama kosong hanya mengubah tampilan dari data kwartal yang sudah dimuat.
+            if (!forceReloadPeriods && loadAllSales && pencapaianCache[cacheKey]) {
                 if (loading) loading.classList.add('hidden');
                 const cached = pencapaianCache[cacheKey];
                 renderPencapaianSales(cached.data || []);
@@ -7859,7 +7867,7 @@ startAutoRefresh();
                 if (!silentRefresh) showLoading(false);
                 res = res || {};
                 const actualPeriod = String(res.selectedPeriod || selectedPeriod || '');
-                const actualCacheKey = pencapaianCacheKeyFor(actualPeriod, isAdminLogin);
+                const actualCacheKey = pencapaianCacheKeyFor(actualPeriod, loadAllSales);
                 pencapaianCache[actualCacheKey] = res;
                 try { appLocalCacheSet('PENCAPAIAN_' + String(currentUsernameInput||'').toUpperCase(), pencapaianCache); } catch(e) {}
                 const periods = Array.isArray(res.periods) ? res.periods : [];
@@ -7871,14 +7879,14 @@ startAutoRefresh();
                 if (periodeEl) { let txt='Periode: '+(res.periode || '-'); if(res.volumeQuarter) txt+=' · Volume: '+res.volumeQuarter; periodeEl.textContent=txt; }
                 renderPencapaianSales(Array.isArray(res.data) ? res.data : []);
                 prefetchPencapaianDetailData(isAdminLogin ? selectedSales : currentUser, actualPeriod);
-                prefetchPencapaianPeriods(periods, actualPeriod, isAdminLogin);
+                prefetchPencapaianPeriods(periods, actualPeriod, loadAllSales);
             }).withFailureHandler(function(err) {
                 if (requestId !== pencapaianRequestSeq) return;
                 pencapaianLoading = false;
                 if (!silentRefresh) showLoading(false);
                 if (loading) loading.classList.add('hidden');
                 if (!pencapaianCache[cacheKey] && container) container.innerHTML = '<div class="bg-white border border-red-200 rounded-2xl p-6 text-center text-xs text-red-500">Gagal memuat pencapaian: ' + escapeHtml(err && err.message ? err.message : 'Terjadi kesalahan.') + '</div>';
-            }).getPencapaianSales(isAdminLogin ? '' : currentUser, currentUsernameInput, selectedPeriod);
+            }).getPencapaianSales(loadAllSales ? '' : currentUser, currentUsernameInput, selectedPeriod);
         }
 
         function formatPricelistDate(value) {
