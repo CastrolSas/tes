@@ -4454,16 +4454,18 @@ body{background:
                 applyRoleVisibility();
                 document.getElementById('userBadge').textContent = isAdminLogin ? "Admin" : currentUser;
                 document.getElementById('userBadge').classList.remove('hidden');
-                loadNotifications(true);
                 const adminTools = document.getElementById('riwayatAdminTools');
                 if (adminTools) adminTools.classList.toggle('hidden', !isAdminLogin);
 
-                loadOutletForSales(currentUser, currentUsernameInput);
-                if (isAdminLogin) loadPencapaianSalesFilter();
-                loadRiwayat(true, true);
-                loadInputMasterData();
-                preloadAppDataInBackground();
+                // Pulihkan cache terlebih dahulu dan tampilkan dashboard tanpa menunggu jaringan.
+                restoreFastTabCaches();
                 switchTab('home');
+
+                // Semua pembaruan data dilakukan asinkron setelah UI utama tampil.
+                // Fungsi dan aturan bisnis tetap sama; panggilan duplikat saat login dihindari.
+                preloadAppDataInBackground();
+                loadNotifications(true);
+                loadOutletForSales(currentUser, currentUsernameInput);
                 checkActivePengumuman();
                 return true;
             } catch (e) {
@@ -9268,11 +9270,12 @@ startAutoRefresh();
 
         function startAutoRefresh() {
             if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-            // Jalankan setiap 5 detik.
+            // Kurangi request berulang agar UI tetap responsif; refresh tetap otomatis.
             autoRefreshTimer = setInterval(function() {
+                if (document.visibilityState && document.visibilityState !== 'visible') return;
                 autoRefreshActiveTab();
                 loadNotifications(true);
-            }, 5000);
+            }, 30000);
         }
 
         let appBackgroundPreloadStarted = false;
@@ -12679,3 +12682,50 @@ function renderPencapaianCards(data) {
 #tabHargaNett #hargaNettTableView table thead th:nth-child(2),
 #tabHargaNett #hargaNettTableView table tbody td:nth-child(2) { display: none !important; }
 </style>
+
+<style id="castrol-premium-corporate-ui-v1">
+/* Premium corporate UI refresh — presentational overrides only. */
+:root{--premium-ink:#17231d;--premium-muted:#68756e;--premium-line:#e1e8e3;--premium-surface:#fff;--premium-canvas:#f4f7f5;--premium-green:#087b43;--premium-green-dark:#075d35;--premium-shadow:0 8px 26px rgba(20,45,31,.07);--premium-shadow-hover:0 12px 30px rgba(20,45,31,.11)}
+html{scroll-behavior:smooth;background:var(--premium-canvas)}
+body{background:var(--premium-canvas)!important;color:var(--premium-ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,input,select,textarea{font:inherit;transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+button{letter-spacing:.005em}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid rgba(8,123,67,.5)!important;outline-offset:2px}
+#mainHeader{background:rgba(255,255,255,.96)!important;border-bottom:1px solid var(--premium-line)!important;box-shadow:0 3px 14px rgba(20,45,31,.04)!important;backdrop-filter:blur(12px)}
+#leftNav{background:#fff!important;border-right:1px solid var(--premium-line)!important;box-shadow:5px 0 22px rgba(20,45,31,.025)!important}
+#leftNav .sidebar-item{border-radius:10px!important;margin:3px 8px!important;padding:11px 13px!important;min-height:42px!important;color:#526159!important;font-weight:650!important;letter-spacing:.005em}
+#leftNav .sidebar-item-active{background:#eaf5ee!important;color:var(--premium-green-dark)!important;box-shadow:inset 3px 0 0 var(--premium-green)!important}
+#leftNav .sidebar-item:hover{background:#f2f7f4!important;color:var(--premium-green-dark)!important}
+/* Navigation intentionally text-only; decorative icons are removed. */
+#leftNav .sidebar-icon,#leftNav .sidebar-item svg,#mainHeader svg,.header-action-icon,.modern-modal-icon,.monitor-date-group-icon,.home-rebuild-icon,.modal-empty-icon{display:none!important}
+#leftNav .sidebar-item{gap:0!important}
+#mainPage,#tabHome,#tabInput,#tabRiwayat,#tabPencapaian,#tabMonitoring,#tabOutletKontrak,#tabOutletBWS,#tabTambahCustomer,#tabPricelist,#tabHargaNett,#tabPesananOutlet,#tabPengumumanAdmin{min-width:0}
+#mainPage .rounded-xl,#mainPage .rounded-2xl,#mainPage .rounded-lg{box-shadow:0 3px 15px rgba(20,45,31,.035)}
+#mainPage .bg-white{border-color:var(--premium-line)!important}
+#mainPage input:not([type=checkbox]):not([type=radio]),#mainPage select,#mainPage textarea,#loginPage input,#registerPage input{border-radius:10px!important;border-color:#d7e1da!important;min-height:40px;box-shadow:none!important}
+#mainPage input:focus,#mainPage select:focus,#mainPage textarea:focus,#loginPage input:focus,#registerPage input:focus{border-color:#15945a!important;box-shadow:0 0 0 3px rgba(8,123,67,.09)!important}
+#mainPage button,#loginPage button,#registerPage button{border-radius:10px;}
+#mainPage button:hover,#loginPage button:hover,#registerPage button:hover{filter:brightness(.985)}
+#mainPage .shadow,#mainPage .shadow-sm,#mainPage .shadow-md{box-shadow:var(--premium-shadow)!important}
+#loginPage,#registerPage{background:radial-gradient(ellipse at 15% 5%,rgba(8,123,67,.09),transparent 40%),linear-gradient(145deg,#f8faf8,#edf3ef)!important}
+#loginPage .bg-white,#registerPage .bg-white{border:1px solid rgba(219,229,222,.95)!important;border-radius:22px!important;box-shadow:0 18px 54px rgba(22,49,33,.10)!important}
+#tabHome .home-rebuild-card,#tabHome .home-rebuild-metric{border-color:var(--premium-line)!important;box-shadow:var(--premium-shadow)!important}
+#tabHome .home-rebuild-metric:after{display:none!important}
+table{border-color:var(--premium-line)!important}
+thead th{background:#f3f7f4!important;color:#435349!important;font-weight:750!important}
+tbody tr:hover{background:#f7faf8!important}
+#mainPage .overflow-x-auto{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+@media(max-width:767px){
+ .header-action-text{display:inline!important}
+ .header-action-btn{width:auto!important;min-width:34px;padding:7px 9px!important;gap:5px!important}
+ body{font-size:14px}
+ #mainHeader{padding-left:12px!important;padding-right:12px!important}
+ #mainPage{padding-left:10px!important;padding-right:10px!important}
+ #leftNav .sidebar-item{margin:2px 5px!important;padding:10px 10px!important;min-height:40px!important}
+ #loginPage .bg-white,#registerPage .bg-white{border-radius:18px!important;margin-left:12px;margin-right:12px}
+ #mainPage .rounded-xl,#mainPage .rounded-2xl{border-radius:14px!important}
+ table{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+
