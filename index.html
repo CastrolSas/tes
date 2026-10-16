@@ -3704,7 +3704,7 @@ body{background:
                             <select id="pencapaianSalesFilter" onchange="loadPencapaianSales(false, true)" class="hidden bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                 <option value="">Semua Sales</option>
                             </select>
-                            <select id="pencapaianPeriodSelect" onchange="loadPencapaianSales(false, true)" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <select id="pencapaianPeriodSelect" onchange="loadPencapaianSalesFilter(this.value); loadPencapaianSales(false, true)" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                 <option value="">Memuat...</option>
                             </select>
                         </div>
@@ -7760,7 +7760,7 @@ startAutoRefresh();
                 !String(currentUser || '').trim();
         }
 
-        function loadPencapaianSalesFilter() {
+        function loadPencapaianSalesFilter(selectedPeriod) {
             const select = document.getElementById('pencapaianSalesFilter');
             if (!select) return;
             const canFilterSales = isPencapaianSalesFilterAllowed();
@@ -7770,16 +7770,23 @@ startAutoRefresh();
             }
             select.classList.remove('hidden');
             const current = select.value || '';
+            const periodSelect = document.getElementById('pencapaianPeriodSelect');
+            const period = String(selectedPeriod || (periodSelect && periodSelect.value) || '').trim();
             google.script.run.withSuccessHandler(function(list) {
                 const salesList = Array.isArray(list) ? list : [];
                 select.innerHTML = '<option value="">Semua Sales</option>' +
                     salesList.map(function(s) {
                         return '<option value="' + escapeHtml(s) + '">' + escapeHtml(s) + '</option>';
                     }).join('');
-                if (salesList.indexOf(current) !== -1) select.value = current;
+                if (salesList.indexOf(current) !== -1) {
+                    select.value = current;
+                } else {
+                    select.value = '';
+                    if (current) loadPencapaianSales(false, true);
+                }
             }).withFailureHandler(function() {
                 select.innerHTML = '<option value="">Semua Sales</option>';
-            }).getListSalesOptions();
+            }).getPencapaianSalesFilterOptions(period);
         }
 
         function prefetchPencapaianDetailData(sales, period) {
@@ -7850,6 +7857,7 @@ startAutoRefresh();
                     periodSelect.innerHTML = res.periods.map(function(p){return '<option value="'+escapeHtml(p.value)+'">'+escapeHtml(p.label)+'</option>';}).join('');
                     periodSelect.value = res.selectedPeriod || selectedPeriod || res.periods[0].value;
                 }
+                if (canFilterSales) loadPencapaianSalesFilter(res.selectedPeriod || selectedPeriod);
                 renderPencapaianSales(res.data || []);
                 prefetchPencapaianDetailData(currentUser, res.selectedPeriod || selectedPeriod);
                 return;
@@ -7875,6 +7883,7 @@ startAutoRefresh();
                     periodSelect.innerHTML = periods.map(function(p){ return '<option value="'+escapeHtml(p.value)+'">'+escapeHtml(p.label)+'</option>'; }).join('');
                     periodSelect.value = periods.some(function(p){return p.value===actualPeriod;}) ? actualPeriod : periods[0].value;
                 }
+                if (canFilterSales) loadPencapaianSalesFilter(actualPeriod);
                 const periodeEl = document.getElementById('pencapaianPeriode');
                 if (periodeEl) { let txt='Periode: '+(res.periode || '-'); if(res.volumeQuarter) txt+=' · Volume: '+res.volumeQuarter; periodeEl.textContent=txt; }
                 renderPencapaianSales(Array.isArray(res.data) ? res.data : []);
