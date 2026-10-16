@@ -1519,6 +1519,7 @@ html,body{height:100%;}
         var p = pending[msg.id];
         if (!p) return;
         delete pending[msg.id];
+        if (p.timer) window.clearTimeout(p.timer);
         cleanup(p);
 
         if (msg.ok) {
@@ -1555,14 +1556,26 @@ html,body{height:100%;}
             form: form,
             success: typeof success === 'function' ? success : null,
             failure: typeof failure === 'function' ? failure : null,
-            userObject: userObject
+            userObject: userObject,
+            timer: null
         };
 
+        // Jangan biarkan tombol/form login menggantung selamanya jika deployment
+        // Apps Script tidak menerima POST bridge atau tidak mengirim balasan.
+        p.timer = window.setTimeout(function () {
+            if (!pending[id]) return;
+            delete pending[id];
+            cleanup(p);
+            if (p.failure) p.failure(new Error(
+                'Server Apps Script tidak merespons. Pastikan Code.gs terbaru sudah di-deploy sebagai Web App dan aksesnya mengizinkan pengguna GitHub Pages.'
+            ), p.userObject);
+        }, 25000);
 
         try {
             form.submit();
         } catch (err) {
             delete pending[id];
+            if (p.timer) window.clearTimeout(p.timer);
             cleanup(p);
             if (p.failure) p.failure(err, p.userObject);
         }
@@ -4596,6 +4609,15 @@ startAutoRefresh();
 
         function handleRegister(e) {
             e.preventDefault();
+            if (!currentUsernameInput || !document.getElementById('loginPass').value) {
+                if (loginBtn) {
+                    loginBtn.classList.remove('login-processing');
+                    loginBtn.removeAttribute('aria-busy');
+                    loginBtn.disabled = false;
+                }
+                showModal('Login Gagal', 'Masukkan username dan password terlebih dahulu.');
+                return;
+            }
             showLoading(true);
             google.script.run.withSuccessHandler(function(res) {
                 showLoading(false);
@@ -4620,6 +4642,10 @@ startAutoRefresh();
                     loginBtn.classList.remove('login-processing');
                     loginBtn.removeAttribute('aria-busy');
                     loginBtn.disabled = false;
+                }
+                if (!res || typeof res.success !== 'boolean') {
+                    showModal('Login Gagal', 'Respons server tidak valid. Periksa deployment Web App Apps Script lalu coba lagi.');
+                    return;
                 }
                 if (res.success) {
                     currentUser = res.sales;
