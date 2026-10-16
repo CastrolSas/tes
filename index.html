@@ -3701,10 +3701,10 @@ body{background:
                         </div>
                         <div class="flex items-center gap-2">
                             <label for="pencapaianPeriodSelect" class="text-[9px] font-bold text-slate-500">Periode</label>
-                            <select id="pencapaianSalesFilter" onchange="loadPencapaianSales()" class="hidden bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <select id="pencapaianSalesFilter" onchange="loadPencapaianSales(false, true)" class="hidden bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                 <option value="">Semua Sales</option>
                             </select>
-                            <select id="pencapaianPeriodSelect" onchange="loadPencapaianSales()" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <select id="pencapaianPeriodSelect" onchange="loadPencapaianSales(false, true)" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                 <option value="">Memuat...</option>
                             </select>
                         </div>
@@ -4454,18 +4454,16 @@ body{background:
                 applyRoleVisibility();
                 document.getElementById('userBadge').textContent = isAdminLogin ? "Admin" : currentUser;
                 document.getElementById('userBadge').classList.remove('hidden');
+                loadNotifications(true);
                 const adminTools = document.getElementById('riwayatAdminTools');
                 if (adminTools) adminTools.classList.toggle('hidden', !isAdminLogin);
 
-                // Pulihkan cache terlebih dahulu dan tampilkan dashboard tanpa menunggu jaringan.
-                restoreFastTabCaches();
-                switchTab('home');
-
-                // Semua pembaruan data dilakukan asinkron setelah UI utama tampil.
-                // Fungsi dan aturan bisnis tetap sama; panggilan duplikat saat login dihindari.
-                preloadAppDataInBackground();
-                loadNotifications(true);
                 loadOutletForSales(currentUser, currentUsernameInput);
+                if (isAdminLogin) loadPencapaianSalesFilter();
+                loadRiwayat(true, true);
+                loadInputMasterData();
+                preloadAppDataInBackground();
+                switchTab('home');
                 checkActivePengumuman();
                 return true;
             } catch (e) {
@@ -7351,8 +7349,11 @@ startAutoRefresh();
             if (loading) loading.classList.add('hidden');
             if (!container) return;
             // Pencapaian Sales: keluarkan SETYO dari semua tampilan dan perhitungan tab ini saja.
+            const isAdminPencapaian = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
+            const selectedSalesPencapaian = isAdminPencapaian ? String((document.getElementById('pencapaianSalesFilter') || {}).value || '').trim().toUpperCase() : '';
             data = (Array.isArray(data) ? data : []).filter(function(item) {
-                return String(item && item.sales || '').trim().toUpperCase() !== 'SETYO';
+                const name = String(item && item.sales || '').trim().toUpperCase();
+                return name !== 'SETYO' && (!selectedSalesPencapaian || name === selectedSalesPencapaian);
             });
             if (!Array.isArray(data) || data.length === 0) {
                 container.innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-400 shadow-sm">Belum ada target untuk periode ini.</div>';
@@ -7764,6 +7765,33 @@ startAutoRefresh();
             });
         }
 
+        function pencapaianCacheKeyFor(period, isAdminLogin) {
+            const owner = (currentUsernameInput || 'admin').toLowerCase();
+            // Admin mengambil semua sales sekaligus agar filter Sales cukup memfilter data lokal.
+            const salesKey = isAdminLogin ? '' : String(currentUser || '').trim().toUpperCase();
+            return owner + '|' + salesKey + '|' + String(period || '');
+        }
+
+        function prefetchPencapaianPeriods(periods, currentPeriod, isAdminLogin) {
+            if (!Array.isArray(periods) || !periods.length) return;
+            const salesName = isAdminLogin ? '' : currentUser;
+            periods.forEach(function(p, index) {
+                const period = String(p && p.value || '');
+                if (!period || period === currentPeriod) return;
+                const key = pencapaianCacheKeyFor(period, isAdminLogin);
+                if (pencapaianCache[key]) return;
+                // Pemanasan cache di latar belakang; pergantian filter berikutnya cukup render lokal.
+                setTimeout(function() {
+                    google.script.run.withSuccessHandler(function(res) {
+                        if (!res) return;
+                        const actualPeriod = String(res.selectedPeriod || period);
+                        pencapaianCache[pencapaianCacheKeyFor(actualPeriod, isAdminLogin)] = res;
+                        try { appLocalCacheSet('PENCAPAIAN_' + String(currentUsernameInput || '').toUpperCase(), pencapaianCache); } catch(e) {}
+                    }).withFailureHandler(function() {}).getPencapaianSales(salesName, currentUsernameInput, period);
+                }, (index + 1) * 180);
+            });
+        }
+
         function loadPencapaianSales(forceReloadPeriods, silentRefresh) {
             const loading = document.getElementById('pencapaianLoading');
             const container = document.getElementById('pencapaianSalesList');
@@ -7772,7 +7800,16 @@ startAutoRefresh();
             const isAdminLogin = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
             const selectedPeriod = periodSelect && periodSelect.value ? periodSelect.value : '';
             const selectedSales = isAdminLogin && salesFilter && salesFilter.value ? salesFilter.value : '';
-            const cacheKey = (currentUsernameInput || 'admin').toLowerCase() + '|' + selectedSales + '|' + selectedPeriod;
+            const cacheKey = pencapaianCacheKeyFor(selectedPeriod, isAdminLogin);
+
+            // Filter Sales admin hanya mengubah tampilan dari data kwartal yang sudah dimuat.
+            if (!forceReloadPeriods && isAdminLogin && pencapaianCache[cacheKey]) {
+                if (loading) loading.classList.add('hidden');
+                const cached = pencapaianCache[cacheKey];
+                renderPencapaianSales(cached.data || []);
+                prefetchPencapaianDetailData(selectedSales || '', cached.selectedPeriod || selectedPeriod);
+                return;
+            }
             if (!forceReloadPeriods && pencapaianCache[cacheKey]) {
                 const res = pencapaianCache[cacheKey];
                 if (loading) loading.classList.add('hidden');
@@ -7781,23 +7818,12 @@ startAutoRefresh();
                     periodSelect.value = res.selectedPeriod || selectedPeriod || res.periods[0].value;
                 }
                 renderPencapaianSales(res.data || []);
-                prefetchPencapaianDetailData(isAdminLogin ? selectedSales : currentUser, res.selectedPeriod || selectedPeriod);
+                prefetchPencapaianDetailData(currentUser, res.selectedPeriod || selectedPeriod);
                 return;
             }
-            // Setiap perubahan filter boleh langsung membuat request baru.
-            // Request lama tidak boleh menghalangi filter baru dan hasil lama
-            // akan diabaikan jika sudah ada request yang lebih baru.
+
             const requestId = ++pencapaianRequestSeq;
             pencapaianLoading = true;
-            const hadCache = !!pencapaianCache[cacheKey];
-            if (hadCache) {
-                const cachedRes = pencapaianCache[cacheKey];
-                if (periodSelect && cachedRes.periods && cachedRes.periods.length) {
-                    periodSelect.innerHTML = cachedRes.periods.map(function(p){return '<option value="'+escapeHtml(p.value)+'">'+escapeHtml(p.label)+'</option>';}).join('');
-                    periodSelect.value = cachedRes.selectedPeriod || selectedPeriod || cachedRes.periods[0].value;
-                }
-                renderPencapaianSales(cachedRes.data || []);
-            }
             if (!silentRefresh) {
                 if (loading) loading.classList.add('hidden');
                 showLoading(true);
@@ -7806,25 +7832,28 @@ startAutoRefresh();
                 if (requestId !== pencapaianRequestSeq) return;
                 pencapaianLoading = false;
                 if (!silentRefresh) showLoading(false);
-                pencapaianCache[cacheKey] = res || {};
+                res = res || {};
+                const actualPeriod = String(res.selectedPeriod || selectedPeriod || '');
+                const actualCacheKey = pencapaianCacheKeyFor(actualPeriod, isAdminLogin);
+                pencapaianCache[actualCacheKey] = res;
                 try { appLocalCacheSet('PENCAPAIAN_' + String(currentUsernameInput||'').toUpperCase(), pencapaianCache); } catch(e) {}
-                const periods = Array.isArray(res && res.periods) ? res.periods : [];
+                const periods = Array.isArray(res.periods) ? res.periods : [];
                 if (periodSelect && periods.length) {
-                    const currentValue = selectedPeriod || (res && res.selectedPeriod ? res.selectedPeriod : '');
                     periodSelect.innerHTML = periods.map(function(p){ return '<option value="'+escapeHtml(p.value)+'">'+escapeHtml(p.label)+'</option>'; }).join('');
-                    periodSelect.value = periods.some(function(p){return p.value===currentValue;}) ? currentValue : periods[0].value;
+                    periodSelect.value = periods.some(function(p){return p.value===actualPeriod;}) ? actualPeriod : periods[0].value;
                 }
                 const periodeEl = document.getElementById('pencapaianPeriode');
-                if (periodeEl) { let txt='Periode: '+(res && res.periode ? res.periode : '-'); if(res && res.volumeQuarter) txt+=' · Volume: '+res.volumeQuarter; periodeEl.textContent=txt; }
-                renderPencapaianSales(Array.isArray(res && res.data) ? res.data : []);
-                prefetchPencapaianDetailData(isAdminLogin ? selectedSales : currentUser, res && res.selectedPeriod ? res.selectedPeriod : selectedPeriod);
+                if (periodeEl) { let txt='Periode: '+(res.periode || '-'); if(res.volumeQuarter) txt+=' · Volume: '+res.volumeQuarter; periodeEl.textContent=txt; }
+                renderPencapaianSales(Array.isArray(res.data) ? res.data : []);
+                prefetchPencapaianDetailData(isAdminLogin ? selectedSales : currentUser, actualPeriod);
+                prefetchPencapaianPeriods(periods, actualPeriod, isAdminLogin);
             }).withFailureHandler(function(err) {
                 if (requestId !== pencapaianRequestSeq) return;
                 pencapaianLoading = false;
                 if (!silentRefresh) showLoading(false);
                 if (loading) loading.classList.add('hidden');
-                if (!hadCache && container) container.innerHTML = '<div class="bg-white border border-red-200 rounded-2xl p-6 text-center text-xs text-red-500">Gagal memuat pencapaian: ' + escapeHtml(err && err.message ? err.message : 'Terjadi kesalahan.') + '</div>';
-            }).getPencapaianSales(isAdminLogin ? selectedSales : currentUser, currentUsernameInput, selectedPeriod);
+                if (!pencapaianCache[cacheKey] && container) container.innerHTML = '<div class="bg-white border border-red-200 rounded-2xl p-6 text-center text-xs text-red-500">Gagal memuat pencapaian: ' + escapeHtml(err && err.message ? err.message : 'Terjadi kesalahan.') + '</div>';
+            }).getPencapaianSales(isAdminLogin ? '' : currentUser, currentUsernameInput, selectedPeriod);
         }
 
         function formatPricelistDate(value) {
@@ -8034,36 +8063,7 @@ startAutoRefresh();
             const campaign=String((document.getElementById('filterCashbackHargaNett')||{}).selectedOptions?.[0]?.textContent||'').trim();
             win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Simulasi Invoice</title><style>'+
               '*{box-sizing:border-box}body{margin:0;background:#eef2f7;font-family:Arial,Helvetica,sans-serif;color:#172033;font-size:11px;-webkit-print-color-adjust:exact;print-color-adjust:exact}.sheet{max-width:1100px;margin:24px auto;background:#fff;padding:34px 38px;border-radius:14px;box-shadow:0 8px 30px #18243a14}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:22px;border-bottom:3px solid #173b68}.eyebrow{font-size:10px;font-weight:700;letter-spacing:2px;color:#64748b;text-transform:uppercase;margin-bottom:8px}.title{font-size:27px;letter-spacing:-.5px;font-weight:800;color:#173b68;margin:0}.subtitle{color:#64748b;margin-top:7px;font-size:11px}.badge{background:#e8f1ff;color:#174a83;padding:9px 13px;border-radius:8px;font-size:10px;font-weight:700;white-space:nowrap}.meta{display:flex;gap:12px;margin:20px 0}.meta-card{flex:1;background:#f6f8fb;border:1px solid #e5eaf1;border-radius:9px;padding:12px 14px;min-width:0}.label{font-size:9px;color:#718096;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}.value{font-size:12px;font-weight:700;overflow-wrap:anywhere}.section-title{font-size:13px;font-weight:800;margin:24px 0 10px;color:#1c2c43}.table-wrap{border:1px solid #e3e8ef;border-radius:9px;overflow:hidden}table{width:100%;border-collapse:collapse;font-size:10px}thead{display:table-header-group}th{background:#173b68;color:#fff;text-align:left;font-size:9px;letter-spacing:.3px;padding:11px 8px;white-space:nowrap}td{padding:11px 8px;border-bottom:1px solid #e8edf3;vertical-align:top}tbody tr:nth-child(even){background:#f8fafc}tbody tr:last-child td{border-bottom:0}.num{color:#94a3b8;width:30px}.product{font-weight:700;color:#1e293b;line-height:1.4}.muted{font-size:9px;color:#94a3b8;margin-top:4px}.center{text-align:center;white-space:nowrap}.right{text-align:right;white-space:nowrap}.strong{font-weight:800;color:#173b68}.negative{color:#dc4b4b}.cashback{color:#0b896b}.star{font-size:9px;color:#b77905;white-space:nowrap}.bottom{display:flex;justify-content:flex-end;margin-top:18px}.summary{width:360px;border:1px solid #e3e8ef;border-radius:10px;padding:8px 15px;background:#fbfcfe}.sumrow{display:flex;justify-content:space-between;gap:18px;padding:8px 0;color:#596579;border-bottom:1px solid #edf0f4}.sumrow b{color:#25334a;white-space:nowrap}.sumrow.total{border:0;border-top:2px solid #173b68;margin-top:5px;padding-top:13px;color:#173b68;font-size:13px;font-weight:800}.sumrow.total b{font-size:17px;color:#173b68}.foot{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #e5eaf1;margin-top:24px;padding-top:12px;color:#94a3b8;font-size:9px}.foot strong{color:#64748b}@page{size:A4 landscape;margin:9mm}@media print{body{background:#fff}.sheet{max-width:none;margin:0;padding:8px;border-radius:0;box-shadow:none}.meta{margin:14px 0}.section-title{margin-top:18px}th,td{padding:8px 6px}.summary{width:330px}.foot{margin-top:16px}}'+
-              '</style></head><body><main class="sheet"><header class="top"><div><div class="eyebrow">Dokumen Perhitungan</div><h1 class="title">Simulasi Invoice</h1><div class="subtitle">Rincian produk dan perhitungan harga nett</div></div><div class="badge">SIMULASI • BUKAN TRANSAKSI FINAL</div></header><section class="meta"><div class="meta-card"><div class="label">Tanggal Cetak</div><div class="value">'+escapeHtml(new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}))+'</div></div><div class="meta-card"><div class="label">Filter Cashback</div><div class="value">'+escapeHtml(campaign||'-')+'</div></div><div class="meta-card"><div class="label">Jumlah Item</div><div class="value">'+hargaNettInvoiceCart.length+' produk</div></div></section><div class="section-title">Rincian Produk</div><div class="table-wrap"><table><thead><tr><th>No.</th><th>SKU / Produk</th><th>Qty</th><th>Harga Unit</th><th>Subtotal</th><th>Diskon</th><th>Cashback</th><th>Nett Subtotal</th></tr></thead><tbody>'+rows+'</tbody></table></div><section class="bottom"><div class="summary"><div class="sumrow"><span>Subtotal Pricelist</span><b>'+formatHargaNett(gross)+'</b></div><div class="sumrow"><span>Total Diskon Produk</span><b class="negative">-'+formatHargaNett(disc)+'</b></div><div class="sumrow"><span>Total Cashback</span><b class="cashback">-'+formatHargaNett(cashback)+'</b></div><div class="sumrow"><span>Total Extra Cashback</span><b class="cashback">-'+formatHargaNett(extra)+'</b></div><div class="sumrow"><span>Bonus Cashback</span><b>-'+formatHargaNett(bonus)+'</b></div><div class="sumrow total"><span>Grand Total Nett</span><b>'+formatHargaNett(grand)+'</b></div></div></section><footer class="foot"><span><strong>Simulasi Invoice</strong> · Mohon periksa kembali rincian sebelum digunakan.</span><span>Dicetak '+escapeHtml(new Date().toLocaleString('id-ID'))+'</span></footer></main>
-<style id="castrol-header-marquee-contrast-fix">
-/* Perbaikan kontras header/pengumuman berjalan: teks harus terbaca di atas latar terang. */
-#mainHeader .pengumuman-main-header-marquee{
-  background:rgba(255,255,255,.98)!important;
-  border:1px solid #dce8e0!important;
-  border-radius:10px!important;
-  box-shadow:0 2px 8px rgba(18,55,35,.06)!important;
-  padding:7px 0!important;
-}
-#mainHeader .pengumuman-marquee-text{
-  color:#075d35!important;
-  font-weight:750!important;
-  text-shadow:none!important;
-}
-#mainHeader{
-  color:#173b29!important;
-}
-#mainHeader .pengumuman-main-header-marquee::before{
-  content:"";
-  display:inline-block;
-  width:7px;height:7px;border-radius:50%;
-  background:#0b8f53;
-}
-@media(max-width:767px){
-  #mainHeader .pengumuman-marquee-text{font-size:11px!important;color:#075d35!important}
-}
-</style>
-
-</body></html>');
+              '</style></head><body><main class="sheet"><header class="top"><div><div class="eyebrow">Dokumen Perhitungan</div><h1 class="title">Simulasi Invoice</h1><div class="subtitle">Rincian produk dan perhitungan harga nett</div></div><div class="badge">SIMULASI • BUKAN TRANSAKSI FINAL</div></header><section class="meta"><div class="meta-card"><div class="label">Tanggal Cetak</div><div class="value">'+escapeHtml(new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}))+'</div></div><div class="meta-card"><div class="label">Filter Cashback</div><div class="value">'+escapeHtml(campaign||'-')+'</div></div><div class="meta-card"><div class="label">Jumlah Item</div><div class="value">'+hargaNettInvoiceCart.length+' produk</div></div></section><div class="section-title">Rincian Produk</div><div class="table-wrap"><table><thead><tr><th>No.</th><th>SKU / Produk</th><th>Qty</th><th>Harga Unit</th><th>Subtotal</th><th>Diskon</th><th>Cashback</th><th>Nett Subtotal</th></tr></thead><tbody>'+rows+'</tbody></table></div><section class="bottom"><div class="summary"><div class="sumrow"><span>Subtotal Pricelist</span><b>'+formatHargaNett(gross)+'</b></div><div class="sumrow"><span>Total Diskon Produk</span><b class="negative">-'+formatHargaNett(disc)+'</b></div><div class="sumrow"><span>Total Cashback</span><b class="cashback">-'+formatHargaNett(cashback)+'</b></div><div class="sumrow"><span>Total Extra Cashback</span><b class="cashback">-'+formatHargaNett(extra)+'</b></div><div class="sumrow"><span>Bonus Cashback</span><b>-'+formatHargaNett(bonus)+'</b></div><div class="sumrow total"><span>Grand Total Nett</span><b>'+formatHargaNett(grand)+'</b></div></div></section><footer class="foot"><span><strong>Simulasi Invoice</strong> · Mohon periksa kembali rincian sebelum digunakan.</span><span>Dicetak '+escapeHtml(new Date().toLocaleString('id-ID'))+'</span></footer></main></body></html>');
             win.document.close();
             win.focus();
             setTimeout(function(){ try { win.print(); } catch(e) { showModal('Cetak PDF','Gunakan Ctrl+P pada jendela invoice, lalu pilih Simpan sebagai PDF.'); } },600);
@@ -8102,36 +8102,7 @@ startAutoRefresh();
             }).join('');
             const win=window.open('','_blank');
             if(!win){showModal('Export PDF','Browser memblokir jendela cetak. Izinkan pop-up untuk Export PDF.');return;}
-            win.document.write('<!doctype html><html><head><title>Harga Nett</title><style>body{font-family:Arial,sans-serif;padding:18px;color:#111}h1{font-size:18px;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #bbb;padding:5px;text-align:left}th{background:#eee}td:nth-child(n+2){white-space:nowrap}@page{size:A4 landscape;margin:10mm}</style></head><body><h1>Harga Nett</h1><table><thead><tr><th>PRODUK</th><th>PRICELIST</th><th>LITER</th><th>CASHBACK</th><th>EXTRA CASHBACK</th><th>NETT</th></tr></thead><tbody>'+body+'</tbody></table><script>window.onload=function(){window.print();};<\/script>
-<style id="castrol-header-marquee-contrast-fix">
-/* Perbaikan kontras header/pengumuman berjalan: teks harus terbaca di atas latar terang. */
-#mainHeader .pengumuman-main-header-marquee{
-  background:rgba(255,255,255,.98)!important;
-  border:1px solid #dce8e0!important;
-  border-radius:10px!important;
-  box-shadow:0 2px 8px rgba(18,55,35,.06)!important;
-  padding:7px 0!important;
-}
-#mainHeader .pengumuman-marquee-text{
-  color:#075d35!important;
-  font-weight:750!important;
-  text-shadow:none!important;
-}
-#mainHeader{
-  color:#173b29!important;
-}
-#mainHeader .pengumuman-main-header-marquee::before{
-  content:"";
-  display:inline-block;
-  width:7px;height:7px;border-radius:50%;
-  background:#0b8f53;
-}
-@media(max-width:767px){
-  #mainHeader .pengumuman-marquee-text{font-size:11px!important;color:#075d35!important}
-}
-</style>
-
-</body></html>');
+            win.document.write('<!doctype html><html><head><title>Harga Nett</title><style>body{font-family:Arial,sans-serif;padding:18px;color:#111}h1{font-size:18px;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #bbb;padding:5px;text-align:left}th{background:#eee}td:nth-child(n+2){white-space:nowrap}@page{size:A4 landscape;margin:10mm}</style></head><body><h1>Harga Nett</h1><table><thead><tr><th>PRODUK</th><th>PRICELIST</th><th>LITER</th><th>CASHBACK</th><th>EXTRA CASHBACK</th><th>NETT</th></tr></thead><tbody>'+body+'</tbody></table><script>window.onload=function(){window.print();};<\/script></body></html>');
             win.document.close();
         }
         function setHargaNettProductType(type) { const el=document.getElementById('filterProdukHargaNett'); if(!el)return; el.value=(el.value===type?'':type); ['PCO','MCO-4T'].forEach(function(t){const b=document.getElementById(t==='PCO'?'filterProdukPCOHargaNett':'filterProdukMCOHargaNett');if(b){const active=el.value===t;b.classList.toggle('bg-emerald-700',active);b.classList.toggle('text-white',active);b.classList.toggle('border-emerald-700',active);}}); renderHargaNettCashbackChoices(); renderHargaNett(); }
@@ -8251,36 +8222,7 @@ startAutoRefresh();
             const rows=data.map(function(item,i){return '<tr><td>'+(i+1)+'</td><td>'+escapeHtml(item.nama||'-')+'</td><td style="text-align:right">'+formatRupiah(item.harga||0)+'</td></tr>';}).join('');
             const win=window.open('','_blank');
             if(!win){showModal('Export PDF','Browser memblokir jendela cetak. Izinkan pop-up untuk Export PDF.');return;}
-            win.document.write('<!doctype html><html><head><title>Pricelist Castrol</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111}h1{font-size:20px;margin:0 0 6px}p{font-size:11px;color:#666;margin:0 0 16px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #ccc;padding:7px}th{text-align:left;background:#f1f5f9}@media print{body{padding:10px}}</style></head><body><h1>Pricelist Castrol</h1><p>'+escapeHtml(filterText)+'</p><table><thead><tr><th style="width:50px">No</th><th>Produk</th><th style="width:160px;text-align:right">Harga</th></tr></thead><tbody>'+rows+'</tbody></table>
-<style id="castrol-header-marquee-contrast-fix">
-/* Perbaikan kontras header/pengumuman berjalan: teks harus terbaca di atas latar terang. */
-#mainHeader .pengumuman-main-header-marquee{
-  background:rgba(255,255,255,.98)!important;
-  border:1px solid #dce8e0!important;
-  border-radius:10px!important;
-  box-shadow:0 2px 8px rgba(18,55,35,.06)!important;
-  padding:7px 0!important;
-}
-#mainHeader .pengumuman-marquee-text{
-  color:#075d35!important;
-  font-weight:750!important;
-  text-shadow:none!important;
-}
-#mainHeader{
-  color:#173b29!important;
-}
-#mainHeader .pengumuman-main-header-marquee::before{
-  content:"";
-  display:inline-block;
-  width:7px;height:7px;border-radius:50%;
-  background:#0b8f53;
-}
-@media(max-width:767px){
-  #mainHeader .pengumuman-marquee-text{font-size:11px!important;color:#075d35!important}
-}
-</style>
-
-</body></html>');
+            win.document.write('<!doctype html><html><head><title>Pricelist Castrol</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111}h1{font-size:20px;margin:0 0 6px}p{font-size:11px;color:#666;margin:0 0 16px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #ccc;padding:7px}th{text-align:left;background:#f1f5f9}@media print{body{padding:10px}}</style></head><body><h1>Pricelist Castrol</h1><p>'+escapeHtml(filterText)+'</p><table><thead><tr><th style="width:50px">No</th><th>Produk</th><th style="width:160px;text-align:right">Harga</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>');
             win.document.close();win.focus();setTimeout(function(){win.print();},250);
         }
 
@@ -9357,12 +9299,11 @@ startAutoRefresh();
 
         function startAutoRefresh() {
             if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-            // Kurangi request berulang agar UI tetap responsif; refresh tetap otomatis.
+            // Jalankan setiap 5 detik.
             autoRefreshTimer = setInterval(function() {
-                if (document.visibilityState && document.visibilityState !== 'visible') return;
                 autoRefreshActiveTab();
                 loadNotifications(true);
-            }, 30000);
+            }, 5000);
         }
 
         let appBackgroundPreloadStarted = false;
@@ -11793,35 +11734,6 @@ function renderPencapaianCards(data) {
   }
 }
 </style>
-
-<style id="castrol-header-marquee-contrast-fix">
-/* Perbaikan kontras header/pengumuman berjalan: teks harus terbaca di atas latar terang. */
-#mainHeader .pengumuman-main-header-marquee{
-  background:rgba(255,255,255,.98)!important;
-  border:1px solid #dce8e0!important;
-  border-radius:10px!important;
-  box-shadow:0 2px 8px rgba(18,55,35,.06)!important;
-  padding:7px 0!important;
-}
-#mainHeader .pengumuman-marquee-text{
-  color:#075d35!important;
-  font-weight:750!important;
-  text-shadow:none!important;
-}
-#mainHeader{
-  color:#173b29!important;
-}
-#mainHeader .pengumuman-main-header-marquee::before{
-  content:"";
-  display:inline-block;
-  width:7px;height:7px;border-radius:50%;
-  background:#0b8f53;
-}
-@media(max-width:767px){
-  #mainHeader .pengumuman-marquee-text{font-size:11px!important;color:#075d35!important}
-}
-</style>
-
 </body>
 </html>
 <style id="mobile-monitoring-pricelist-bottom-fix">
@@ -12798,50 +12710,3 @@ function renderPencapaianCards(data) {
 #tabHargaNett #hargaNettTableView table thead th:nth-child(2),
 #tabHargaNett #hargaNettTableView table tbody td:nth-child(2) { display: none !important; }
 </style>
-
-<style id="castrol-premium-corporate-ui-v1">
-/* Premium corporate UI refresh — presentational overrides only. */
-:root{--premium-ink:#17231d;--premium-muted:#68756e;--premium-line:#e1e8e3;--premium-surface:#fff;--premium-canvas:#f4f7f5;--premium-green:#087b43;--premium-green-dark:#075d35;--premium-shadow:0 8px 26px rgba(20,45,31,.07);--premium-shadow-hover:0 12px 30px rgba(20,45,31,.11)}
-html{scroll-behavior:smooth;background:var(--premium-canvas)}
-body{background:var(--premium-canvas)!important;color:var(--premium-ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-button,input,select,textarea{font:inherit;transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease}
-button{letter-spacing:.005em}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid rgba(8,123,67,.5)!important;outline-offset:2px}
-#mainHeader{background:rgba(255,255,255,.96)!important;border-bottom:1px solid var(--premium-line)!important;box-shadow:0 3px 14px rgba(20,45,31,.04)!important;backdrop-filter:blur(12px)}
-#leftNav{background:#fff!important;border-right:1px solid var(--premium-line)!important;box-shadow:5px 0 22px rgba(20,45,31,.025)!important}
-#leftNav .sidebar-item{border-radius:10px!important;margin:3px 8px!important;padding:11px 13px!important;min-height:42px!important;color:#526159!important;font-weight:650!important;letter-spacing:.005em}
-#leftNav .sidebar-item-active{background:#eaf5ee!important;color:var(--premium-green-dark)!important;box-shadow:inset 3px 0 0 var(--premium-green)!important}
-#leftNav .sidebar-item:hover{background:#f2f7f4!important;color:var(--premium-green-dark)!important}
-/* Navigation intentionally text-only; decorative icons are removed. */
-#leftNav .sidebar-icon,#leftNav .sidebar-item svg,#mainHeader svg,.header-action-icon,.modern-modal-icon,.monitor-date-group-icon,.home-rebuild-icon,.modal-empty-icon{display:none!important}
-#leftNav .sidebar-item{gap:0!important}
-#mainPage,#tabHome,#tabInput,#tabRiwayat,#tabPencapaian,#tabMonitoring,#tabOutletKontrak,#tabOutletBWS,#tabTambahCustomer,#tabPricelist,#tabHargaNett,#tabPesananOutlet,#tabPengumumanAdmin{min-width:0}
-#mainPage .rounded-xl,#mainPage .rounded-2xl,#mainPage .rounded-lg{box-shadow:0 3px 15px rgba(20,45,31,.035)}
-#mainPage .bg-white{border-color:var(--premium-line)!important}
-#mainPage input:not([type=checkbox]):not([type=radio]),#mainPage select,#mainPage textarea,#loginPage input,#registerPage input{border-radius:10px!important;border-color:#d7e1da!important;min-height:40px;box-shadow:none!important}
-#mainPage input:focus,#mainPage select:focus,#mainPage textarea:focus,#loginPage input:focus,#registerPage input:focus{border-color:#15945a!important;box-shadow:0 0 0 3px rgba(8,123,67,.09)!important}
-#mainPage button,#loginPage button,#registerPage button{border-radius:10px;}
-#mainPage button:hover,#loginPage button:hover,#registerPage button:hover{filter:brightness(.985)}
-#mainPage .shadow,#mainPage .shadow-sm,#mainPage .shadow-md{box-shadow:var(--premium-shadow)!important}
-#loginPage,#registerPage{background:radial-gradient(ellipse at 15% 5%,rgba(8,123,67,.09),transparent 40%),linear-gradient(145deg,#f8faf8,#edf3ef)!important}
-#loginPage .bg-white,#registerPage .bg-white{border:1px solid rgba(219,229,222,.95)!important;border-radius:22px!important;box-shadow:0 18px 54px rgba(22,49,33,.10)!important}
-#tabHome .home-rebuild-card,#tabHome .home-rebuild-metric{border-color:var(--premium-line)!important;box-shadow:var(--premium-shadow)!important}
-#tabHome .home-rebuild-metric:after{display:none!important}
-table{border-color:var(--premium-line)!important}
-thead th{background:#f3f7f4!important;color:#435349!important;font-weight:750!important}
-tbody tr:hover{background:#f7faf8!important}
-#mainPage .overflow-x-auto{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
-@media(max-width:767px){
- .header-action-text{display:inline!important}
- .header-action-btn{width:auto!important;min-width:34px;padding:7px 9px!important;gap:5px!important}
- body{font-size:14px}
- #mainHeader{padding-left:12px!important;padding-right:12px!important}
- #mainPage{padding-left:10px!important;padding-right:10px!important}
- #leftNav .sidebar-item{margin:2px 5px!important;padding:10px 10px!important;min-height:40px!important}
- #loginPage .bg-white,#registerPage .bg-white{border-radius:18px!important;margin-left:12px;margin-right:12px}
- #mainPage .rounded-xl,#mainPage .rounded-2xl{border-radius:14px!important}
- table{font-size:12px}
-}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-</style>
-
