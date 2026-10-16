@@ -1519,7 +1519,6 @@ html,body{height:100%;}
         var p = pending[msg.id];
         if (!p) return;
         delete pending[msg.id];
-        if (p.timer) window.clearTimeout(p.timer);
         cleanup(p);
 
         if (msg.ok) {
@@ -1556,26 +1555,14 @@ html,body{height:100%;}
             form: form,
             success: typeof success === 'function' ? success : null,
             failure: typeof failure === 'function' ? failure : null,
-            userObject: userObject,
-            timer: null
+            userObject: userObject
         };
 
-        // Jangan biarkan tombol/form login menggantung selamanya jika deployment
-        // Apps Script tidak menerima POST bridge atau tidak mengirim balasan.
-        p.timer = window.setTimeout(function () {
-            if (!pending[id]) return;
-            delete pending[id];
-            cleanup(p);
-            if (p.failure) p.failure(new Error(
-                'Server Apps Script tidak merespons. Pastikan Code.gs terbaru sudah di-deploy sebagai Web App dan aksesnya mengizinkan pengguna GitHub Pages.'
-            ), p.userObject);
-        }, 25000);
 
         try {
             form.submit();
         } catch (err) {
             delete pending[id];
-            if (p.timer) window.clearTimeout(p.timer);
             cleanup(p);
             if (p.failure) p.failure(err, p.userObject);
         }
@@ -3717,7 +3704,7 @@ body{background:
                             <select id="pencapaianSalesFilter" onchange="loadPencapaianSales(false, true)" class="hidden bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                 <option value="">Semua Sales</option>
                             </select>
-                            <select id="pencapaianPeriodSelect" onchange="loadPencapaianSalesFilter(this.value); loadPencapaianSales(false, true)" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <select id="pencapaianPeriodSelect" onchange="loadPencapaianSales(false, true)" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                 <option value="">Memuat...</option>
                             </select>
                         </div>
@@ -4472,7 +4459,7 @@ body{background:
                 if (adminTools) adminTools.classList.toggle('hidden', !isAdminLogin);
 
                 loadOutletForSales(currentUser, currentUsernameInput);
-                if (isPencapaianSalesFilterAllowed()) loadPencapaianSalesFilter();
+                if (isAdminLogin) loadPencapaianSalesFilter();
                 loadRiwayat(true, true);
                 loadInputMasterData();
                 preloadAppDataInBackground();
@@ -4620,12 +4607,7 @@ startAutoRefresh();
         function handleLogin(e) {
             e.preventDefault();
             currentUsernameInput = document.getElementById('loginUser').value.trim();
-            const loginPassword = document.getElementById('loginPass').value;
             const loginBtn = document.getElementById('loginSubmitBtn');
-            if (!currentUsernameInput || !loginPassword) {
-                showModal('Login Gagal', 'Masukkan username dan password terlebih dahulu.');
-                return;
-            }
             if (loginBtn) {
                 loginBtn.classList.add('login-processing');
                 loginBtn.setAttribute('aria-busy', 'true');
@@ -4638,10 +4620,6 @@ startAutoRefresh();
                     loginBtn.classList.remove('login-processing');
                     loginBtn.removeAttribute('aria-busy');
                     loginBtn.disabled = false;
-                }
-                if (!res || typeof res.success !== 'boolean') {
-                    showModal('Login Gagal', 'Respons server tidak valid. Periksa deployment Web App Apps Script lalu coba lagi.');
-                    return;
                 }
                 if (res.success) {
                     currentUser = res.sales;
@@ -4662,7 +4640,7 @@ startAutoRefresh();
                     if (adminTools) adminTools.classList.toggle('hidden', !isAdminLogin);
                     saveAuthState();
                     loadOutletForSales(currentUser, currentUsernameInput);
-                    if (isPencapaianSalesFilterAllowed()) loadPencapaianSalesFilter();
+                    if (isAdminLogin) loadPencapaianSalesFilter();
                     loadRiwayat(true, true);
                     loadInputMasterData();
                     preloadAppDataInBackground();
@@ -4678,7 +4656,7 @@ startAutoRefresh();
                     loginBtn.disabled = false;
                 }
                 showModal("Login Gagal", err && err.message ? err.message : "Terjadi kesalahan saat proses login.");
-            }).prosesLogin(currentUsernameInput, loginPassword);
+            }).prosesLogin(currentUsernameInput, document.getElementById('loginPass').value);
         }
 
         function loadOutletForSales(sales, usernameInput) {
@@ -7371,8 +7349,8 @@ startAutoRefresh();
             if (loading) loading.classList.add('hidden');
             if (!container) return;
             // Pencapaian Sales: keluarkan SETYO dari semua tampilan dan perhitungan tab ini saja.
-            const canFilterSalesPencapaian = isPencapaianSalesFilterAllowed();
-            const selectedSalesPencapaian = canFilterSalesPencapaian ? String((document.getElementById('pencapaianSalesFilter') || {}).value || '').trim().toUpperCase() : '';
+            const isAdminPencapaian = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
+            const selectedSalesPencapaian = isAdminPencapaian ? String((document.getElementById('pencapaianSalesFilter') || {}).value || '').trim().toUpperCase() : '';
             data = (Array.isArray(data) ? data : []).filter(function(item) {
                 const name = String(item && item.sales || '').trim().toUpperCase();
                 return name !== 'SETYO' && (!selectedSalesPencapaian || name === selectedSalesPencapaian);
@@ -7437,10 +7415,10 @@ startAutoRefresh();
             pencapaianViewMode = mode === 'chart' ? 'chart' : 'table';
             const periodSelect = document.getElementById('pencapaianPeriodSelect');
             const selectedPeriod = periodSelect && periodSelect.value ? periodSelect.value : '';
-            const canFilterSales = isPencapaianSalesFilterAllowed();
+            const isAdmin = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
             const salesFilter = document.getElementById('pencapaianSalesFilter');
-            const selectedSales = canFilterSales && salesFilter && salesFilter.value ? salesFilter.value : '';
-            const cacheKey = (currentUsernameInput || 'admin').toLowerCase() + '|' + (canFilterSales ? '' : String(currentUser || '').trim().toUpperCase()) + '|' + selectedPeriod;
+            const selectedSales = isAdmin && salesFilter && salesFilter.value ? salesFilter.value : '';
+            const cacheKey = (currentUsernameInput || 'admin').toLowerCase() + '|' + selectedSales + '|' + selectedPeriod;
             const cached = pencapaianCache[cacheKey];
             if (cached && Array.isArray(cached.data)) {
                 renderPencapaianSales(cached.data);
@@ -7516,69 +7494,44 @@ startAutoRefresh();
         function renderPencapaianTable(data) {
             const container = document.getElementById('pencapaianSalesList');
             if (!container) return;
-            const cats = [
-                {key:'value',label:'Value',type:'value'},
-                {key:'volume',label:'Volume',type:'volume'},
-                {key:'active',label:'Active Outlet',type:'active'},
-                {key:'product',label:'Produk Fokus',type:'product'},
-                {key:'powerBrand',label:'Power Brand',type:'powerBrand'},
-                {key:'noo',label:'NOO/Reaktivasi',type:'noo'}
-            ];
-            // Simpan data yang sudah difilter Sales agar pergantian kategori hanya merender ulang tabel.
-            window.__pencapaianTableData = Array.isArray(data) ? data : [];
-            const oldFilter = document.getElementById('pencapaianCategoryFilter');
-            const selectedCategory = oldFilter ? oldFilter.value : 'value';
-            const selectedCat = cats.find(function(c){ return c.key === selectedCategory; }) || cats[0];
-            const monthly = {};
-            window.__pencapaianTableData.forEach(function(item) {
-                const category = item && item.categories && item.categories[selectedCat.key];
-                const months = category && Array.isArray(category.months) ? category.months : [];
-                months.forEach(function(m) {
-                    const key = String(m.period || ('MONTH ' + (m.monthNo || '')));
-                    if (!monthly[key]) monthly[key] = {period:key, target:0, actual:0, gap:0, percentage:0, monthNo:Number(m.monthNo || 0)};
-                    monthly[key].target += Number(m.target || 0);
-                    monthly[key].actual += Number(m.actual || 0);
-                    monthly[key].gap += Number(m.gap != null ? m.gap : (Number(m.actual || 0) - Number(m.target || 0)));
-                    monthly[key].monthNo = monthly[key].monthNo || Number(m.monthNo || 0);
+            const cats = [{key:'value',label:'Value',type:'value'},{key:'volume',label:'Volume',type:'volume'},{key:'active',label:'Active Outlet',type:'active'},{key:'product',label:'Produk Fokus',type:'product'},{key:'powerBrand',label:'Power Brand',type:'powerBrand'},{key:'noo',label:'NOO/Reaktivasi',type:'noo'}];
+            let rows='';
+            data.forEach(function(item){
+                cats.forEach(function(c, index){
+                    const q=(item.categories&&item.categories[c.key]&&item.categories[c.key].quarter)||{};
+                    const salesCell = index === 0
+                        ? '<td class="px-3 py-2.5 font-bold text-slate-700 align-top border-r border-slate-100" rowspan="'+cats.length+'">'+escapeHtml(item.sales||'-')+'</td>'
+                        : '';
+                    rows += '<tr class="border-b border-slate-100 hover:bg-emerald-50/50 cursor-pointer" onclick="openPencapaianDetail(\''+escapeHtml(categoryKeyForDetail(c.type))+'\', \''+escapeHtml(item.sales||'')+'\')">'+salesCell+'<td class="px-3 py-2.5">'+escapeHtml(c.label)+'</td><td class="px-3 py-2.5 text-right">'+formatPencapaianValue(q.target,c.type)+'</td><td class="px-3 py-2.5 text-right font-bold">'+formatPencapaianValue(q.actual,c.type)+'</td><td class="px-3 py-2.5 text-right font-bold '+(Number(q.gap||0)>=0?'text-emerald-700':'text-red-600')+'">'+formatPencapaianValue(q.gap||0,c.type)+'</td><td class="px-3 py-2.5 text-right font-extrabold">'+formatPercentID(q.percentage||0)+'</td></tr>';
                 });
             });
-            const rowsData = Object.keys(monthly).map(function(k) {
-                const m = monthly[k];
-                m.percentage = m.target !== 0 ? (m.actual / m.target) * 100 : 0;
-                return m;
-            }).sort(function(a,b){ return a.monthNo - b.monthNo || a.period.localeCompare(b.period); });
-            const rows = rowsData.map(function(m) {
-                const gap = Number(m.gap || 0);
-                return '<tr class="border-b border-slate-100 hover:bg-emerald-50/50">' +
-                    '<td class="px-3 py-2.5 font-semibold text-slate-700">' + escapeHtml(m.period) + '</td>' +
-                    '<td class="px-3 py-2.5 text-right">' + formatPencapaianValue(m.target, selectedCat.type) + '</td>' +
-                    '<td class="px-3 py-2.5 text-right font-bold">' + formatPencapaianValue(m.actual, selectedCat.type) + '</td>' +
-                    '<td class="px-3 py-2.5 text-right font-bold ' + (gap >= 0 ? 'text-emerald-700' : 'text-red-600') + '">' + formatPencapaianValue(gap, selectedCat.type) + '</td>' +
-                    '<td class="px-3 py-2.5 text-right font-extrabold">' + formatPercentID(m.percentage) + '</td>' +
-                    '</tr>';
-            }).join('');
-            const totalTarget = rowsData.reduce(function(sum, m){ return sum + Number(m.target || 0); }, 0);
-            const totalActual = rowsData.reduce(function(sum, m){ return sum + Number(m.actual || 0); }, 0);
-            const totalGap = rowsData.reduce(function(sum, m){ return sum + Number(m.gap || 0); }, 0);
-            const totalAch = totalTarget !== 0 ? (totalActual / totalTarget) * 100 : 0;
-            const totalRow = rowsData.length ? '<tr class="bg-slate-100 border-t-2 border-slate-300 font-extrabold">' +
-                '<td class="px-3 py-2.5 text-slate-800">Total</td>' +
-                '<td class="px-3 py-2.5 text-right">' + formatPencapaianValue(totalTarget, selectedCat.type) + '</td>' +
-                '<td class="px-3 py-2.5 text-right">' + formatPencapaianValue(totalActual, selectedCat.type) + '</td>' +
-                '<td class="px-3 py-2.5 text-right ' + (totalGap >= 0 ? 'text-emerald-700' : 'text-red-600') + '">' + formatPencapaianValue(totalGap, selectedCat.type) + '</td>' +
-                '<td class="px-3 py-2.5 text-right">' + formatPercentID(totalAch) + '</td>' +
-                '</tr>' : '';
-            container.innerHTML =
-                '<div class="flex flex-wrap items-center justify-between gap-2 mb-2">' +
-                    '<label for="pencapaianCategoryFilter" class="text-[10px] font-bold text-slate-600">Kategori</label>' +
-                    '<select id="pencapaianCategoryFilter" onchange="renderPencapaianTable(window.__pencapaianTableData || [])" class="bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">' +
-                        cats.map(function(c){ return '<option value="' + c.key + '"' + (c.key === selectedCat.key ? ' selected' : '') + '>' + escapeHtml(c.label) + '</option>'; }).join('') +
-                    '</select>' +
-                '</div>' +
-                '<div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"><div class="overflow-x-auto"><table class="w-full min-w-[520px] text-[10px]">' +
-                    '<thead><tr class="bg-slate-50 border-b border-slate-200 text-[9px] uppercase tracking-wide text-slate-500">' +
-                        '<th class="px-3 py-2 text-left">Bulan</th><th class="px-3 py-2 text-right">Target</th><th class="px-3 py-2 text-right">Actual</th><th class="px-3 py-2 text-right">Gap</th><th class="px-3 py-2 text-right">Ach</th>' +
-                    '</tr></thead><tbody>' + (rows ? rows + totalRow : '<tr><td colspan="5" class="px-3 py-6 text-center text-slate-400">Data bulanan belum tersedia untuk kategori ini.</td></tr>') + '</tbody></table></div></div>';
+            let totalSummaryHtml = '';
+            const salesFilter = document.getElementById('pencapaianSalesFilter');
+            const isAdminLogin = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
+            const showTotals = isAdminLogin && !(salesFilter && String(salesFilter.value || '').trim());
+            if (showTotals) {
+                const totalCards = cats.map(function(c) {
+                    let totalTarget = 0;
+                    let totalActual = 0;
+                    data.forEach(function(item) {
+                        const q = (item.categories && item.categories[c.key] && item.categories[c.key].quarter) || {};
+                        totalTarget += Number(q.target || 0);
+                        totalActual += Number(q.actual || 0);
+                    });
+                    const totalGap = totalActual - totalTarget;
+                    const totalAch = totalTarget !== 0 ? (totalActual / totalTarget) * 100 : 0;
+                    return '<div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm min-w-0">' +
+                        '<div class="text-[9px] font-extrabold uppercase tracking-wide text-slate-500 mb-2">' + escapeHtml(c.label) + '</div>' +
+                        '<div class="grid grid-cols-2 gap-x-3 gap-y-2 text-[10px]">' +
+                        '<div><div class="text-slate-400">Total Target</div><div class="font-bold text-slate-700 break-words">' + formatPencapaianValue(totalTarget, c.type) + '</div></div>' +
+                        '<div><div class="text-slate-400">Total Actual</div><div class="font-extrabold text-slate-800 break-words">' + formatPencapaianValue(totalActual, c.type) + '</div></div>' +
+                        '<div><div class="text-slate-400">Total Gap</div><div class="font-bold ' + (totalGap >= 0 ? 'text-emerald-700' : 'text-red-600') + ' break-words">' + formatPencapaianValue(totalGap, c.type) + '</div></div>' +
+                        '<div><div class="text-slate-400">Total Ach%</div><div class="font-extrabold text-slate-800">' + formatPercentID(totalAch) + '</div></div>' +
+                        '</div></div>';
+                }).join('');
+                totalSummaryHtml = '<div class="mb-3"><div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600 mb-2">Total Pencapaian Semua Sales</div><div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">' + totalCards + '</div></div>';
+            }
+            container.innerHTML=totalSummaryHtml+'<div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"><div class="overflow-x-auto"><table class="w-full min-w-[820px] text-[10px]"><thead><tr class="bg-slate-50 border-b border-slate-200 text-[9px] uppercase tracking-wide text-slate-500"><th class="px-3 py-2 text-left">Sales</th><th class="px-3 py-2 text-left">Kategori</th><th class="px-3 py-2 text-right">Target</th><th class="px-3 py-2 text-right">Actual</th><th class="px-3 py-2 text-right">Gap</th><th class="px-3 py-2 text-right">%</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
         }
 
         function renderPencapaianChart(data) {
@@ -7776,54 +7729,26 @@ startAutoRefresh();
             requestDetail();
         }
 
-        function isPencapaianSalesFilterAllowed() {
-            return String(currentUsernameInput || '').trim().toLowerCase() === 'admin' ||
-                !String(currentUsernameInput || '').trim() ||
-                !String(currentUser || '').trim();
-        }
-
-        function loadPencapaianSalesFilter(selectedPeriod) {
+        function loadPencapaianSalesFilter() {
             const select = document.getElementById('pencapaianSalesFilter');
             if (!select) return;
-            const canFilterSales = isPencapaianSalesFilterAllowed();
-            if (!canFilterSales) {
+            const isAdminLogin = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
+            if (!isAdminLogin) {
                 select.classList.add('hidden');
                 return;
             }
             select.classList.remove('hidden');
             const current = select.value || '';
-            const periodSelect = document.getElementById('pencapaianPeriodSelect');
-            const period = String(selectedPeriod || (periodSelect && periodSelect.value) || '').trim();
             google.script.run.withSuccessHandler(function(list) {
                 const salesList = Array.isArray(list) ? list : [];
                 select.innerHTML = '<option value="">Semua Sales</option>' +
                     salesList.map(function(s) {
                         return '<option value="' + escapeHtml(s) + '">' + escapeHtml(s) + '</option>';
                     }).join('');
-                if (salesList.indexOf(current) !== -1) {
-                    select.value = current;
-                } else {
-                    select.value = '';
-                    if (current) loadPencapaianSales(false, true);
-                }
-            }).withFailureHandler(function(err) {
-                // Fallback frontend-only: backend asli belum menyediakan
-                // getPencapaianSalesFilterOptions(), jadi gunakan endpoint Sales yang sudah ada.
-                // Catatan: endpoint ini berasal dari sheet OUTLET, bukan filter kuartal TARGET PER SALES.
-                google.script.run.withSuccessHandler(function(fallbackList) {
-                    const salesList = Array.isArray(fallbackList) ? fallbackList : [];
-                    select.innerHTML = '<option value="">Semua Sales</option>' +
-                        salesList.map(function(s) {
-                            s = String(s || '').trim();
-                            return s ? '<option value="' + escapeHtml(s) + '">' + escapeHtml(s) + '</option>' : '';
-                        }).join('');
-                    if (salesList.indexOf(current) !== -1) select.value = current;
-                    else select.value = '';
-                }).withFailureHandler(function() {
-                    select.innerHTML = '<option value="">Semua Sales</option>';
-                    console.warn('Daftar Sales tidak berhasil dimuat.', err);
-                }).getListSalesOptions();
-            }).getPencapaianSalesFilterOptions(period);
+                if (salesList.indexOf(current) !== -1) select.value = current;
+            }).withFailureHandler(function() {
+                select.innerHTML = '<option value="">Semua Sales</option>';
+            }).getListSalesOptions();
         }
 
         function prefetchPencapaianDetailData(sales, period) {
@@ -7873,14 +7798,12 @@ startAutoRefresh();
             const periodSelect = document.getElementById('pencapaianPeriodSelect');
             const salesFilter = document.getElementById('pencapaianSalesFilter');
             const isAdminLogin = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
-            const canFilterSales = isPencapaianSalesFilterAllowed();
-            const loadAllSales = canFilterSales;
             const selectedPeriod = periodSelect && periodSelect.value ? periodSelect.value : '';
-            const selectedSales = canFilterSales && salesFilter && salesFilter.value ? salesFilter.value : '';
-            const cacheKey = pencapaianCacheKeyFor(selectedPeriod, loadAllSales);
+            const selectedSales = isAdminLogin && salesFilter && salesFilter.value ? salesFilter.value : '';
+            const cacheKey = pencapaianCacheKeyFor(selectedPeriod, isAdminLogin);
 
-            // Filter Sales untuk admin/nama kosong hanya mengubah tampilan dari data kwartal yang sudah dimuat.
-            if (!forceReloadPeriods && loadAllSales && pencapaianCache[cacheKey]) {
+            // Filter Sales admin hanya mengubah tampilan dari data kwartal yang sudah dimuat.
+            if (!forceReloadPeriods && isAdminLogin && pencapaianCache[cacheKey]) {
                 if (loading) loading.classList.add('hidden');
                 const cached = pencapaianCache[cacheKey];
                 renderPencapaianSales(cached.data || []);
@@ -7894,7 +7817,6 @@ startAutoRefresh();
                     periodSelect.innerHTML = res.periods.map(function(p){return '<option value="'+escapeHtml(p.value)+'">'+escapeHtml(p.label)+'</option>';}).join('');
                     periodSelect.value = res.selectedPeriod || selectedPeriod || res.periods[0].value;
                 }
-                if (canFilterSales) loadPencapaianSalesFilter(res.selectedPeriod || selectedPeriod);
                 renderPencapaianSales(res.data || []);
                 prefetchPencapaianDetailData(currentUser, res.selectedPeriod || selectedPeriod);
                 return;
@@ -7912,7 +7834,7 @@ startAutoRefresh();
                 if (!silentRefresh) showLoading(false);
                 res = res || {};
                 const actualPeriod = String(res.selectedPeriod || selectedPeriod || '');
-                const actualCacheKey = pencapaianCacheKeyFor(actualPeriod, loadAllSales);
+                const actualCacheKey = pencapaianCacheKeyFor(actualPeriod, isAdminLogin);
                 pencapaianCache[actualCacheKey] = res;
                 try { appLocalCacheSet('PENCAPAIAN_' + String(currentUsernameInput||'').toUpperCase(), pencapaianCache); } catch(e) {}
                 const periods = Array.isArray(res.periods) ? res.periods : [];
@@ -7920,19 +7842,18 @@ startAutoRefresh();
                     periodSelect.innerHTML = periods.map(function(p){ return '<option value="'+escapeHtml(p.value)+'">'+escapeHtml(p.label)+'</option>'; }).join('');
                     periodSelect.value = periods.some(function(p){return p.value===actualPeriod;}) ? actualPeriod : periods[0].value;
                 }
-                if (canFilterSales) loadPencapaianSalesFilter(actualPeriod);
                 const periodeEl = document.getElementById('pencapaianPeriode');
                 if (periodeEl) { let txt='Periode: '+(res.periode || '-'); if(res.volumeQuarter) txt+=' · Volume: '+res.volumeQuarter; periodeEl.textContent=txt; }
                 renderPencapaianSales(Array.isArray(res.data) ? res.data : []);
                 prefetchPencapaianDetailData(isAdminLogin ? selectedSales : currentUser, actualPeriod);
-                prefetchPencapaianPeriods(periods, actualPeriod, loadAllSales);
+                prefetchPencapaianPeriods(periods, actualPeriod, isAdminLogin);
             }).withFailureHandler(function(err) {
                 if (requestId !== pencapaianRequestSeq) return;
                 pencapaianLoading = false;
                 if (!silentRefresh) showLoading(false);
                 if (loading) loading.classList.add('hidden');
                 if (!pencapaianCache[cacheKey] && container) container.innerHTML = '<div class="bg-white border border-red-200 rounded-2xl p-6 text-center text-xs text-red-500">Gagal memuat pencapaian: ' + escapeHtml(err && err.message ? err.message : 'Terjadi kesalahan.') + '</div>';
-            }).getPencapaianSales(loadAllSales ? '' : currentUser, currentUsernameInput, selectedPeriod);
+            }).getPencapaianSales(isAdminLogin ? '' : currentUser, currentUsernameInput, selectedPeriod);
         }
 
         function formatPricelistDate(value) {
@@ -8142,44 +8063,7 @@ startAutoRefresh();
             const campaign=String((document.getElementById('filterCashbackHargaNett')||{}).selectedOptions?.[0]?.textContent||'').trim();
             win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Simulasi Invoice</title><style>'+
               '*{box-sizing:border-box}body{margin:0;background:#eef2f7;font-family:Arial,Helvetica,sans-serif;color:#172033;font-size:11px;-webkit-print-color-adjust:exact;print-color-adjust:exact}.sheet{max-width:1100px;margin:24px auto;background:#fff;padding:34px 38px;border-radius:14px;box-shadow:0 8px 30px #18243a14}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:22px;border-bottom:3px solid #173b68}.eyebrow{font-size:10px;font-weight:700;letter-spacing:2px;color:#64748b;text-transform:uppercase;margin-bottom:8px}.title{font-size:27px;letter-spacing:-.5px;font-weight:800;color:#173b68;margin:0}.subtitle{color:#64748b;margin-top:7px;font-size:11px}.badge{background:#e8f1ff;color:#174a83;padding:9px 13px;border-radius:8px;font-size:10px;font-weight:700;white-space:nowrap}.meta{display:flex;gap:12px;margin:20px 0}.meta-card{flex:1;background:#f6f8fb;border:1px solid #e5eaf1;border-radius:9px;padding:12px 14px;min-width:0}.label{font-size:9px;color:#718096;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}.value{font-size:12px;font-weight:700;overflow-wrap:anywhere}.section-title{font-size:13px;font-weight:800;margin:24px 0 10px;color:#1c2c43}.table-wrap{border:1px solid #e3e8ef;border-radius:9px;overflow:hidden}table{width:100%;border-collapse:collapse;font-size:10px}thead{display:table-header-group}th{background:#173b68;color:#fff;text-align:left;font-size:9px;letter-spacing:.3px;padding:11px 8px;white-space:nowrap}td{padding:11px 8px;border-bottom:1px solid #e8edf3;vertical-align:top}tbody tr:nth-child(even){background:#f8fafc}tbody tr:last-child td{border-bottom:0}.num{color:#94a3b8;width:30px}.product{font-weight:700;color:#1e293b;line-height:1.4}.muted{font-size:9px;color:#94a3b8;margin-top:4px}.center{text-align:center;white-space:nowrap}.right{text-align:right;white-space:nowrap}.strong{font-weight:800;color:#173b68}.negative{color:#dc4b4b}.cashback{color:#0b896b}.star{font-size:9px;color:#b77905;white-space:nowrap}.bottom{display:flex;justify-content:flex-end;margin-top:18px}.summary{width:360px;border:1px solid #e3e8ef;border-radius:10px;padding:8px 15px;background:#fbfcfe}.sumrow{display:flex;justify-content:space-between;gap:18px;padding:8px 0;color:#596579;border-bottom:1px solid #edf0f4}.sumrow b{color:#25334a;white-space:nowrap}.sumrow.total{border:0;border-top:2px solid #173b68;margin-top:5px;padding-top:13px;color:#173b68;font-size:13px;font-weight:800}.sumrow.total b{font-size:17px;color:#173b68}.foot{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #e5eaf1;margin-top:24px;padding-top:12px;color:#94a3b8;font-size:9px}.foot strong{color:#64748b}@page{size:A4 landscape;margin:9mm}@media print{body{background:#fff}.sheet{max-width:none;margin:0;padding:8px;border-radius:0;box-shadow:none}.meta{margin:14px 0}.section-title{margin-top:18px}th,td{padding:8px 6px}.summary{width:330px}.foot{margin-top:16px}}'+
-              '</style></head><body><main class="sheet"><header class="top"><div><div class="eyebrow">Dokumen Perhitungan</div><h1 class="title">Simulasi Invoice</h1><div class="subtitle">Rincian produk dan perhitungan harga nett</div></div><div class="badge">SIMULASI • BUKAN TRANSAKSI FINAL</div></header><section class="meta"><div class="meta-card"><div class="label">Tanggal Cetak</div><div class="value">'+escapeHtml(new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}))+'</div></div><div class="meta-card"><div class="label">Filter Cashback</div><div class="value">'+escapeHtml(campaign||'-')+'</div></div><div class="meta-card"><div class="label">Jumlah Item</div><div class="value">'+hargaNettInvoiceCart.length+' produk</div></div></section><div class="section-title">Rincian Produk</div><div class="table-wrap"><table><thead><tr><th>No.</th><th>SKU / Produk</th><th>Qty</th><th>Harga Unit</th><th>Subtotal</th><th>Diskon</th><th>Cashback</th><th>Nett Subtotal</th></tr></thead><tbody>'+rows+'</tbody></table></div><section class="bottom"><div class="summary"><div class="sumrow"><span>Subtotal Pricelist</span><b>'+formatHargaNett(gross)+'</b></div><div class="sumrow"><span>Total Diskon Produk</span><b class="negative">-'+formatHargaNett(disc)+'</b></div><div class="sumrow"><span>Total Cashback</span><b class="cashback">-'+formatHargaNett(cashback)+'</b></div><div class="sumrow"><span>Total Extra Cashback</span><b class="cashback">-'+formatHargaNett(extra)+'</b></div><div class="sumrow"><span>Bonus Cashback</span><b>-'+formatHargaNett(bonus)+'</b></div><div class="sumrow total"><span>Grand Total Nett</span><b>'+formatHargaNett(grand)+'</b></div></div></section><footer class="foot"><span><strong>Simulasi Invoice</strong> · Mohon periksa kembali rincian sebelum digunakan.</span><span>Dicetak '+escapeHtml(new Date().toLocaleString('id-ID'))+'</span></footer></main>
-<style id="pencapaian-sales-mobile-table-fit">
-/* Khusus mobile: tabel Pencapaian Sales menyesuaikan lebar layar. Desktop tidak diubah. */
-@media (max-width: 767px) {
-  #tabPencapaian #pencapaianSalesList .overflow-x-auto {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-  }
-  #tabPencapaian #pencapaianSalesList table {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    table-layout: fixed !important;
-    border-collapse: collapse !important;
-  }
-  #tabPencapaian #pencapaianSalesList table th,
-  #tabPencapaian #pencapaianSalesList table td {
-    box-sizing: border-box !important;
-    padding: 5px 3px !important;
-    font-size: 8px !important;
-    line-height: 1.25 !important;
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-    word-break: normal !important;
-    vertical-align: middle !important;
-  }
-  #tabPencapaian #pencapaianSalesList table th:first-child,
-  #tabPencapaian #pencapaianSalesList table td:first-child {
-    width: 23% !important;
-  }
-  #tabPencapaian #pencapaianSalesList table th:nth-child(n+2),
-  #tabPencapaian #pencapaianSalesList table td:nth-child(n+2) {
-    width: 19.25% !important;
-  }
-}
-</style>
-</body></html>');
+              '</style></head><body><main class="sheet"><header class="top"><div><div class="eyebrow">Dokumen Perhitungan</div><h1 class="title">Simulasi Invoice</h1><div class="subtitle">Rincian produk dan perhitungan harga nett</div></div><div class="badge">SIMULASI • BUKAN TRANSAKSI FINAL</div></header><section class="meta"><div class="meta-card"><div class="label">Tanggal Cetak</div><div class="value">'+escapeHtml(new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}))+'</div></div><div class="meta-card"><div class="label">Filter Cashback</div><div class="value">'+escapeHtml(campaign||'-')+'</div></div><div class="meta-card"><div class="label">Jumlah Item</div><div class="value">'+hargaNettInvoiceCart.length+' produk</div></div></section><div class="section-title">Rincian Produk</div><div class="table-wrap"><table><thead><tr><th>No.</th><th>SKU / Produk</th><th>Qty</th><th>Harga Unit</th><th>Subtotal</th><th>Diskon</th><th>Cashback</th><th>Nett Subtotal</th></tr></thead><tbody>'+rows+'</tbody></table></div><section class="bottom"><div class="summary"><div class="sumrow"><span>Subtotal Pricelist</span><b>'+formatHargaNett(gross)+'</b></div><div class="sumrow"><span>Total Diskon Produk</span><b class="negative">-'+formatHargaNett(disc)+'</b></div><div class="sumrow"><span>Total Cashback</span><b class="cashback">-'+formatHargaNett(cashback)+'</b></div><div class="sumrow"><span>Total Extra Cashback</span><b class="cashback">-'+formatHargaNett(extra)+'</b></div><div class="sumrow"><span>Bonus Cashback</span><b>-'+formatHargaNett(bonus)+'</b></div><div class="sumrow total"><span>Grand Total Nett</span><b>'+formatHargaNett(grand)+'</b></div></div></section><footer class="foot"><span><strong>Simulasi Invoice</strong> · Mohon periksa kembali rincian sebelum digunakan.</span><span>Dicetak '+escapeHtml(new Date().toLocaleString('id-ID'))+'</span></footer></main></body></html>');
             win.document.close();
             win.focus();
             setTimeout(function(){ try { win.print(); } catch(e) { showModal('Cetak PDF','Gunakan Ctrl+P pada jendela invoice, lalu pilih Simpan sebagai PDF.'); } },600);
