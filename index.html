@@ -4609,15 +4609,6 @@ startAutoRefresh();
 
         function handleRegister(e) {
             e.preventDefault();
-            if (!currentUsernameInput || !document.getElementById('loginPass').value) {
-                if (loginBtn) {
-                    loginBtn.classList.remove('login-processing');
-                    loginBtn.removeAttribute('aria-busy');
-                    loginBtn.disabled = false;
-                }
-                showModal('Login Gagal', 'Masukkan username dan password terlebih dahulu.');
-                return;
-            }
             showLoading(true);
             google.script.run.withSuccessHandler(function(res) {
                 showLoading(false);
@@ -4629,7 +4620,12 @@ startAutoRefresh();
         function handleLogin(e) {
             e.preventDefault();
             currentUsernameInput = document.getElementById('loginUser').value.trim();
+            const loginPassword = document.getElementById('loginPass').value;
             const loginBtn = document.getElementById('loginSubmitBtn');
+            if (!currentUsernameInput || !loginPassword) {
+                showModal('Login Gagal', 'Masukkan username dan password terlebih dahulu.');
+                return;
+            }
             if (loginBtn) {
                 loginBtn.classList.add('login-processing');
                 loginBtn.setAttribute('aria-busy', 'true');
@@ -4682,7 +4678,7 @@ startAutoRefresh();
                     loginBtn.disabled = false;
                 }
                 showModal("Login Gagal", err && err.message ? err.message : "Terjadi kesalahan saat proses login.");
-            }).prosesLogin(currentUsernameInput, document.getElementById('loginPass').value);
+            }).prosesLogin(currentUsernameInput, loginPassword);
         }
 
         function loadOutletForSales(sales, usernameInput) {
