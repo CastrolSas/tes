@@ -8317,7 +8317,87 @@ startAutoRefresh();
             const rows=data.map(function(item,i){return '<tr><td>'+(i+1)+'</td><td>'+escapeHtml(item.nama||'-')+'</td><td style="text-align:right">'+formatRupiah(item.harga||0)+'</td></tr>';}).join('');
             const win=window.open('','_blank');
             if(!win){showModal('Export PDF','Browser memblokir jendela cetak. Izinkan pop-up untuk Export PDF.');return;}
-            win.document.write('<!doctype html><html><head><title>Pricelist Castrol</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111}h1{font-size:20px;margin:0 0 6px}p{font-size:11px;color:#666;margin:0 0 16px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #ccc;padding:7px}th{text-align:left;background:#f1f5f9}@media print{body{padding:10px}}</style></head><body><h1>Pricelist Castrol</h1><p>'+escapeHtml(filterText)+'</p><table><thead><tr><th style="width:50px">No</th><th>Produk</th><th style="width:160px;text-align:right">Harga</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>');
+            win.document.write('<!doctype html><html><head><title>Pricelist Castrol</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111}h1{font-size:20px;margin:0 0 6px}p{font-size:11px;color:#666;margin:0 0 16px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #ccc;padding:7px}th{text-align:left;background:#f1f5f9}@media print{body{padding:10px}}</style>
+<style id="castrol-modern-theme-final">
+/* CASTROL PORTAL — modern smooth visual refresh (presentation only) */
+:root{
+ --castrol-green:#00834b;--castrol-green-deep:#005b38;--castrol-lime:#c6e63b;
+ --castrol-navy:#0c172b;--castrol-ink:#172538;--castrol-muted:#718096;
+ --castrol-line:#e2e9f0;--castrol-bg:#f2f6fa;--castrol-white:#fff;
+ --castrol-shadow:0 10px 30px rgba(19,38,59,.07);--castrol-shadow-hover:0 16px 36px rgba(19,38,59,.12)
+}
+html{scroll-behavior:smooth}
+body{background:var(--castrol-bg)!important;color:var(--castrol-ink)!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important;-webkit-font-smoothing:antialiased}
+#app.app-shell{width:100%!important;max-width:none!important;min-height:100vh;background:var(--castrol-bg)!important;box-shadow:none!important;overflow:visible!important}
+#mainHeader{position:sticky!important;top:0!important;z-index:100!important;min-height:72px!important;padding:12px 24px!important;background:linear-gradient(112deg,#091426 0%,#0b2c2b 52%,#005b3b 100%)!important;border:0!important;border-bottom:1px solid rgba(198,230,59,.45)!important;box-shadow:0 8px 28px rgba(9,20,38,.18)!important;gap:16px}
+#mainHeader:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#e31837 0 13%,#fff 13% 14%,#c6e63b 14% 28%,#00a85a 28% 100%);pointer-events:none}
+#mainHeader .sidebar-toggle,#sidebarToggle{border-radius:14px!important;border:1px solid rgba(255,255,255,.16)!important;background:rgba(255,255,255,.09)!important;transition:all .22s ease!important}
+#mainHeader .sidebar-toggle:hover,#sidebarToggle:hover{background:rgba(255,255,255,.17)!important;transform:translateY(-1px)}
+#leftNav.app-sidebar{background:#fff!important;border-right:1px solid #e3eaf1!important;box-shadow:8px 0 28px rgba(21,39,60,.035)!important;color:var(--castrol-ink)!important;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
+#leftNav .sidebar-inner{padding:16px 12px!important}
+#leftNav button,#leftNav a{transition:background .2s ease,color .2s ease,border-color .2s ease,transform .2s ease!important}
+#leftNav button:hover,#leftNav a:hover{transform:translateX(2px)}
+#leftNav .active,#leftNav .nav-active,#leftNav button[aria-current="page"]{border-radius:14px!important}
+#app #mainPage{width:100%!important;max-width:1600px!important;margin:0 auto!important;padding:24px clamp(14px,2.4vw,36px)!important;min-width:0}
+#app #mainPage .tab-content{animation:castrolPageIn .24s ease-out both}
+@keyframes castrolPageIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+/* Main surfaces: dashboard panels, forms, metric cards, dialogs */
+#mainPage .bg-white,#mainPage .home-rebuild-card,#mainPage .home-rebuild-panel,#mainPage .home-rebuild-section,
+#mainPage .rounded-xl.bg-white,#mainPage .rounded-2xl.bg-white,#mainPage .shadow-sm.bg-white,
+#tabInput>div,#tabRiwayat>div,#tabPencapaian>div,#tabMonitoring>div,#tabOutletKontrak>div,#tabPesananOutlet>div{
+ border-color:var(--castrol-line)!important;box-shadow:var(--castrol-shadow)!important;transition:box-shadow .22s ease,border-color .22s ease,transform .22s ease
+}
+#mainPage .rounded-2xl,#mainPage .rounded-xl{border-radius:20px!important}
+#mainPage .shadow-sm{box-shadow:var(--castrol-shadow)!important}
+#mainPage .shadow-lg{box-shadow:0 16px 40px rgba(18,36,58,.12)!important}
+#mainPage .home-rebuild-wrap{gap:22px!important}
+#mainPage .home-rebuild-banner{border-radius:26px!important;box-shadow:0 18px 40px rgba(7,34,35,.15)!important;overflow:hidden}
+#mainPage .home-rebuild-banner h1,#mainPage .home-rebuild-banner h2{letter-spacing:-.035em!important}
+#mainPage .home-rebuild-card:hover,#mainPage .home-rebuild-panel:hover{border-color:#c9e6d8!important;box-shadow:var(--castrol-shadow-hover)!important}
+/* Typography hierarchy */
+#mainPage h1,#mainPage h2,#mainPage h3{color:#12243a;letter-spacing:-.02em}
+#mainPage h1{font-weight:850!important}
+#mainPage h2,#mainPage h3{font-weight:800!important}
+#mainPage .text-slate-400,#mainPage .text-slate-500,#mainPage .text-gray-500{color:#748399!important}
+/* Inputs, dropdowns, Select2 */
+#mainPage input:not([type=checkbox]):not([type=radio]):not([type=range]),#mainPage select,#mainPage textarea,
+.select2-container .select2-selection--single,.select2-dropdown,
+#searchRiwayatInput,#searchMonitoringInput,#searchOutletKontrakInput,#filterQuarterSelect,#filterPricelistUpdate{
+ border:1px solid #dbe4ed!important;border-radius:13px!important;background-color:#fff!important;color:#172538!important;box-shadow:inset 0 1px 1px rgba(18,36,58,.02)!important;transition:border-color .18s ease,box-shadow .18s ease!important
+}
+#mainPage input:not([type=checkbox]):not([type=radio]):not([type=range]):focus,#mainPage select:focus,#mainPage textarea:focus,
+.select2-container--focus .select2-selection--single{outline:none!important;border-color:#13a66a!important;box-shadow:0 0 0 4px rgba(0,166,94,.11)!important}
+#mainPage input:not([type=checkbox]):not([type=radio]):not([type=range]),#mainPage select{min-height:42px}
+.select2-container .select2-selection--single{height:44px!important;padding:6px 10px!important}
+.select2-container--default .select2-selection--single .select2-selection__arrow{height:42px!important}
+.select2-container--default .select2-selection--single .select2-selection__rendered{line-height:30px!important;color:#172538!important}
+.select2-dropdown{overflow:hidden!important;box-shadow:0 14px 36px rgba(18,36,58,.15)!important}
+/* Buttons: cohesive, soft and responsive */
+#mainPage button:not(.home-rebuild-outlet-table button),#mainPage .button,#mainPage [role=button]{transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
+#mainPage button:active{transform:translateY(1px)}
+#mainPage button.bg-emerald-600,#mainPage button.bg-emerald-700,#mainPage .bg-emerald-600 button,#mainPage .bg-emerald-700 button{border-radius:12px!important;box-shadow:0 5px 12px rgba(0,131,75,.16)}
+#mainPage button.bg-emerald-600:hover,#mainPage button.bg-emerald-700:hover{filter:brightness(1.04);box-shadow:0 8px 18px rgba(0,131,75,.2)}
+/* Tables: calm surfaces, sticky-feeling header, clear row separation */
+#mainPage table{border-collapse:separate!important;border-spacing:0!important;color:#203047}
+#mainPage table thead th{background:#f3f7fa!important;color:#65758b!important;font-size:10px!important;font-weight:800!important;letter-spacing:.045em;text-transform:uppercase;border-bottom:1px solid #dfe7ef!important}
+#mainPage table tbody tr{transition:background .15s ease}
+#mainPage table tbody tr:hover{background:#f5fbf8!important}
+#mainPage table th,#mainPage table td{border-color:#e8edf3!important}
+#mainPage .overflow-x-auto{scrollbar-width:thin;scrollbar-color:#c5d1de transparent}
+/* Pills and status chips */
+#mainPage .rounded-full{letter-spacing:.005em}
+/* Modals and notification panels */
+#modalHeader,.notification-panel{border-radius:20px!important;box-shadow:0 24px 70px rgba(8,24,40,.22)!important}
+/* Auth screens remain on-brand */
+#loginPage,#registerPage{color:var(--castrol-ink)}
+/* Responsive layout */
+@media(min-width:1200px){#app #mainPage{padding-top:28px!important;padding-bottom:36px!important}}
+@media(max-width:900px){#mainHeader{padding:10px 14px!important;min-height:62px!important}#app #mainPage{padding:16px 12px!important}#mainPage .home-rebuild-wrap{gap:14px!important}}
+@media(max-width:640px){#mainHeader{gap:8px!important;padding:9px 10px!important}#app #mainPage{padding:12px 9px!important}#mainPage .rounded-2xl{border-radius:16px!important}#mainPage .home-rebuild-banner{border-radius:19px!important}#mainPage input:not([type=checkbox]):not([type=radio]):not([type=range]),#mainPage select,#mainPage textarea{font-size:14px!important}#leftNav .sidebar-inner{padding:10px 8px!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+</style>
+</head><body><h1>Pricelist Castrol</h1><p>'+escapeHtml(filterText)+'</p><table><thead><tr><th style="width:50px">No</th><th>Produk</th><th style="width:160px;text-align:right">Harga</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>');
             win.document.close();win.focus();setTimeout(function(){win.print();},250);
         }
 
