@@ -3161,97 +3161,6 @@ body{background:
 /* Sembunyikan menu dan halaman Pricelist tanpa menghapus sumber data/fungsi yang mungkin dipakai fitur lain. */
 #navPricelist, #tabPricelist { display: none !important; }
 </style>
-<style id="castrol-full-ui-redesign-v2">
-/* CASTROL PORTAL — full visual redesign layer; presentation only */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
-:root{--ui-ink:#142238;--ui-muted:#718096;--ui-green:#0b8f55;--ui-green-dark:#06613d;--ui-bg:#f3f6fa;--ui-line:#e4eaf1;--ui-card:#fff;--ui-radius:20px;--ui-shadow:0 8px 30px rgba(20,34,56,.055)}
-html,body{font-family:'DM Sans',sans-serif!important;background:var(--ui-bg)!important;color:var(--ui-ink);-webkit-font-smoothing:antialiased}
-h1,h2,h3,h4,.font-extrabold,.font-black{font-family:'Manrope','DM Sans',sans-serif!important;letter-spacing:-.025em}
-#app{background:var(--ui-bg)!important}
-#app main,#app .app-content,#app .main-content{padding:clamp(16px,2.4vw,32px)!important}
-#leftNav,.app-sidebar{background:#fff!important;border-right:1px solid #e6ebf2!important;box-shadow:8px 0 28px rgba(20,34,56,.025)!important}
-.app-sidebar{padding:14px!important}
-.sidebar-inner{gap:7px!important}
-.sidebar-item{border:1px solid transparent!important;border-radius:13px!important;padding:11px 13px!important;min-height:44px;transition:background .2s,border-color .2s,transform .2s!important;font-size:13px!important;font-weight:600!important}
-.sidebar-item:hover{background:#f1faf5!important;border-color:#d8f0e3!important;transform:translateX(2px)}
-.sidebar-item-active{background:linear-gradient(105deg,#e4f7ec,#f4fbf7)!important;border-color:#c7ead6!important;color:#087747!important;box-shadow:inset 3px 0 #0b9659!important}
-.sidebar-icon{border-radius:10px!important;width:34px!important;height:34px!important}
-button,input,select,textarea{font-family:'DM Sans',sans-serif!important}
-button{transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease!important}
-button:active{transform:translateY(1px)}
-input,select,textarea,.select2-container--default .select2-selection--single,.select2-container--default .select2-selection--multiple{border:1px solid #dce4ed!important;border-radius:11px!important;min-height:40px;box-shadow:0 1px 2px rgba(20,34,56,.025)!important;background-color:#fff!important}
-input:focus,select:focus,textarea:focus,.select2-container--focus .select2-selection{outline:none!important;border-color:#35a975!important;box-shadow:0 0 0 4px rgba(11,143,85,.11)!important}
-/* Elevate content surfaces into consistent modular panels */
-#app .bg-white.border,#app .bg-white.rounded-xl,#app .bg-white.rounded-2xl,#app .bg-white.shadow-sm,#app .bg-white.shadow{border-color:var(--ui-line)!important;border-radius:var(--ui-radius)!important;box-shadow:var(--ui-shadow)!important}
-#app .rounded-xl{border-radius:16px!important}#app .rounded-2xl{border-radius:20px!important}#app .shadow-sm{box-shadow:var(--ui-shadow)!important}
-#app .border-slate-200{border-color:var(--ui-line)!important}
-#app .bg-slate-50,#app .bg-gray-50{background:#f7f9fc!important}
-#app .text-slate-400{color:#8794a7!important}#app .text-slate-500{color:#718096!important}#app .text-slate-700{color:#34445a!important}#app .text-slate-900{color:#17283f!important}
-#app .bg-emerald-600,#app .bg-green-600{background:linear-gradient(135deg,#0b9b5d,#087346)!important}
-#app .bg-emerald-500,#app .bg-green-500{background:#0b9659!important}
-#app .text-emerald-700,#app .text-green-700{color:#087747!important}
-/* Tables: structured headers, more breathing room, subtle row rhythm */
-#app table{border-collapse:separate!important;border-spacing:0!important;font-size:12px!important;color:#34445a}
-#app table thead th{background:#f4f7fa!important;color:#66768b!important;font-size:10px!important;font-weight:800!important;letter-spacing:.065em!important;text-transform:uppercase!important;padding:13px 14px!important;border-bottom:1px solid #e2e9f1!important;white-space:nowrap}
-#app table thead th:first-child{border-top-left-radius:10px}#app table thead th:last-child{border-top-right-radius:10px}
-#app table tbody td{padding:12px 14px!important;border-bottom:1px solid #edf1f5!important;vertical-align:middle!important}
-#app table tbody tr{background:#fff;transition:background .15s ease}
-#app table tbody tr:nth-child(even){background:#fbfcfe}
-#app table tbody tr:hover{background:#f0faf5!important}
-#app table tbody tr:last-child td{border-bottom:0!important}
-#app .overflow-x-auto{scrollbar-width:thin;scrollbar-color:#cbd6e2 transparent}
-/* Dashboard layout and chart containers */
-.home-rebuild-wrap{max-width:1480px!important;padding:8px 0 28px!important}
-.home-rebuild-card{border:1px solid #e5ebf2!important;border-radius:22px!important;box-shadow:0 10px 34px rgba(20,34,56,.055)!important;margin-bottom:20px!important}
-.home-rebuild-head{padding:20px 24px!important;border-bottom:1px solid #edf1f5!important}
-.home-rebuild-title{font-size:16px!important;font-weight:800!important;color:#17283f!important}
-.home-rebuild-sub{font-size:11px!important;color:#8794a7!important}
-.home-rebuild-metrics{gap:14px!important;padding:20px 24px!important}
-.home-rebuild-metric{border:1px solid #e6edf3!important;border-radius:18px!important;padding:18px!important;background:linear-gradient(145deg,#fff,#f8fbfd)!important;box-shadow:0 3px 12px rgba(20,34,56,.025)!important;transition:transform .2s,box-shadow .2s}
-.home-rebuild-metric:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(20,34,56,.08)!important}
-.home-rebuild-icon{width:40px!important;height:40px!important;border-radius:13px!important;font-size:18px!important;margin-bottom:14px!important}
-.home-rebuild-label{font-size:10px!important;letter-spacing:.08em!important}
-.home-rebuild-value{font-family:'Manrope',sans-serif!important;font-size:clamp(24px,2vw,32px)!important;letter-spacing:-.04em!important;margin-top:10px!important}
-.home-rebuild-unit{font-size:10px!important}
-.home-rebuild-performance{padding:0 24px 22px!important}
-.home-rebuild-performance-title{font-size:11px!important;margin-bottom:10px!important}
-.home-rebuild-performance-grid{gap:10px!important}
-.home-rebuild-performance-item{border-radius:13px!important;padding:12px!important;background:#f7f9fc!important}
-.home-rebuild-performance-label{font-size:9px!important}
-.home-rebuild-performance-today{font-size:14px!important}
-.home-weekly-section,.home-status-section{padding:20px 24px!important;border-top:1px solid #edf1f5!important}
-.home-weekly-title{font-size:14px!important;font-weight:800!important}
-.home-weekly-sub{font-size:11px!important}
-.home-weekly-chart{margin-top:16px!important;min-height:220px!important;padding:12px 4px!important;border-radius:16px;background:linear-gradient(180deg,#fbfdfc,#fff)}
-.home-weekly-chart svg{overflow:visible}
-.home-weekly-chart svg text{font-family:'DM Sans',sans-serif!important;font-size:11px!important;fill:#8492a5!important}
-.home-weekly-chart svg path{stroke-linecap:round;stroke-linejoin:round}
-.home-weekly-chart .weekly-point circle{transition:r .15s,stroke-width .15s}
-.home-weekly-chart .weekly-point:hover circle{r:6;stroke-width:3}
-.home-status-cards{gap:12px!important}
-.home-status-card{border-radius:16px!important;padding:16px!important;gap:7px!important;box-shadow:0 3px 12px rgba(20,34,56,.025);transition:transform .2s,box-shadow .2s}
-.home-status-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(20,34,56,.07)}
-.home-status-card span{font-size:10px!important;letter-spacing:.06em}
-.home-status-card b{font-family:'Manrope',sans-serif!important;font-size:28px!important;letter-spacing:-.04em}
-.home-status-card small{font-size:10px!important}
-.home-rebuild-outlet-table{font-size:12px!important}
-.home-rebuild-outlet-table th{padding:13px 16px!important;font-size:10px!important;letter-spacing:.06em;text-transform:uppercase;background:#f4f7fa!important;color:#718096!important}
-.home-rebuild-outlet-table td{padding:14px 16px!important;border-bottom:1px solid #edf1f5!important}
-/* Modals and overlays */
-#app [role=dialog],#app .modal-content,.modal-content{border-radius:22px!important;border:1px solid #e4eaf1!important;box-shadow:0 24px 80px rgba(10,24,42,.22)!important}
-#app .modal-table-wrap{border:1px solid #e5ebf2!important;border-radius:14px!important;overflow:auto}
-#app .modal-detail-table th{background:#f4f7fa!important;padding:12px!important}
-#app .modal-detail-table td{padding:12px!important}
-.select2-dropdown{border:1px solid #dce4ed!important;border-radius:12px!important;overflow:hidden;box-shadow:0 12px 30px rgba(20,34,56,.12)!important}
-.select2-results__option{padding:10px 12px!important;font-size:12px!important}
-/* Smooth, restrained motion */
-@keyframes uiRiseIn{from{opacity:.5;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-#tabHome,#tabInput,#tabRiwayat,#tabPencapaianSales,#tabMonitoring{animation:uiRiseIn .28s ease-out}
-@media(max-width:900px){#app main,#app .app-content,#app .main-content{padding:16px!important}.home-rebuild-head{padding:16px!important}.home-rebuild-metrics{padding:14px!important;gap:9px!important}.home-rebuild-metric{padding:13px!important}.home-rebuild-performance{padding:0 14px 16px!important}.home-weekly-section,.home-status-section{padding:16px!important}}
-@media(max-width:600px){#app main,#app .app-content,#app .main-content{padding:10px!important}.home-rebuild-wrap{padding:0 0 18px!important}.home-rebuild-card{border-radius:16px!important;margin-bottom:12px!important}.home-rebuild-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}.home-rebuild-value{font-size:23px!important}.home-rebuild-performance-grid{grid-template-columns:1fr!important}.home-weekly-chart{min-height:160px!important}.home-status-card{padding:11px 8px!important}.home-status-card b{font-size:22px!important}#app table thead th{padding:10px!important}#app table tbody td{padding:10px!important}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
-
-</style>
 </head>
 <body class="bg-slate-50 font-sans">
 
@@ -12866,4 +12775,72 @@ function renderPencapaianCards(data) {
 /* Hanya sembunyikan kolom Pricelist pada tabel Harga Nett; Simulasi Invoice tidak diubah. */
 #tabHargaNett #hargaNettTableView table thead th:nth-child(2),
 #tabHargaNett #hargaNettTableView table tbody td:nth-child(2) { display: none !important; }
+</style>
+<style id="castrol-reference-ui-theme-20261017">
+/* UI/TEMA SAJA — tidak mengubah JavaScript, rumus, atau alur transaksi. */
+:root{
+  --castrol-green:#007a53;
+  --castrol-green-2:#00a878;
+  --castrol-dark:#071526;
+  --castrol-red:#e60012;
+  --castrol-lime:#b8e600;
+  --castrol-ink:#10243d;
+  --castrol-muted:#7d91ad;
+  --castrol-line:#dce5ef;
+  --castrol-soft:#f0f4f8;
+  --castrol-card:#fff;
+}
+html,body{background:#eef3f8!important;color:#10243d}
+body{background:linear-gradient(180deg,#f3f6fa 0%,#edf2f7 100%)!important}
+#mainHeader{
+  background:linear-gradient(105deg,#071426 0%,#062b27 58%,#003a2a 100%)!important;
+  border-bottom:1px solid rgba(0,220,156,.25)!important;
+  box-shadow:0 8px 24px rgba(4,18,36,.20)!important;
+}
+#mainHeader:after{height:3px;background:linear-gradient(90deg,#e60012 0 19%,#b8e600 19% 30%,#fff 30% 32%,#00a878 32% 100%)}
+#mainHeader .sidebar-toggle{background:#202a3c!important;border:1px solid #39445a!important;border-radius:12px!important}
+#mainHeader .sidebar-toggle:hover{background:#2c3850!important}
+#mainHeader .user-badge{background:#173c3a!important;color:#a7ffe3!important;border-color:#28645a!important}
+#leftNav.app-sidebar{
+ background:#fff!important;border-right:1px solid #dce5ef!important;
+ box-shadow:5px 0 22px rgba(19,43,72,.05)!important;backdrop-filter:none!important
+}
+.sidebar-item{border-radius:17px!important;min-height:58px!important;color:#344b68!important}
+.sidebar-item:hover{background:#eef8f4!important;color:#007a53!important;border-color:#d0e9df!important;transform:translateY(-1px)}
+.sidebar-item-active{
+ color:#fff!important;background:linear-gradient(115deg,#007957,#00865c)!important;
+ border-color:#00865c!important;box-shadow:0 5px 12px rgba(0,121,83,.17)!important
+}
+.sidebar-item-active .sidebar-icon{background:rgba(255,255,255,.18)!important;color:#fff!important;border-color:rgba(255,255,255,.15)!important;box-shadow:none!important}
+.sidebar-icon{background:#f0f4f8!important;border:1px solid #e7edf4!important;color:#4d6380!important;box-shadow:none!important}
+#mainPage{max-width:1280px!important}
+.tab-content{animation:castrolFade .18s ease both}
+#tabInput>h2,#tabRiwayat>div:first-child,#tabMonitoring>div:first-child,#tabOutletKontrak>div:first-child,#tabPricelist>div:first-child{
+ border-color:#dce5ef!important;border-radius:18px!important
+}
+#tabInput .bg-white,#tabRiwayat .bg-white,#tabMonitoring .bg-white,#tabOutletKontrak .bg-white,#tabPricelist .bg-white{
+ border-color:#dce5ef!important;box-shadow:0 2px 5px rgba(16,36,61,.045),0 10px 25px rgba(16,36,61,.035)!important
+}
+#tabInput input,#tabInput select,#tabInput textarea,#searchRiwayatInput,#searchMonitoringInput,#searchOutletKontrakInput,#filterQuarterSelect,#filterPricelistUpdate{
+ border-color:#dce5ef!important;border-radius:13px!important;background:#fff!important;color:#10243d!important
+}
+#tabInput input:focus,#tabInput select:focus,#tabInput textarea:focus,#searchRiwayatInput:focus,#searchMonitoringInput:focus,#searchOutletKontrakInput:focus,#filterQuarterSelect:focus{
+ border-color:#00a878!important;box-shadow:0 0 0 4px rgba(0,168,120,.11)!important;outline:none!important
+}
+#tabInput .bg-slate-50,#tabInput .bg-emerald-50\/40{background:#f7f9fc!important;border-color:#e2e9f1!important}
+#btnKirimOrder{background:linear-gradient(110deg,#ed0015,#c90010)!important;box-shadow:0 8px 18px rgba(230,0,18,.17)!important;border-radius:14px!important}
+#btnKirimOrder:hover{filter:brightness(1.04);transform:translateY(-1px)}
+#tabInput button.bg-emerald-700,#tabInput button:hover.bg-emerald-800{background:linear-gradient(120deg,#00845c,#006e4c)!important}
+#tabInput .bg-emerald-900{background:linear-gradient(120deg,#071526,#064637)!important;box-shadow:0 8px 20px rgba(0,65,47,.15)!important}
+#cartList>div,#listRiwayat>div{border-color:#e1e9f1!important;box-shadow:0 3px 10px rgba(16,36,61,.04)!important;border-radius:15px!important}
+#listRiwayat>div{border-left-color:#00a878!important;background:#fff!important}
+#listRiwayat button{transition:transform .16s ease,box-shadow .16s ease,background .16s ease!important}
+#listRiwayat button:hover{transform:translateY(-1px)}
+#listMonitoringTableBody tr:hover,#listOutletKontrakTableBody tr:hover{background:#f0faf6!important}
+button, [role="button"]{transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease}
+@media(max-width:768px){
+ #mainPage{padding-left:12px!important;padding-right:12px!important}
+ #leftNav.app-sidebar{box-shadow:12px 0 30px rgba(8,24,42,.14)!important}
+ #tabInput>h2,#tabRiwayat>div:first-child,#tabMonitoring>div:first-child,#tabOutletKontrak>div:first-child,#tabPricelist>div:first-child{border-radius:14px!important}
+}
 </style>
