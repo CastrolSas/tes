@@ -3161,6 +3161,35 @@ body{background:
 /* Sembunyikan menu dan halaman Pricelist tanpa menghapus sumber data/fungsi yang mungkin dipakai fitur lain. */
 #navPricelist, #tabPricelist { display: none !important; }
 </style>
+
+<!-- Castrol Portal UI theme refresh: presentation only; no calculation or application logic changed. -->
+<style id="castrol-ui-theme-refresh">
+:root{--castrol-green:#007a53;--castrol-green-dark:#005f43;--castrol-lime:#c8f000;--castrol-navy:#0d172b;--castrol-ink:#14233b;--castrol-muted:#7184a0;--castrol-line:#dce5ef;--castrol-bg:#f0f5f9;--castrol-card:#fff}
+html{scroll-behavior:smooth}
+body.bg-slate-50{background:var(--castrol-bg)!important;color:var(--castrol-ink)}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+/* Shared surfaces */
+.rounded-xl,.rounded-2xl,.rounded-3xl{border-radius:20px!important}
+.shadow,.shadow-sm,.shadow-md,.shadow-lg,.shadow-xl{box-shadow:0 2px 5px rgba(15,35,60,.06),0 12px 28px rgba(15,35,60,.045)!important}
+.border,.border-slate-100,.border-slate-200{border-color:var(--castrol-line)!important}
+/* Primary actions */
+button.bg-green-600,button.bg-emerald-600,button.bg-green-700,button.bg-emerald-700,
+.bg-green-600,.bg-emerald-600,.bg-green-700,.bg-emerald-700{background-color:var(--castrol-green)!important}
+button.bg-green-600:hover,button.bg-emerald-600:hover,button.bg-green-700:hover,button.bg-emerald-700:hover{background-color:var(--castrol-green-dark)!important}
+.text-green-600,.text-emerald-600,.text-green-700,.text-emerald-700{color:var(--castrol-green)!important}
+.ring-green-500,.ring-emerald-500{--tw-ring-color:var(--castrol-green)!important}
+/* Form controls: clearer borders and focus, retaining their existing values/handlers */
+input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{border-color:var(--castrol-line);border-radius:12px;transition:border-color .18s ease,box-shadow .18s ease}
+input:not([type=checkbox]):not([type=radio]):not([type=range]):focus,select:focus,textarea:focus{outline:none;border-color:#00966a!important;box-shadow:0 0 0 3px rgba(0,150,106,.12)!important}
+/* Tables */
+table{border-collapse:separate;border-spacing:0}
+thead th{font-weight:800}
+/* Keyboard and touch feedback */
+button,a,[role=button]{transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+button:focus-visible,a:focus-visible,[role=button]:focus-visible{outline:2px solid #00a875;outline-offset:2px}
+@media(max-width:768px){.rounded-xl,.rounded-2xl,.rounded-3xl{border-radius:15px!important}body{overflow-x:hidden}}
+</style>
+
 </head>
 <body class="bg-slate-50 font-sans">
 
@@ -11800,193 +11829,6 @@ function renderPencapaianCards(data) {
   }
 }
 </style>
-
-<style id="modern-ui-redesign-v2">
-/* VISUAL REDESIGN V2 — presentational CSS only. Existing IDs, handlers, calculations and data flow remain untouched. */
-:root{--ui-bg:#f4f7fb;--ui-surface:#fff;--ui-ink:#172033;--ui-muted:#758198;--ui-line:#e5eaf2;--ui-brand:#087f5b;--ui-brand-2:#0ca678;--ui-brand-soft:#e7f8f1;--ui-navy:#111b2e;--ui-radius:20px;--ui-shadow:0 8px 28px rgba(24,39,75,.055);--ui-shadow-hover:0 16px 38px rgba(24,39,75,.11)}
-html{scroll-behavior:smooth;scroll-padding-top:88px}body{background:var(--ui-bg)!important;color:var(--ui-ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;letter-spacing:-.012em;-webkit-font-smoothing:antialiased}
-#app{background:radial-gradient(ellipse at 85% 0%,rgba(16,185,129,.055),transparent 32%),var(--ui-bg)!important;min-height:100vh}
-#mainHeader{position:sticky;top:0;z-index:1000;min-height:72px;padding:14px 26px!important;background:rgba(17,27,46,.96)!important;border-bottom:1px solid rgba(255,255,255,.08)!important;box-shadow:0 8px 28px rgba(15,23,42,.12)!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-#mainHeader h1{font-size:17px!important;letter-spacing:.01em!important;font-weight:800!important}
-#mainHeader .sidebar-toggle{width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#e7f8f1}
-#mainHeader .sidebar-toggle:hover{background:rgba(16,185,129,.18);transform:translateY(-1px)}
-#app>div.p-4.flex-1.overflow-y-auto.space-y-4{padding:clamp(16px,2.5vw,34px)!important;min-width:0;scrollbar-gutter:stable}
-.app-sidebar{top:72px!important;width:246px!important;padding:20px 14px!important;background:rgba(255,255,255,.94)!important;border-right:1px solid var(--ui-line)!important;box-shadow:12px 0 32px rgba(24,39,75,.035)!important;overflow-x:hidden!important;overflow-y:auto!important;backdrop-filter:blur(16px)}
-#app:not(.sidebar-closed) #leftNav:not(.hidden)+div{margin-left:246px!important;transition:margin-left .28s cubic-bezier(.2,.8,.2,1)!important}
-.app-sidebar .sidebar-inner{gap:7px!important;position:relative!important;top:0!important;min-height:100%!important}
-.sidebar-label{padding:7px 8px 18px!important;text-align:left!important;letter-spacing:.12em!important;font-size:10px!important;color:#9aa5b7!important}
-.castrol-sidebar-logo img{max-width:136px!important;max-height:54px!important;object-fit:contain!important;object-position:left center!important}
-.sidebar-item{min-height:48px!important;display:flex!important;flex-direction:row!important;justify-content:flex-start!important;gap:13px!important;padding:0 13px!important;border-radius:13px!important;border:1px solid transparent!important;font-size:13px!important;font-weight:650!important;color:#647086!important;text-align:left!important;white-space:normal!important}
-.sidebar-item:hover{transform:translateX(2px)!important;background:#f2faf6!important;border-color:#d8f2e5!important;color:#087f5b!important}
-.sidebar-item-active{background:linear-gradient(100deg,#e6f8f0,#f2fbf7)!important;border-color:#c8eddd!important;color:#087f5b!important;box-shadow:inset 3px 0 0 #0ca678!important}
-.sidebar-icon{width:34px!important;height:34px!important;min-width:34px!important;border-radius:11px!important;background:#f3f6fa!important;box-shadow:none!important;font-size:16px!important}
-.sidebar-item-active .sidebar-icon{background:#fff!important;box-shadow:0 2px 8px rgba(8,127,91,.09)!important}
-.sidebar-text{font-size:12px!important;line-height:1.35!important}
-.sidebar-bottom{margin-top:auto!important;padding-top:14px!important;border-color:var(--ui-line)!important}
-.sidebar-user-item{flex-direction:row!important;justify-content:flex-start!important;gap:12px!important;padding:0 10px!important;min-height:48px!important}
-.sidebar-user-item .sidebar-text{white-space:normal!important;text-align:left!important}
-/* Consistent surfaces: cards, dashboard modules, forms, tables */
-#mainPage .bg-white,.tab-content .bg-white,.home-rebuild .bg-white,.riwayat-card,.modern-modal-card{border-color:var(--ui-line)!important;box-shadow:var(--ui-shadow)!important}
-#mainPage .rounded-xl,#mainPage .rounded-2xl,.tab-content .rounded-xl,.tab-content .rounded-2xl{border-radius:var(--ui-radius)!important}
-.home-rebuild-wrap{gap:22px!important}
-#loginPage,#registerPage{width:min(100%,470px);margin:auto!important;padding:clamp(24px,4vw,42px)!important;background:rgba(255,255,255,.92);border:1px solid rgba(226,232,240,.9);border-radius:28px;box-shadow:0 24px 80px rgba(24,39,75,.09);backdrop-filter:blur(12px)}
-#loginPage h2,#registerPage h2{font-size:clamp(22px,2.5vw,29px)!important;letter-spacing:-.04em!important;line-height:1.15!important;color:#172033!important}
-#loginPage input,#registerPage input,#registerPage select{min-height:46px!important;border-radius:12px!important;border-color:#dce3ed!important;background:#fbfcfe!important;padding:11px 13px!important;font-size:14px!important;transition:border-color .2s,box-shadow .2s,background .2s!important}
-#loginPage input:focus,#registerPage input:focus,#registerPage select:focus{background:#fff!important;border-color:#0ca678!important;box-shadow:0 0 0 4px rgba(12,166,120,.11)!important;outline:none!important}
-button{transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease,border-color .18s ease,color .18s ease}
-button:not(:disabled):active{transform:scale(.985)}
-button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(12,166,120,.32)!important;outline-offset:2px}
-#mainPage button[class*="bg-emerald-700"],#loginPage button[type="submit"],#registerPage button[type="submit"]{box-shadow:0 6px 14px rgba(8,127,91,.15);border-radius:12px!important}
-input,select,textarea{border-radius:11px!important}
-input:not([type=checkbox]):not([type=radio]),select,textarea{transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
-input:focus,select:focus,textarea:focus{border-color:#0ca678!important;box-shadow:0 0 0 3px rgba(12,166,120,.10)!important}
-.select2-container .select2-selection--single{height:44px!important;display:flex!important;align-items:center!important;border:1px solid #dce3ed!important;border-radius:11px!important;background:#fbfcfe!important;padding:5px 10px!important}
-.select2-container--default .select2-selection--single .select2-selection__rendered{line-height:30px!important;font-size:13px!important;color:#263247!important}
-.select2-container--default .select2-selection--single .select2-selection__arrow{height:42px!important;right:7px!important}
-.select2-dropdown{border:1px solid #dce3ed!important;border-radius:12px!important;overflow:hidden!important;box-shadow:0 12px 30px rgba(24,39,75,.12)!important}
-.select2-results__option{padding:10px 12px!important;font-size:13px!important}
-/* Tables are calmer, clearer and horizontally scrollable where needed */
-table{border-color:var(--ui-line)!important}thead th{background:#f5f8fc!important;color:#68758b!important;font-size:10px!important;font-weight:800!important;letter-spacing:.055em!important;text-transform:uppercase!important;border-color:var(--ui-line)!important}tbody td{border-color:#edf0f5!important}tbody tr{transition:background-color .15s ease}tbody tr:hover{background:#f7fbf9!important}
-.overflow-x-auto{max-width:100%;border-radius:14px;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
-.overflow-x-auto::-webkit-scrollbar{height:7px}.overflow-x-auto::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
-.riwayat-card{border-radius:18px!important;padding:17px!important}.riwayat-card:hover{transform:translateY(-3px)!important;box-shadow:var(--ui-shadow-hover)!important;border-color:#c9e8da!important}
-.modern-modal-overlay{background:rgba(12,20,35,.55)!important;backdrop-filter:blur(10px)!important}
-.modern-modal-card{border-radius:24px!important;box-shadow:0 28px 90px rgba(8,20,40,.3)!important;border:1px solid rgba(255,255,255,.7)!important}
-.modern-modal-header{padding:19px 21px!important;background:#fff!important}.modern-modal-title{font-size:16px!important}.modern-modal-body{font-size:13px!important;line-height:1.65!important;padding:20px!important}.modern-modal-footer{padding:14px 20px!important;background:#f8fafc!important}
-#loadingOverlay{backdrop-filter:blur(5px)}
-/* Responsive layout */
-@media(max-width:900px){
- .app-sidebar{width:82px!important;padding:16px 8px!important}
- #app:not(.sidebar-closed) #leftNav:not(.hidden)+div{margin-left:82px!important}
- .sidebar-label{text-align:center!important;padding:6px 0 12px!important}
- .castrol-sidebar-logo img{max-width:52px!important;max-height:38px!important;object-position:center!important}
- .sidebar-item{flex-direction:column!important;justify-content:center!important;gap:5px!important;padding:7px 3px!important;min-height:61px!important;text-align:center!important;font-size:10px!important}
- .sidebar-icon{width:31px!important;height:31px!important;min-width:31px!important}
- .sidebar-text{font-size:9px!important;line-height:1.15!important;overflow-wrap:anywhere}
- .sidebar-user-item{flex-direction:column!important;gap:4px!important;padding:5px 0!important}
- .sidebar-user-item .sidebar-text{display:none!important}
- #mainHeader{padding:12px 16px!important}
-}
-@media(max-width:620px){
- #mainHeader{min-height:62px;padding:10px 12px!important;gap:8px}
- #mainHeader h1{font-size:15px!important}
- #app>div.p-4.flex-1.overflow-y-auto.space-y-4{padding:12px!important}
- .app-sidebar{top:62px!important;width:68px!important;padding:12px 5px!important}
- #app:not(.sidebar-closed) #leftNav:not(.hidden)+div{margin-left:68px!important}
- .sidebar-item{min-height:56px!important;border-radius:12px!important}
- .sidebar-icon{width:28px!important;height:28px!important;min-width:28px!important;font-size:14px!important;border-radius:9px!important}
- #loginPage,#registerPage{padding:23px 18px!important;border-radius:22px!important}
- .riwayat-cards-grid{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
- .modern-modal-overlay{padding:10px!important}.modern-modal-card{border-radius:20px!important;max-height:90dvh!important}
- .modern-modal-body{padding:14px!important}
-}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-</style>
-
-
-<style id="full-theme-redesign-v3">
-/* FULL VISUAL REDESIGN V3 — CSS only. Existing markup, IDs, handlers and calculations remain intact. */
-:root{
- --ui-bg:#f4f6fb!important;--ui-surface:#ffffff!important;--ui-border:#e4e8f1!important;
- --ui-text:#172033!important;--ui-muted:#778198!important;--ui-primary:#6558f5!important;
- --ui-primary-dark:#5145d8!important;--ui-accent:#19b8a5!important;
- --ui-shadow:0 12px 34px rgba(25,35,70,.065)!important;
- color-scheme:light;
-}
-html{background:#f4f6fb!important;scroll-behavior:smooth}
-body{background:#f4f6fb!important;color:#172033!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;-webkit-font-smoothing:antialiased}
-#app.app-shell{max-width:1680px!important;width:100%!important;margin:0 auto!important;background:#f4f6fb!important;border:0!important;box-shadow:none!important;overflow:clip!important}
-#mainHeader{min-height:72px!important;padding:14px 26px!important;gap:16px!important;background:linear-gradient(112deg,#171b35 0%,#24234f 52%,#3b347e 100%)!important;border:0!important;box-shadow:0 8px 28px rgba(24,25,61,.16)!important;position:sticky!important;top:0!important;z-index:70!important}
-#mainHeader:after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,#19b8a5,#8278ff,#b9a5ff);opacity:.9}
-#mainHeader h1{font-size:15px!important;letter-spacing:.035em!important;color:#fff!important}
-#mainHeader .sidebar-toggle,#mainHeader button{transition:transform .2s ease,background .2s ease,border-color .2s ease!important}
-#mainHeader .sidebar-toggle{width:40px!important;height:40px!important;border-radius:13px!important;background:rgba(255,255,255,.1)!important;border:1px solid rgba(255,255,255,.15)!important;color:white!important}
-#mainHeader .sidebar-toggle:hover,#mainHeader button:hover{transform:translateY(-1px)}
-#mainHeader .notification-bell-btn,#mainHeader .global-refresh-btn{border-radius:12px!important;background:rgba(255,255,255,.1)!important;border:1px solid rgba(255,255,255,.15)!important;color:#fff!important}
-#mainHeader .global-last-sync{color:#d7d8f2!important}
-#leftNav.app-sidebar{position:absolute!important;top:72px!important;bottom:0!important;left:0!important;width:250px!important;padding:18px 14px!important;background:#fff!important;border-right:1px solid #e8eaf3!important;box-shadow:10px 0 30px rgba(30,35,75,.035)!important;overflow-x:hidden!important;overflow-y:auto!important;z-index:55!important;border-radius:0 18px 0 0!important}
-#leftNav .sidebar-inner{min-height:100%!important;display:flex!important;flex-direction:column!important;gap:7px!important;opacity:1!important;transform:none!important}
-#leftNav .sidebar-label{padding:8px 10px 18px!important;margin-bottom:8px!important;border-bottom:1px solid #edf0f6!important;text-align:left!important}
-#leftNav .castrol-sidebar-logo img{max-width:148px!important;max-height:44px!important;object-fit:contain!important;object-position:left center!important}
-#leftNav .sidebar-item{width:100%!important;min-height:46px!important;flex-direction:row!important;justify-content:flex-start!important;align-items:center!important;gap:12px!important;padding:9px 12px!important;margin:0!important;border:1px solid transparent!important;border-radius:13px!important;background:transparent!important;color:#737d96!important;font-size:12px!important;font-weight:650!important;text-align:left!important;box-shadow:none!important;transition:background .22s ease,color .22s ease,border-color .22s ease,transform .22s ease!important}
-#leftNav .sidebar-item:hover{background:#f4f3ff!important;color:#5145d8!important;border-color:#e8e5ff!important;transform:translateX(2px)}
-#leftNav .sidebar-item-active,#leftNav .sidebar-item[aria-current="page"]{background:linear-gradient(105deg,#eeeaff,#f7f6ff)!important;border-color:#e2ddff!important;color:#5145d8!important;box-shadow:inset 3px 0 #6558f5!important}
-#leftNav .sidebar-icon{width:32px!important;height:32px!important;min-width:32px!important;border-radius:10px!important;background:#f1f3f9!important;box-shadow:none!important;font-size:15px!important}
-#leftNav .sidebar-item-active .sidebar-icon{background:#fff!important;box-shadow:0 3px 10px rgba(101,88,245,.12)!important}
-#leftNav .sidebar-text{font-size:12px!important;line-height:1.3!important;white-space:normal!important}
-#leftNav .sidebar-bottom{margin-top:auto!important;padding-top:14px!important;border-top:1px solid #edf0f6!important}
-#leftNav .sidebar-item-danger{color:#d94b66!important}
-#leftNav:not(.hidden) + div{margin-left:250px!important;transition:margin-left .28s cubic-bezier(.2,.8,.2,1)!important}
-#app>.p-4.flex-1.overflow-y-auto{min-width:0!important;min-height:calc(100vh - 72px)!important;padding:28px 32px 36px!important;background:#f4f6fb!important;overflow-x:hidden!important}
-#mainPage{width:100%!important;max-width:1480px!important;margin:0 auto!important}
-#mainPage .tab-content{animation:v3Enter .32s cubic-bezier(.2,.75,.25,1) both!important}
-@keyframes v3Enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-/* Main content surfaces */
-#mainPage .home-rebuild-card,#mainPage .bg-white.border.rounded-xl,#mainPage .bg-white.rounded-xl,#mainPage .bg-white.border.rounded-lg,#mainPage .border.rounded-xl.bg-white,#mainPage .modern-modal-card{border:1px solid #e5e8f2!important;border-radius:19px!important;background:#fff!important;box-shadow:0 7px 24px rgba(31,39,78,.045)!important}
-#mainPage .home-rebuild-card{overflow:hidden!important;margin-bottom:18px!important;transition:box-shadow .22s ease,border-color .22s ease,transform .22s ease!important}
-#mainPage .home-rebuild-card:hover{box-shadow:0 13px 34px rgba(31,39,78,.075)!important;border-color:#dcdff0!important}
-#mainPage .home-rebuild-head{padding:17px 20px!important;border-bottom:1px solid #edf0f6!important;background:linear-gradient(180deg,#fff,#fcfcff)!important}
-#mainPage .home-rebuild-title{font-size:14px!important;font-weight:750!important;letter-spacing:-.015em!important;color:#202744!important}
-#mainPage .home-rebuild-sub{font-size:11px!important;color:#8b93a8!important}
-#mainPage .home-rebuild-banner{border-radius:20px!important;box-shadow:0 12px 30px rgba(33,36,79,.12)!important}
-#mainPage h2,#mainPage h3{letter-spacing:-.025em!important;color:#202744}
-#mainPage h2{font-weight:760!important}
-#mainPage .tab-content>h2,#mainPage .tab-content>div:first-child h2{margin-bottom:18px!important}
-/* Unified form controls */
-#mainPage input:not([type=checkbox]):not([type=radio]):not([type=range]),#mainPage select,#mainPage textarea,#loginPage input,#registerPage input,#registerPage select,#searchRiwayatInput,#searchMonitoringInput,#searchOutletKontrakInput,#filterQuarterSelect,#filterPricelistUpdate,.select2-container--default .select2-selection--single,.select2-container--default .select2-selection--multiple{min-height:43px!important;border:1px solid #dfe3ee!important;border-radius:11px!important;background-color:#fff!important;color:#202744!important;box-shadow:0 1px 2px rgba(30,35,75,.025)!important;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease!important}
-#mainPage textarea{min-height:88px!important}
-#mainPage input:focus,#mainPage select:focus,#mainPage textarea:focus,#loginPage input:focus,#registerPage input:focus,#registerPage select:focus{outline:none!important;border-color:#8d83ff!important;box-shadow:0 0 0 4px rgba(101,88,245,.12)!important}
-#mainPage label,#loginPage label,#registerPage label{color:#65708a!important;font-weight:650!important}
-/* Buttons */
-#mainPage button,#loginPage button,#registerPage button{transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease,border-color .18s ease!important}
-#mainPage button:not(.home-rebuild-arrow):not(.sidebar-item),#loginPage button[type=submit],#registerPage button[type=submit]{border-radius:11px}
-#mainPage button.bg-emerald-700,#mainPage button.bg-emerald-600,#mainPage .bg-emerald-700,#mainPage .bg-emerald-600,#loginPage button[type=submit],#registerPage button[type=submit]{background:#6558f5!important;color:#fff!important;border-color:#6558f5!important;box-shadow:0 5px 12px rgba(101,88,245,.16)!important}
-#mainPage button.bg-emerald-700:hover,#mainPage button.bg-emerald-600:hover,#loginPage button[type=submit]:hover,#registerPage button[type=submit]:hover{background:#5145d8!important;box-shadow:0 8px 18px rgba(101,88,245,.23)!important;transform:translateY(-1px)}
-#mainPage button:active,#loginPage button:active,#registerPage button:active{transform:translateY(0) scale(.985)}
-/* Tables: cleaner hierarchy and easier scanning */
-#mainPage table{border-collapse:separate!important;border-spacing:0!important;color:#39435c!important;font-size:12px!important}
-#mainPage table thead th{background:#f6f7fc!important;color:#65708a!important;font-size:10px!important;font-weight:750!important;letter-spacing:.045em!important;text-transform:uppercase!important;border-bottom:1px solid #e7eaf3!important;padding:12px 13px!important}
-#mainPage table tbody td{padding:11px 13px!important;border-bottom:1px solid #eff1f7!important}
-#mainPage table tbody tr{transition:background .15s ease!important}
-#mainPage table tbody tr:hover td{background:#f8f8ff!important}
-#mainPage table tbody tr:last-child td{border-bottom:0!important}
-#mainPage .overflow-x-auto{scrollbar-width:thin;scrollbar-color:#cbd0e2 transparent}
-#mainPage ::-webkit-scrollbar{width:8px;height:8px}#mainPage ::-webkit-scrollbar-thumb{background:#d1d5e5;border-radius:20px}#mainPage ::-webkit-scrollbar-track{background:transparent}
-/* Status chips and metrics */
-#mainPage .home-rebuild-metric{border:1px solid #e8eaf4!important;border-radius:15px!important;background:linear-gradient(145deg,#fff,#f8f8ff)!important;padding:15px!important}
-#mainPage .home-rebuild-label{color:#7c849b!important}
-/* Modals and notifications */
-.modern-modal-overlay{backdrop-filter:blur(8px)!important;background:rgba(20,24,49,.48)!important}
-.modern-modal-card{border-radius:22px!important;box-shadow:0 24px 80px rgba(18,22,55,.24)!important;overflow:hidden!important}
-.modern-modal-header{background:#fafaff!important;border-bottom:1px solid #e9ebf5!important}
-.notification-panel{border:1px solid #e4e7f1!important;border-radius:17px!important;box-shadow:0 20px 60px rgba(25,30,65,.17)!important}
-/* Auth page gets a distinct, premium canvas without touching its behavior */
-#loginPage,#registerPage{max-width:460px!important;width:100%!important;margin:auto!important;padding:34px!important;border:1px solid rgba(225,228,242,.9)!important;border-radius:26px!important;background:rgba(255,255,255,.94)!important;box-shadow:0 24px 70px rgba(35,39,88,.1)!important;backdrop-filter:blur(14px)!important}
-#loginPage h2,#registerPage h2{font-size:25px!important;letter-spacing:-.04em!important;color:#202744!important}
-#loginPage .inline-block,#registerPage .inline-block{border-radius:17px!important;box-shadow:0 8px 24px rgba(30,35,75,.08)!important}
-/* Announcement */
-.pengumuman-panel{border-radius:24px!important;box-shadow:0 20px 70px rgba(24,28,70,.14)!important}
-/* Mobile: convert sidebar into a floating drawer and simplify spacing */
-@media(max-width:767px){
- #mainHeader{min-height:60px!important;padding:9px 12px!important;gap:8px!important}
- #mainHeader h1{font-size:13px!important}
- #mainHeader .sidebar-toggle{width:36px!important;height:36px!important}
- #leftNav.app-sidebar{position:fixed!important;top:60px!important;bottom:0!important;left:0!important;width:min(286px,86vw)!important;padding:16px 12px!important;border-radius:0 18px 18px 0!important;box-shadow:18px 0 50px rgba(24,28,70,.18)!important;z-index:100!important;transform:translateX(0);}
- #leftNav.app-sidebar.hidden{display:none!important}
- #leftNav:not(.hidden) + div{margin-left:0!important}
- #app>.p-4.flex-1.overflow-y-auto{padding:13px 11px 24px!important;min-height:calc(100vh - 60px)!important}
- #mainPage{max-width:none!important}
- #mainPage .home-rebuild-card{border-radius:15px!important;margin-bottom:13px!important}
- #mainPage .home-rebuild-head{padding:13px 14px!important}
- #mainPage table{font-size:11px!important}
- #mainPage table thead th,#mainPage table tbody td{padding:9px 8px!important}
- #loginPage,#registerPage{padding:24px 18px!important;border-radius:21px!important;margin:8px auto!important}
- #mainPage .home-rebuild-metrics{gap:7px!important;padding:10px!important}
- #mainPage .home-rebuild-metric{padding:10px!important;border-radius:12px!important}
-}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
-</style>
-
 </body>
 </html>
 <style id="mobile-monitoring-pricelist-bottom-fix">
