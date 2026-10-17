@@ -8024,10 +8024,14 @@ startAutoRefresh();
             if(!prod){if(notice)notice.textContent='';if(preview)preview.textContent='Rp 0';return;}
             const ctx=getHargaNettInvoiceContext(prod);
             if(notice)notice.textContent=ctx.isCtm?'★ Produk CTM: diskon tidak diterapkan.':'';
-            const disc=ctx.isCtm?0:ctx.discPercent;
-            const extra=Math.max(0,Number((document.getElementById('hnExtra')||{}).value||0));
-            const gross=ctx.isCtm?ctx.base:Math.max(0,ctx.base-ctx.base*disc/100);
-            if(preview)preview.textContent=formatHargaNett(Math.max(0,gross-ctx.cashbackPerPcs-extra));
+            // Harga Nett per Pcs = Pricelist - Diskon - Cashback - Extra Cashback.
+            // Diskon tetap mengikuti persentase yang dipilih; produk CTM tetap tanpa diskon.
+            const discPercent=ctx.isCtm?0:ctx.discPercent;
+            const discountAmount=ctx.base*discPercent/100;
+            const cashbackAmount=Number(ctx.cashbackPerPcs)||0;
+            const extraCashback=Math.max(0,Number((document.getElementById('hnExtra')||{}).value||0));
+            const nettPerPcs=Math.max(0,ctx.base-discountAmount-cashbackAmount-extraCashback);
+            if(preview)preview.textContent=formatHargaNett(nettPerPcs);
         }
         function addHargaNettInvoiceItem() {
             const prod=getHargaNettInvoiceSelectedProduct();
