@@ -3161,35 +3161,6 @@ body{background:
 /* Sembunyikan menu dan halaman Pricelist tanpa menghapus sumber data/fungsi yang mungkin dipakai fitur lain. */
 #navPricelist, #tabPricelist { display: none !important; }
 </style>
-
-<!-- Castrol Portal UI theme refresh: presentation only; no calculation or application logic changed. -->
-<style id="castrol-ui-theme-refresh">
-:root{--castrol-green:#007a53;--castrol-green-dark:#005f43;--castrol-lime:#c8f000;--castrol-navy:#0d172b;--castrol-ink:#14233b;--castrol-muted:#7184a0;--castrol-line:#dce5ef;--castrol-bg:#f0f5f9;--castrol-card:#fff}
-html{scroll-behavior:smooth}
-body.bg-slate-50{background:var(--castrol-bg)!important;color:var(--castrol-ink)}
-body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-/* Shared surfaces */
-.rounded-xl,.rounded-2xl,.rounded-3xl{border-radius:20px!important}
-.shadow,.shadow-sm,.shadow-md,.shadow-lg,.shadow-xl{box-shadow:0 2px 5px rgba(15,35,60,.06),0 12px 28px rgba(15,35,60,.045)!important}
-.border,.border-slate-100,.border-slate-200{border-color:var(--castrol-line)!important}
-/* Primary actions */
-button.bg-green-600,button.bg-emerald-600,button.bg-green-700,button.bg-emerald-700,
-.bg-green-600,.bg-emerald-600,.bg-green-700,.bg-emerald-700{background-color:var(--castrol-green)!important}
-button.bg-green-600:hover,button.bg-emerald-600:hover,button.bg-green-700:hover,button.bg-emerald-700:hover{background-color:var(--castrol-green-dark)!important}
-.text-green-600,.text-emerald-600,.text-green-700,.text-emerald-700{color:var(--castrol-green)!important}
-.ring-green-500,.ring-emerald-500{--tw-ring-color:var(--castrol-green)!important}
-/* Form controls: clearer borders and focus, retaining their existing values/handlers */
-input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{border-color:var(--castrol-line);border-radius:12px;transition:border-color .18s ease,box-shadow .18s ease}
-input:not([type=checkbox]):not([type=radio]):not([type=range]):focus,select:focus,textarea:focus{outline:none;border-color:#00966a!important;box-shadow:0 0 0 3px rgba(0,150,106,.12)!important}
-/* Tables */
-table{border-collapse:separate;border-spacing:0}
-thead th{font-weight:800}
-/* Keyboard and touch feedback */
-button,a,[role=button]{transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease}
-button:focus-visible,a:focus-visible,[role=button]:focus-visible{outline:2px solid #00a875;outline-offset:2px}
-@media(max-width:768px){.rounded-xl,.rounded-2xl,.rounded-3xl{border-radius:15px!important}body{overflow-x:hidden}}
-</style>
-
 </head>
 <body class="bg-slate-50 font-sans">
 
@@ -11828,6 +11799,62 @@ function renderPencapaianCards(data) {
     box-sizing: border-box !important;
   }
 }
+</style>
+
+<style id="castrol-modern-theme-final">
+/* CASTROL PORTAL — MODERN VISUAL LAYER
+   Styling-only overrides. Existing HTML IDs, event handlers and application logic are preserved. */
+:root{--cp-ink:#10233f;--cp-muted:#718198;--cp-green:#00845a;--cp-green-dark:#006747;--cp-lime:#b7e900;--cp-bg:#f2f6fa;--cp-line:#e2eaf1;--cp-card:#fff;--cp-shadow:0 10px 30px rgba(17,38,65,.07);--cp-radius:20px}
+html{scroll-behavior:smooth} body{background:var(--cp-bg)!important;color:var(--cp-ink)!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important;letter-spacing:-.01em}
+button,a,input,select,textarea{transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+button{font-weight:650}
+#app{min-height:100vh!important;background:var(--cp-bg)!important}
+#mainHeader{position:sticky!important;top:0;z-index:100!important;min-height:76px;padding:14px 26px!important;background:linear-gradient(112deg,#071528 0%,#092b31 55%,#004b39 100%)!important;border-bottom:1px solid rgba(183,233,0,.45)!important;box-shadow:0 8px 28px rgba(5,22,39,.18)!important;backdrop-filter:blur(18px)}
+#mainHeader h1{font-size:17px!important;font-weight:850!important;letter-spacing:-.035em!important}
+#mainHeader .sidebar-toggle{width:42px!important;height:42px!important;border-radius:14px!important;background:rgba(255,255,255,.09)!important;border:1px solid rgba(255,255,255,.14)!important;color:#fff!important}
+#mainHeader .sidebar-toggle:hover{background:rgba(0,190,125,.22)!important;transform:translateY(-1px)}
+#leftNav.app-sidebar{background:#fff!important;border-right:1px solid #e3ebf2!important;box-shadow:8px 0 28px rgba(24,45,70,.035)!important;padding:22px 16px!important;width:252px!important;min-width:252px!important;overflow-y:auto!important;scrollbar-width:thin;scrollbar-color:#d4e0e9 transparent}
+#leftNav .sidebar-inner{gap:7px!important}
+#leftNav .castrol-sidebar-logo{padding:10px 12px 22px!important;margin-bottom:10px!important;border-bottom:1px solid #edf1f5!important}
+#leftNav .castrol-sidebar-logo img{max-width:142px!important;max-height:54px!important;object-fit:contain}
+#leftNav .sidebar-label{color:#8493a7!important;font-size:10px!important;font-weight:850!important;letter-spacing:.13em!important;text-transform:uppercase}
+#leftNav .sidebar-item{display:flex!important;align-items:center!important;gap:12px!important;width:100%!important;min-height:48px!important;padding:10px 13px!important;margin:3px 0!important;border:1px solid transparent!important;border-radius:14px!important;background:transparent!important;color:#52647b!important;font-size:12px!important;font-weight:750!important;text-align:left!important}
+#leftNav .sidebar-item:hover{background:#f1faf6!important;border-color:#d7f0e4!important;color:#007a53!important;transform:translateX(2px)}
+#leftNav .sidebar-item-active,#leftNav .sidebar-item[aria-current="page"]{background:linear-gradient(110deg,#007c54,#00996a)!important;color:#fff!important;border-color:transparent!important;box-shadow:0 7px 16px rgba(0,132,90,.2)!important}
+#leftNav .sidebar-icon{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 34px!important;width:34px!important;height:34px!important;border-radius:11px!important;background:#eff4f8!important;font-size:16px!important;color:#486078!important}
+#leftNav .sidebar-item-active .sidebar-icon{background:rgba(255,255,255,.17)!important;color:#fff!important}
+#leftNav .sidebar-text{line-height:1.35!important}
+#app #mainPage{padding:28px!important;max-width:1800px!important;margin:0 auto!important;width:100%!important}
+#app .tab-content{animation:cpFadeUp .28s ease both}
+@keyframes cpFadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+#app .home-rebuild-wrap{gap:22px!important}
+#app .home-rebuild-banner{border-radius:24px!important;overflow:hidden!important;box-shadow:0 16px 36px rgba(8,28,47,.16)!important}
+#app .home-rebuild-card,#app .home-rebuild-metric,#app .home-rebuild-wrap>section:not(.home-rebuild-banner),#app .bg-white.rounded-xl,#app .bg-white.rounded-2xl{border:1px solid var(--cp-line)!important;border-radius:var(--cp-radius)!important;box-shadow:var(--cp-shadow)!important}
+#app .home-rebuild-card{padding:24px!important;background:#fff!important}
+#app .home-rebuild-metric{background:linear-gradient(145deg,#fff,#f8fbfd)!important;padding:20px!important}
+#app .home-rebuild-value{font-size:clamp(23px,2vw,32px)!important;font-weight:850!important;letter-spacing:-.04em!important;color:#10233f!important}
+#app .home-rebuild-label{font-size:10px!important;letter-spacing:.1em!important;text-transform:uppercase!important;font-weight:850!important;color:#8190a5!important}
+#app .bg-white.rounded-xl,#app .bg-white.rounded-2xl{padding:22px!important}
+#app .rounded-lg,#app .rounded-xl,#app .rounded-2xl{border-radius:14px!important}
+#app input:not([type=checkbox]):not([type=radio]):not([type=range]),#app select,#app textarea,.select2-container .select2-selection--single{min-height:42px!important;border:1px solid #dce5ee!important;border-radius:12px!important;background-color:#fff!important;color:#18304c!important;box-shadow:0 1px 2px rgba(16,35,63,.025)!important;padding:10px 13px!important;font-size:13px!important}
+#app input:focus,#app select:focus,#app textarea:focus,.select2-container--focus .select2-selection--single{outline:none!important;border-color:#00a875!important;box-shadow:0 0 0 4px rgba(0,168,117,.12)!important}
+.select2-container .select2-selection--single{height:44px!important;padding:4px 10px!important}.select2-container--default .select2-selection--single .select2-selection__rendered{line-height:32px!important;color:#18304c!important}.select2-dropdown{border:1px solid #dce5ee!important;border-radius:12px!important;overflow:hidden;box-shadow:var(--cp-shadow)!important}
+#app button.bg-emerald-700,#app button.bg-emerald-600,#app .bg-emerald-700 button,#app button[class*="bg-emerald"]{border-radius:12px!important;box-shadow:0 5px 12px rgba(0,132,90,.14)!important}
+#app button:hover{filter:saturate(1.04)}
+#app table{border-collapse:separate!important;border-spacing:0!important;width:100%}
+#app table thead th{background:#f3f7fa!important;color:#687a90!important;font-size:10px!important;letter-spacing:.07em!important;text-transform:uppercase!important;font-weight:850!important;border-bottom:1px solid #e0e8ef!important;padding:13px 12px!important}
+#app table tbody td{padding:12px!important;border-bottom:1px solid #edf1f5!important;color:#34465d!important;font-size:12px!important}
+#app table tbody tr:hover td{background:#f7fbf9!important}
+#app .shadow,.shadow-md,.shadow-lg{box-shadow:var(--cp-shadow)!important}
+#app .border-slate-200,#app .border-gray-200{border-color:var(--cp-line)!important}
+#app .text-slate-500,#app .text-gray-500{color:#718198!important}
+#app .bg-slate-50,#app .bg-gray-50{background:#f5f8fb!important}
+#app .modal,#app [role=dialog]{border-radius:22px!important;box-shadow:0 24px 70px rgba(8,25,46,.24)!important}
+#app .notification-panel{border:1px solid var(--cp-line)!important;border-radius:18px!important;box-shadow:0 20px 55px rgba(8,25,46,.18)!important}
+@media(max-width:900px){#app #mainPage{padding:18px!important}#leftNav.app-sidebar{width:228px!important;min-width:228px!important}#mainHeader{padding:12px 16px!important}}
+@media(max-width:640px){#app #mainPage{padding:12px!important}#leftNav.app-sidebar{width:min(84vw,280px)!important;min-width:min(84vw,280px)!important;padding:16px 12px!important}#mainHeader{min-height:62px;padding:10px 12px!important}#mainHeader h1{font-size:14px!important}#app .home-rebuild-card{padding:15px!important}#app .bg-white.rounded-xl,#app .bg-white.rounded-2xl{padding:14px!important}#app table thead th,#app table tbody td{padding:8px 7px!important;font-size:10px!important}.cp-hide-mobile{display:none!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
 </style>
 </body>
 </html>
