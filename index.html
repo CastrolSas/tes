@@ -5822,7 +5822,7 @@ startAutoRefresh();
             const target = document.getElementById('monitoringDetailHistoryChart');
             if (!target) return;
             const custKey = String(data && data.custCode || '').trim().toUpperCase().replace(/\s+/g, ' ');
-            const cacheKey = 'MONITORING_HISTORY_V2_' + custKey;
+            const cacheKey = 'MONITORING_HISTORY_V3_' + custKey;
             const cached = appLocalCacheGet(cacheKey);
 
             if (cached && typeof cached === 'object' && Array.isArray(cached.history)) {
@@ -6024,7 +6024,7 @@ startAutoRefresh();
                                 }).join('') + '</div>';
                         }).join('');
                     } else {
-                        tooltipDetails.innerHTML = '<div style="padding:3px 0;color:#cbd5e1">Memuat.</div>';
+                        tooltipDetails.innerHTML = '<div style="padding:3px 0;color:#cbd5e1">Tidak ada rincian transaksi pada bulan ini.</div>';
                     }
                 }
 
