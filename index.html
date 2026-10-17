@@ -4018,6 +4018,11 @@ body{background:
                                       <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Satuan</label><select id="hnUnit" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-xs" onchange="updateHargaNettInvoiceProduct()"><option value="DUS">Dus</option><option value="PCS">Pcs</option></select></div>
                                       <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Jumlah</label><input id="hnQty" type="number" min="1" value="1" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-xs" oninput="updateHargaNettInvoiceProduct()"></div>
                                     </div>
+                                    <div class="flex items-center gap-2 rounded-lg border border-slate-200 p-2">
+                                      <input id="hnManualPriceToggle" type="checkbox" class="h-4 w-4" onchange="toggleHargaNettManualPrice()">
+                                      <label for="hnManualPriceToggle" class="text-[10px] font-bold text-slate-600">Atur Harga Sendiri</label>
+                                    </div>
+                                    <div id="hnManualPriceWrap" class="hidden"><label class="block text-[10px] font-bold text-slate-500 mb-1">Harga Nett / Pcs Manual (Rp)</label><input id="hnManualPrice" type="number" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-xs" oninput="updateHargaNettInvoiceProduct()"></div>
                                     <div class="grid grid-cols-2 gap-2">
                                       <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Extra Cashback (Rp/Pcs)</label><input id="hnExtra" type="number" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-xs" oninput="updateHargaNettInvoiceProduct()"></div>
                                       <div class="rounded-lg bg-slate-50 border border-slate-100 p-2"><div class="text-[9px] text-slate-400">Harga Nett / Pcs</div><div id="hnNettPreview" class="text-sm font-extrabold text-emerald-800 mt-1">Rp 0</div></div>
@@ -8005,17 +8010,25 @@ startAutoRefresh();
                 const totalPcs=item.unit==='PCS'?item.qty:item.qty*pack;
                 const discPercent=ctx.isCtm?0:ctx.discPercent;
                 const grossPcs=ctx.isCtm?ctx.base:Math.max(0,ctx.base-ctx.base*discPercent/100);
-                item.pack=pack;item.totalPcs=totalPcs;item.liter=ctx.liter;item.price=ctx.base;
-                item.isCtm=ctx.isCtm;item.subtotalGross=ctx.base*totalPcs;
+                const manual=!!item.manualPrice;
+                const unitPrice=manual?Math.max(0,Number(item.manualNettPerPcs)||0):ctx.base;
+                item.pack=pack;item.totalPcs=totalPcs;item.liter=ctx.liter;item.price=unitPrice;
+                item.isCtm=ctx.isCtm;item.manualPrice=manual;item.subtotalGross=unitPrice*totalPcs;
                 item.totalDisc=(ctx.base-grossPcs)*totalPcs;
                 item.cashbackPerPcs=ctx.cashbackPerPcs;item.totalCashback=ctx.cashbackPerPcs*totalPcs;
                 item.totalExtra=Math.max(0,Number(item.extraPerPcs)||0)*totalPcs;
-                item.nettSubtotal=Math.max(0,item.subtotalGross-item.totalDisc-item.totalCashback-item.totalExtra);
+                item.nettSubtotal=manual?unitPrice*totalPcs:Math.max(0,item.subtotalGross-item.totalDisc-item.totalCashback-item.totalExtra);
             });
         }
         function getHargaNettInvoiceSelectedProduct() {
             const key=String((document.getElementById('hnProductSelect')||{}).value||'');
             return hargaNettData.find(function(x){return String(x.kode||x.produk||'')===key;})||null;
+        }
+        function toggleHargaNettManualPrice() {
+            const active=!!((document.getElementById('hnManualPriceToggle')||{}).checked);
+            const wrap=document.getElementById('hnManualPriceWrap');
+            if(wrap)wrap.classList.toggle('hidden',!active);
+            updateHargaNettInvoiceProduct();
         }
         function updateHargaNettInvoiceProduct() {
             const prod=getHargaNettInvoiceSelectedProduct();
@@ -8023,14 +8036,18 @@ startAutoRefresh();
             const preview=document.getElementById('hnNettPreview');
             if(!prod){if(notice)notice.textContent='';if(preview)preview.textContent='Rp 0';return;}
             const ctx=getHargaNettInvoiceContext(prod);
-            if(notice)notice.textContent=ctx.isCtm?'★ Produk CTM: diskon tidak diterapkan.':'';
-            // Harga Nett per Pcs = Pricelist - Diskon - Cashback - Extra Cashback.
-            // Diskon tetap mengikuti persentase yang dipilih; produk CTM tetap tanpa diskon.
-            const discPercent=ctx.isCtm?0:ctx.discPercent;
-            const discountAmount=ctx.base*discPercent/100;
-            const cashbackAmount=Number(ctx.cashbackPerPcs)||0;
-            const extraCashback=Math.max(0,Number((document.getElementById('hnExtra')||{}).value||0));
-            const nettPerPcs=Math.max(0,ctx.base-discountAmount-cashbackAmount-extraCashback);
+            const manual=!!((document.getElementById('hnManualPriceToggle')||{}).checked);
+            const manualInput=document.getElementById('hnManualPrice');
+            if(notice)notice.textContent=manual?'Mode harga manual aktif: diskon, cashback, dan extra cashback tidak mengurangi total.':(ctx.isCtm?'★ Produk CTM: diskon tidak diterapkan.':'');
+            let nettPerPcs;
+            if(manual){nettPerPcs=Math.max(0,Number((manualInput||{}).value)||0);}
+            else {
+                const discPercent=ctx.isCtm?0:ctx.discPercent;
+                const discountAmount=ctx.base*discPercent/100;
+                const cashbackAmount=Number(ctx.cashbackPerPcs)||0;
+                const extraCashback=Math.max(0,Number((document.getElementById('hnExtra')||{}).value||0));
+                nettPerPcs=Math.max(0,ctx.base-discountAmount-cashbackAmount-extraCashback);
+            }
             if(preview)preview.textContent=formatHargaNett(nettPerPcs);
         }
         function addHargaNettInvoiceItem() {
@@ -8043,13 +8060,16 @@ startAutoRefresh();
             const totalPcs=unit==='PCS'?qty:qty*pack;
             const discPercent=ctx.isCtm?0:ctx.discPercent;
             const extraPerPcs=Math.max(0,Number((document.getElementById('hnExtra')||{}).value||0));
+            const manual=!!((document.getElementById('hnManualPriceToggle')||{}).checked);
+            const manualNettPerPcs=manual?Math.max(0,Number((document.getElementById('hnManualPrice')||{}).value)||0):0;
             const grossPcs=ctx.isCtm?ctx.base:Math.max(0,ctx.base-ctx.base*discPercent/100);
-            const subtotalGross=ctx.base*totalPcs;
+            const unitPrice=manual?manualNettPerPcs:ctx.base;
+            const subtotalGross=unitPrice*totalPcs;
             const totalDisc=(ctx.base-grossPcs)*totalPcs;
             const totalCashback=ctx.cashbackPerPcs*totalPcs;
             const totalExtra=extraPerPcs*totalPcs;
-            const nettSubtotal=Math.max(0,subtotalGross-totalDisc-totalCashback-totalExtra);
-            hargaNettInvoiceCart.push({key:String(prod.kode||prod.produk||''),produk:prod.produk,unit:unit,qty:qty,totalPcs:totalPcs,pack:pack,liter:ctx.liter,price:ctx.base,discPercent:discPercent,subtotalGross:subtotalGross,totalDisc:totalDisc,cashbackPerPcs:ctx.cashbackPerPcs,totalCashback:totalCashback,extraPerPcs:extraPerPcs,totalExtra:totalExtra,nettSubtotal:nettSubtotal,isCtm:ctx.isCtm});
+            const nettSubtotal=manual?manualNettPerPcs*totalPcs:Math.max(0,subtotalGross-totalDisc-totalCashback-totalExtra);
+            hargaNettInvoiceCart.push({key:String(prod.kode||prod.produk||''),produk:prod.produk,unit:unit,qty:qty,totalPcs:totalPcs,pack:pack,liter:ctx.liter,price:unitPrice,discPercent:discPercent,subtotalGross:subtotalGross,totalDisc:totalDisc,cashbackPerPcs:ctx.cashbackPerPcs,totalCashback:totalCashback,extraPerPcs:extraPerPcs,totalExtra:totalExtra,nettSubtotal:nettSubtotal,isCtm:ctx.isCtm,manualPrice:manual,manualNettPerPcs:manualNettPerPcs});
             renderHargaNettInvoiceCart();
             document.getElementById('hnExtra').value='0';
         }
