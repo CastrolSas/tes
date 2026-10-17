@@ -3161,6 +3161,130 @@ body{background:
 /* Sembunyikan menu dan halaman Pricelist tanpa menghapus sumber data/fungsi yang mungkin dipakai fitur lain. */
 #navPricelist, #tabPricelist { display: none !important; }
 </style>
+
+<style id="nova-rebuild-theme">
+/* NOVA UI — redesain menyeluruh, tanpa mengubah ID atau alur JavaScript aplikasi */
+:root{
+  --nova-bg:#f4f6fb;--nova-surface:#fff;--nova-ink:#172033;--nova-muted:#778198;
+  --nova-line:#e3e8f2;--nova-primary:#5145e5;--nova-primary-dark:#3930b7;
+  --nova-cyan:#13b8c8;--nova-warm:#f59e0b;--nova-danger:#e34d67;
+  --nova-shadow:0 10px 30px rgba(27,39,75,.065);--nova-radius:18px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--nova-bg)!important;color:var(--nova-ink)!important;font-family:Inter,"Segoe UI",system-ui,-apple-system,sans-serif!important;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+#app.app-shell{max-width:none!important;width:100%!important;background:transparent!important;box-shadow:none!important;border:0!important;overflow:visible!important}
+#mainHeader{position:sticky!important;top:0!important;z-index:120!important;min-height:72px!important;padding:12px 26px!important;
+ background:#171b31!important;border:0!important;border-bottom:1px solid rgba(255,255,255,.08)!important;
+ box-shadow:0 8px 30px rgba(18,24,49,.16)!important;gap:14px}
+#mainHeader:after{content:"";position:absolute;left:0;bottom:0;height:3px;width:100%;background:linear-gradient(90deg,#5145e5,#13b8c8,#f59e0b);pointer-events:none}
+#mainHeader h1{font-size:15px!important;font-weight:800!important;letter-spacing:.015em!important;color:#fff!important}
+#mainHeader .sidebar-toggle{width:42px!important;height:42px!important;border-radius:13px!important;background:#292e49!important;border:1px solid #3a4161!important;color:#fff!important}
+#mainHeader .sidebar-toggle:hover{background:#383e60!important;border-color:#7168ff!important}
+#mainHeader .user-badge{background:#292e49!important;color:#e5e9ff!important;border:1px solid #424866!important;border-radius:999px!important}
+#mainHeader .header-action-btn,#mainHeader .account-header-btn,#mainHeader .notification-bell-btn{background:#292e49!important;border:1px solid #414866!important;color:#f5f6ff!important;border-radius:12px!important}
+#mainHeader .header-action-btn:hover,#mainHeader .account-header-btn:hover,#mainHeader .notification-bell-btn:hover{background:#393f60!important}
+#leftNav.app-sidebar{position:fixed!important;top:72px!important;left:0!important;bottom:0!important;width:238px!important;max-width:85vw!important;padding:20px 14px 18px!important;
+ background:#fff!important;border:0!important;border-right:1px solid var(--nova-line)!important;border-radius:0!important;box-shadow:10px 0 35px rgba(25,34,70,.055)!important;
+ z-index:110!important;overflow-y:auto!important;transform:translateX(0);visibility:visible;opacity:1}
+#leftNav.app-sidebar.is-collapsed{width:238px!important;padding:20px 14px 18px!important;transform:translateX(-105%)!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+#leftNav .sidebar-inner{display:flex!important;flex-direction:column!important;gap:6px!important;min-height:100%!important;position:static!important}
+#leftNav .sidebar-label{font-size:10px!important;letter-spacing:.14em!important;color:#9aa3b7!important;padding:4px 8px 18px!important;text-align:left!important}
+#leftNav .sidebar-label img{max-width:142px!important;max-height:38px!important;object-fit:contain!important;object-position:left center!important}
+#leftNav .sidebar-item,#leftNav .sidebar-user-item{min-height:46px!important;height:auto!important;flex-direction:row!important;justify-content:flex-start!important;gap:12px!important;padding:8px 12px!important;border:1px solid transparent!important;border-radius:12px!important;
+ color:#68738c!important;font-size:12px!important;font-weight:700!important;text-align:left!important;background:transparent!important}
+#leftNav .sidebar-item:hover{background:#f4f5ff!important;border-color:#e4e2ff!important;color:var(--nova-primary)!important;transform:translateX(2px)!important}
+#leftNav .sidebar-item-active{background:#eeedff!important;border-color:#dedbff!important;color:var(--nova-primary)!important;box-shadow:inset 3px 0 0 var(--nova-primary)!important}
+#leftNav .sidebar-icon{width:30px!important;height:30px!important;min-width:30px!important;border-radius:9px!important;background:#f1f3f9!important;border:0!important;box-shadow:none!important;font-size:15px!important}
+#leftNav .sidebar-item-active .sidebar-icon{background:#dedbff!important}
+#leftNav .sidebar-bottom{margin-top:auto!important;padding-top:14px!important;border-top:1px solid var(--nova-line)!important}
+#leftNav .sidebar-spacer{min-height:16px}
+#app #leftNav.app-sidebar + div{margin-left:238px!important;width:calc(100% - 238px)!important;min-width:0!important;transition:margin .24s ease,width .24s ease}
+#app.sidebar-closed #leftNav.app-sidebar + div{margin-left:0!important;width:100%!important}
+#app>.p-4.flex-1.overflow-y-auto{padding:28px clamp(14px,3vw,42px)!important;min-width:0!important;overflow-x:hidden!important}
+#mainPage{max-width:1480px!important;width:100%!important;margin:0 auto!important}
+.tab-content{animation:novaPageIn .24s ease both}
+@keyframes novaPageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+#mainPage h2{color:#202944!important;font-weight:800!important;letter-spacing:-.025em!important}
+#tabInput>div,#tabInput .bg-white,#tabRiwayat .bg-white,#tabMonitoring .bg-white,#tabOutletKontrak .bg-white,#tabPricelist .bg-white,
+#tabInput .bg-slate-50,#tabInput .bg-emerald-50\/40,#tabHome .bg-white{border-color:var(--nova-line)!important;border-radius:18px!important;box-shadow:var(--nova-shadow)!important}
+#tabInput .border-b,#tabRiwayat .border-b,#tabMonitoring .border-b,#tabOutletKontrak .border-b,#tabPricelist .border-b{border-color:var(--nova-line)!important}
+#tabInput .bg-slate-50,#tabInput .bg-emerald-50\/40{background:#f8f9ff!important}
+#tabInput input,#tabInput select,#tabInput textarea,#searchRiwayatInput,#searchMonitoringInput,#searchOutletKontrakInput,#filterQuarterSelect,#filterPricelistUpdate,
+.select2-container .select2-selection--single{min-height:43px!important;background:#fff!important;border:1px solid #dfe4f0!important;border-radius:11px!important;color:#29334d!important;box-shadow:none!important}
+#tabInput input:focus,#tabInput select:focus,#tabInput textarea:focus,#searchRiwayatInput:focus,#searchMonitoringInput:focus,#searchOutletKontrakInput:focus,#filterQuarterSelect:focus,#filterPricelistUpdate:focus{outline:none!important;border-color:#8d86ff!important;box-shadow:0 0 0 4px rgba(81,69,229,.10)!important}
+.select2-container--default .select2-selection--single .select2-selection__rendered{line-height:32px!important;color:#29334d!important}
+.select2-container--default .select2-selection--single .select2-selection__arrow{height:40px!important}
+.select2-dropdown{border:1px solid var(--nova-line)!important;border-radius:12px!important;overflow:hidden;box-shadow:var(--nova-shadow)!important}
+button{transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+#btnKirimOrder{min-height:48px!important;border:0!important;border-radius:13px!important;background:linear-gradient(135deg,#5145e5,#6b5cff)!important;box-shadow:0 9px 20px rgba(81,69,229,.23)!important;color:white!important;font-weight:800!important}
+#btnKirimOrder:hover{background:linear-gradient(135deg,#3930b7,#5145e5)!important;transform:translateY(-1px)}
+#tabInput button.bg-emerald-700,#tabInput button:hover.bg-emerald-800,#tabInput .bg-emerald-900{background:var(--nova-primary)!important;color:#fff!important;border-color:var(--nova-primary)!important;box-shadow:0 5px 14px rgba(81,69,229,.15)!important}
+#cartList>div,#listRiwayat>div{border:1px solid var(--nova-line)!important;border-radius:14px!important;box-shadow:0 4px 14px rgba(27,39,75,.035)!important;background:#fff!important}
+#listRiwayat>div{border-left:3px solid var(--nova-primary)!important}
+#tabMonitoring .overflow-x-auto,#tabOutletKontrak .overflow-x-auto,#tabPricelist .overflow-x-auto,#tabRiwayat .overflow-x-auto{max-width:100%;border:1px solid var(--nova-line)!important;border-radius:15px!important;background:#fff!important;box-shadow:0 5px 18px rgba(27,39,75,.035)!important;-webkit-overflow-scrolling:touch}
+#tabMonitoring table,#tabOutletKontrak table,#tabPricelist table{border-collapse:separate!important;border-spacing:0!important}
+#tabMonitoring table thead tr,#tabOutletKontrak table thead tr,#tabPricelist table thead tr{background:#f0f2fa!important}
+#tabMonitoring table th,#tabOutletKontrak table th,#tabPricelist table th{color:#59647e!important;font-size:10px!important;font-weight:800!important;text-transform:uppercase;letter-spacing:.045em;border-bottom:1px solid var(--nova-line)!important}
+#tabMonitoring table td,#tabOutletKontrak table td,#tabPricelist table td{border-bottom:1px solid #edf0f6!important;color:#38435d}
+#tabMonitoring table tbody tr:hover,#tabOutletKontrak table tbody tr:hover,#tabPricelist table tbody tr:hover{background:#f7f7ff!important}
+.riwayat-card{border:1px solid var(--nova-line)!important;border-radius:18px!important;box-shadow:var(--nova-shadow)!important}
+.riwayat-card:hover{border-color:#c8c4ff!important;box-shadow:0 14px 30px rgba(27,39,75,.09)!important}
+.riwayat-card-number{background:#f0efff!important;color:var(--nova-primary)!important}
+.riwayat-action-edit{background:var(--nova-primary)!important;border-color:var(--nova-primary)!important;border-radius:9px!important}
+.riwayat-action-wa{background:#0f9f88!important;border-color:#0f9f88!important;border-radius:9px!important}
+.riwayat-table{border-color:var(--nova-line)!important;border-radius:14px!important}
+.riwayat-table th{background:#f0f2fa!important;color:#59647e!important}
+.riwayat-table td{border-bottom-color:#edf0f6!important}
+.modern-modal-overlay{background:rgba(17,22,43,.58)!important;backdrop-filter:blur(9px)!important}
+.modern-modal-card{border:1px solid #e1e5f1!important;border-radius:22px!important;box-shadow:0 28px 90px rgba(15,20,45,.25)!important}
+.modern-modal-header{background:#f8f9ff!important;border-bottom-color:var(--nova-line)!important}
+.modern-modal-icon{background:#eeedff!important;border-color:#dedbff!important;color:var(--nova-primary)!important}
+.modern-modal-ok{background:var(--nova-primary)!important;border-color:var(--nova-primary)!important;box-shadow:0 5px 14px rgba(81,69,229,.2)!important}
+.modal-detail-table thead th{background:#f0f2fa!important;color:#59647e!important}
+.modal-id-chip{background:#eeedff!important;border-color:#dedbff!important;color:var(--nova-primary)!important}
+.notification-panel{border:1px solid var(--nova-line)!important;border-radius:18px!important;box-shadow:0 22px 60px rgba(22,28,55,.2)!important}
+.notification-panel-head{background:#f8f9ff!important;border-color:var(--nova-line)!important}
+.notification-mark-all{color:var(--nova-primary)!important}
+.notification-item.unread{background:#f3f2ff!important}
+.notification-item.unread:before{background:var(--nova-primary)!important}
+.top-loading{border-color:var(--nova-line)!important;border-radius:999px!important;box-shadow:var(--nova-shadow)!important}
+.top-loading-spinner{border-color:#e4e2ff!important;border-top-color:var(--nova-primary)!important}
+.monitor-date-group-row td{background:#f1f2ff!important;border-color:#dedfff!important}
+.monitor-date-group-label{color:#5145e5!important}
+.monitor-date-group-icon{background:#e1dfff!important}
+.modal-stat-card{border-color:var(--nova-line)!important;border-radius:13px!important;background:#fafbff!important}
+.modal-stat-value.is-main,.modal-product-qty{color:var(--nova-primary)!important}
+@media(min-width:768px){
+ #leftNav.app-sidebar{width:238px!important}
+ #leftNav.app-sidebar.is-collapsed{transform:translateX(-105%)!important}
+ #app #leftNav.app-sidebar + div{margin-left:238px!important;width:calc(100% - 238px)!important}
+ #app.sidebar-closed #leftNav.app-sidebar + div{margin-left:0!important;width:100%!important}
+}
+@media(max-width:767px){
+ #mainHeader{min-height:62px!important;padding:9px 12px!important}
+ #mainHeader h1{font-size:12px!important;max-width:44vw!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ #leftNav.app-sidebar{top:62px!important;width:260px!important;max-width:86vw!important;box-shadow:18px 0 50px rgba(17,22,43,.18)!important}
+ #leftNav.app-sidebar.is-collapsed{width:260px!important;transform:translateX(-105%)!important}
+ #app #leftNav.app-sidebar + div,#app.sidebar-closed #leftNav.app-sidebar + div{margin-left:0!important;width:100%!important}
+ #app>.p-4.flex-1.overflow-y-auto{padding:14px 10px!important}
+ #mainPage{max-width:none!important}
+ #tabInput .grid.grid-cols-3,#tabInput .grid.grid-cols-2{grid-template-columns:minmax(0,1fr)!important}
+ #tabMonitoring .overflow-x-auto,#tabOutletKontrak .overflow-x-auto,#tabPricelist .overflow-x-auto,#tabRiwayat .overflow-x-auto{border-radius:12px!important}
+ .modern-modal-card{width:calc(100vw - 24px)!important;max-width:none!important;max-height:90dvh!important;border-radius:18px!important}
+ .bws-detail-modal-card{width:calc(100vw - 20px)!important}
+ .riwayat-cards-grid{grid-template-columns:minmax(0,1fr)!important}
+}
+@media(max-width:430px){
+ #mainHeader{gap:6px!important;padding-inline:9px!important}
+ #mainHeader h1{max-width:35vw!important;font-size:11px!important}
+ #app>.p-4.flex-1.overflow-y-auto{padding:10px 7px!important}
+ .modal-detail-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .modern-modal-body{padding:10px!important}
+ .header-action-btn{width:34px!important;padding:6px!important}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style>
+
 </head>
 <body class="bg-slate-50 font-sans">
 
@@ -11800,105 +11924,6 @@ function renderPencapaianCards(data) {
   }
 }
 </style>
-<style id="castrol-atlas-complete-redesign">
-
-/* =========================================================
-   CASTROL ATLAS — COMPLETE VISUAL SYSTEM v1
-   UI-only layer. Business logic and event handlers untouched.
-   ========================================================= */
-:root{
- --atlas-ink:#171a2b;--atlas-muted:#747b91;--atlas-paper:#f6f5f1;--atlas-white:#fff;
- --atlas-line:#e6e5df;--atlas-violet:#6657e8;--atlas-violet-dark:#4a3bc8;
- --atlas-lime:#d9f36a;--atlas-teal:#137c70;--atlas-coral:#ff785f;
- --atlas-shadow:0 12px 34px rgba(30,32,57,.07);--atlas-radius:22px;
-}
-html{background:var(--atlas-paper)!important}
-body{background:var(--atlas-paper)!important;color:var(--atlas-ink)!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important;letter-spacing:-.01em}
-#app{min-height:100vh!important;background:var(--atlas-paper)!important;display:grid!important;grid-template-columns:250px minmax(0,1fr)!important;grid-template-rows:auto minmax(0,1fr)!important;align-items:start!important}
-#mainHeader{grid-column:1/-1!important;position:sticky!important;top:0!important;z-index:60!important;min-height:78px!important;padding:14px 28px!important;background:#191b2d!important;color:#fff!important;border:0!important;border-bottom:1px solid rgba(255,255,255,.1)!important;box-shadow:0 8px 28px rgba(25,27,45,.12)!important}
-#mainHeader .sidebar-toggle{width:42px!important;height:42px!important;border-radius:14px!important;background:#2b2e46!important;border:1px solid #41445c!important;color:#fff!important}
-#mainHeader img{border-radius:12px!important}
-#mainHeader button{border-radius:13px!important}
-#leftNav.app-sidebar{grid-column:1!important;grid-row:2!important;position:sticky!important;top:78px!important;height:calc(100vh - 78px)!important;min-height:calc(100vh - 78px)!important;width:250px!important;max-width:250px!important;overflow-y:auto!important;background:#202239!important;color:#f7f7ff!important;border:0!important;border-right:1px solid #30334c!important;box-shadow:none!important;z-index:40!important;padding:20px 14px!important}
-#leftNav .sidebar-inner{width:100%!important;gap:7px!important}
-#leftNav .sidebar-label{padding:8px 10px 20px!important;margin-bottom:10px!important;border-bottom:1px solid rgba(255,255,255,.1)!important}
-#leftNav .sidebar-label img{max-width:132px!important;max-height:42px!important;object-fit:contain!important}
-#leftNav .sidebar-item{display:flex!important;align-items:center!important;gap:12px!important;width:100%!important;min-height:49px!important;padding:11px 13px!important;margin:3px 0!important;border-radius:14px!important;border:1px solid transparent!important;background:transparent!important;color:#c4c7dc!important;text-align:left!important;font-size:12px!important;font-weight:700!important;box-shadow:none!important;transition:all .18s ease!important}
-#leftNav .sidebar-item:hover{background:#2b2e48!important;color:#fff!important;transform:translateX(2px)!important}
-#leftNav .sidebar-item-active,#leftNav .sidebar-item.active{background:var(--atlas-lime)!important;color:#202239!important;border-color:var(--atlas-lime)!important;box-shadow:0 8px 20px rgba(217,243,106,.12)!important}
-#leftNav .sidebar-item svg,#leftNav .sidebar-item i{width:19px!important;height:19px!important;flex-shrink:0!important}
-#mainPage{grid-column:2!important;grid-row:2!important;min-width:0!important;width:100%!important;max-width:none!important;margin:0!important;padding:30px clamp(18px,3vw,48px) 48px!important;background:var(--atlas-paper)!important;overflow:hidden!important}
-#mainPage .tab-content{min-width:0!important;animation:atlasIn .24s ease both}
-@keyframes atlasIn{from{opacity:.25;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-/* dashboard / analytics canvas */
-.home-rebuild-wrap{gap:22px!important}
-#homeRebuildBanner{border:0!important;border-radius:26px!important;overflow:hidden!important;background:radial-gradient(circle at 86% 10%,rgba(217,243,106,.22),transparent 28%),linear-gradient(125deg,#222540 0%,#38316c 58%,#6657e8 100%)!important;color:#fff!important;box-shadow:0 18px 42px rgba(58,48,132,.18)!important;min-height:170px!important}
-#homeRebuildBanner h1,#homeRebuildBanner h2,#homeRebuildBanner p{color:inherit!important}
-.home-rebuild-section,.home-weekly-section,.home-rebuild-card,.home-rebuild-panel{border:1px solid var(--atlas-line)!important;border-radius:var(--atlas-radius)!important;background:#fff!important;box-shadow:var(--atlas-shadow)!important}
-.home-rebuild-section{padding:22px!important}
-.home-rebuild-outlet-table,.home-rebuild-table,.home-weekly-section table{border-collapse:separate!important;border-spacing:0 7px!important;width:100%!important}
-.home-rebuild-outlet-table th,.home-rebuild-table th,.home-weekly-section table th{background:#f2f1fb!important;color:#77718f!important;text-transform:uppercase!important;letter-spacing:.09em!important;font-size:10px!important;font-weight:800!important;padding:13px 14px!important;border:0!important}
-.home-rebuild-outlet-table td,.home-rebuild-table td,.home-weekly-section table td{background:#fbfbfd!important;padding:14px!important;border-top:1px solid #efeff5!important;border-bottom:1px solid #efeff5!important;font-size:12px!important}
-.home-rebuild-outlet-table tr td:first-child,.home-rebuild-table tr td:first-child{border-left:1px solid #efeff5!important;border-radius:12px 0 0 12px!important}
-.home-rebuild-outlet-table tr td:last-child,.home-rebuild-table tr td:last-child{border-right:1px solid #efeff5!important;border-radius:0 12px 12px 0!important}
-.home-rebuild-outlet-table tbody tr:hover td,.home-rebuild-table tbody tr:hover td{background:#f4f2ff!important}
-.home-weekly-title{font-size:14px!important;color:var(--atlas-ink)!important;font-weight:850!important}
-.home-weekly-sub{font-size:11px!important;color:var(--atlas-muted)!important}
-.home-weekly-chart{padding:14px!important;border-radius:18px!important;background:linear-gradient(180deg,#fbfaff,#fff)!important}
-.home-weekly-chart svg{overflow:visible!important}
-/* all page headings and containers */
-#tabInput>div,#tabRiwayat>div,#tabPencapaian>div,#tabMonitoring>div,#tabOutletKontrak>div,#tabPricelist>div,#tabCustomerOutlet>div,#tabPesananOutlet>div{border-color:var(--atlas-line)!important}
-#tabInput .bg-white,#tabRiwayat .bg-white,#tabPencapaian .bg-white,#tabMonitoring .bg-white,#tabOutletKontrak .bg-white,#tabPricelist .bg-white,#tabCustomerOutlet .bg-white,#tabPesananOutlet .bg-white{border-color:var(--atlas-line)!important;border-radius:20px!important;box-shadow:0 7px 22px rgba(31,34,59,.045)!important}
-#tabInput h2,#tabRiwayat h2,#tabPencapaian h2,#tabMonitoring h2,#tabOutletKontrak h2,#tabPricelist h2,#tabCustomerOutlet h2,#tabPesananOutlet h2{color:var(--atlas-ink)!important;letter-spacing:-.035em!important;font-size:clamp(19px,1.7vw,26px)!important;font-weight:850!important}
-#tabInput label,#tabRiwayat label,#tabPencapaian label,#tabMonitoring label{font-size:11px!important;font-weight:750!important;color:#555b72!important}
-/* controls */
-button,[role=button],input[type=button],input[type=submit]{font-family:inherit!important;transition:transform .16s ease,box-shadow .16s ease,background .16s ease!important}
-button:not(:disabled):hover,[role=button]:hover{filter:saturate(1.08)}
-button:focus-visible,[role=button]:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(102,87,232,.24)!important;outline-offset:2px!important}
-#tabInput input,#tabInput select,#tabInput textarea,#tabRiwayat input,#tabPencapaian input,#tabMonitoring input,#tabMonitoring select,#tabOutletKontrak input,#tabOutletKontrak select,#tabPricelist input,#tabPricelist select,#searchRiwayatInput,#searchMonitoringInput,#searchOutletKontrakInput,#filterQuarterSelect,#filterPricelistUpdate{min-height:42px!important;border:1px solid #e2e1eb!important;border-radius:12px!important;background:#fff!important;color:var(--atlas-ink)!important;padding:10px 13px!important;box-shadow:inset 0 1px 1px rgba(25,27,45,.02)!important}
-#tabInput input:focus,#tabInput select:focus,#tabInput textarea:focus,#searchRiwayatInput:focus,#searchMonitoringInput:focus,#searchOutletKontrakInput:focus,#filterQuarterSelect:focus{border-color:var(--atlas-violet)!important;box-shadow:0 0 0 4px rgba(102,87,232,.12)!important}
-#btnKirimOrder{background:linear-gradient(120deg,#6d5df0,#5143d0)!important;color:#fff!important;border:0!important;border-radius:13px!important;box-shadow:0 9px 22px rgba(102,87,232,.24)!important;padding:13px 20px!important}
-#tabInput button.bg-emerald-700,#tabInput button:hover.bg-emerald-800{background:var(--atlas-violet)!important;color:#fff!important;border-radius:12px!important}
-#tabInput .bg-emerald-900{background:#242640!important;border-radius:15px!important;box-shadow:0 8px 20px rgba(31,34,59,.12)!important}
-/* records, data tables and list rows */
-#tabRiwayat table,#tabPencapaian table,#tabMonitoring table,#tabOutletKontrak table,#tabPricelist table,#tabCustomerOutlet table,#tabPesananOutlet table{border-collapse:separate!important;border-spacing:0!important;width:100%!important;background:#fff!important;border:1px solid var(--atlas-line)!important;border-radius:16px!important;overflow:hidden!important}
-#tabRiwayat table thead th,#tabPencapaian table thead th,#tabMonitoring table thead th,#tabOutletKontrak table thead th,#tabPricelist table thead th,#tabCustomerOutlet table thead th,#tabPesananOutlet table thead th{background:#f0eff8!important;color:#6d6987!important;text-transform:uppercase!important;letter-spacing:.07em!important;font-size:9px!important;font-weight:850!important;padding:13px 12px!important;border-bottom:1px solid #e5e3f0!important;white-space:nowrap!important}
-#tabRiwayat table tbody td,#tabPencapaian table tbody td,#tabMonitoring table tbody td,#tabOutletKontrak table tbody td,#tabPricelist table tbody td,#tabCustomerOutlet table tbody td,#tabPesananOutlet table tbody td{padding:12px!important;border-bottom:1px solid #f0eff5!important;font-size:11px!important;color:#34384e!important}
-#tabRiwayat table tbody tr:hover td,#tabPencapaian table tbody tr:hover td,#tabMonitoring table tbody tr:hover td,#tabOutletKontrak table tbody tr:hover td,#tabPricelist table tbody tr:hover td,#tabCustomerOutlet table tbody tr:hover td,#tabPesananOutlet table tbody tr:hover td{background:#f7f6ff!important}
-#listRiwayat>div,#listMonitoringTableBody tr,#listOutletKontrakTableBody tr,#cartList>div{border-color:var(--atlas-line)!important;border-radius:15px!important;box-shadow:0 4px 14px rgba(31,34,59,.035)!important}
-#listRiwayat>div{border-left:3px solid var(--atlas-violet)!important;background:#fff!important}
-/* charts, SVGs, legends, tooltips */
-canvas{max-width:100%!important}
-.chart-container,.chart-wrapper,[class*=chart-card],[class*=ChartCard],[id*=ChartContainer],[id*=chartContainer]{border:1px solid var(--atlas-line)!important;border-radius:20px!important;background:#fff!important;box-shadow:var(--atlas-shadow)!important;padding:18px!important}
-.chartjs-tooltip,.chart-tooltip,[class*=tooltip]{backdrop-filter:blur(14px)}
-/* badges and alerts */
-.bg-emerald-50,.bg-green-50{background:#effaf5!important;color:#167a57!important}
-.text-emerald-700,.text-emerald-600{color:#167a68!important}
-.border-emerald-200{border-color:#cceee0!important}
-/* modal / overlays */
-.modal,.modal-content,[role=dialog]{border-radius:22px!important}
-#loadingOverlay{backdrop-filter:blur(5px)!important}
-/* responsive app shell */
-@media(max-width:900px){
- #app{display:flex!important;flex-direction:column!important}
- #mainHeader{position:sticky!important;width:100%!important;min-height:68px!important;padding:12px 15px!important}
- #leftNav.app-sidebar{position:fixed!important;top:68px!important;left:0!important;height:calc(100dvh - 68px)!important;min-height:0!important;width:min(280px,84vw)!important;max-width:min(280px,84vw)!important;box-shadow:16px 0 40px rgba(18,19,38,.22)!important}
- #mainPage{padding:18px 14px 32px!important;width:100%!important}
- .home-rebuild-wrap{gap:14px!important}
- .home-rebuild-section{padding:15px!important}
- #tabRiwayat table,#tabPencapaian table,#tabMonitoring table,#tabOutletKontrak table,#tabPricelist table,#tabCustomerOutlet table,#tabPesananOutlet table{display:block!important;max-width:100%!important;overflow-x:auto!important}
-}
-@media(max-width:520px){
- #mainHeader{padding:10px 11px!important;gap:8px!important}
- #mainPage{padding:12px 10px 24px!important}
- #homeRebuildBanner{border-radius:20px!important;min-height:140px!important}
- .home-rebuild-section,.home-weekly-section{border-radius:17px!important;padding:13px!important}
- #tabInput .bg-white,#tabRiwayat .bg-white,#tabPencapaian .bg-white,#tabMonitoring .bg-white{border-radius:16px!important}
- #btnKirimOrder{width:100%!important}
-}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
-
-</style>
 </body>
 </html>
 <style id="mobile-monitoring-pricelist-bottom-fix">
@@ -12874,72 +12899,4 @@ canvas{max-width:100%!important}
 /* Hanya sembunyikan kolom Pricelist pada tabel Harga Nett; Simulasi Invoice tidak diubah. */
 #tabHargaNett #hargaNettTableView table thead th:nth-child(2),
 #tabHargaNett #hargaNettTableView table tbody td:nth-child(2) { display: none !important; }
-</style>
-<style id="castrol-reference-ui-theme-20261017">
-/* UI/TEMA SAJA — tidak mengubah JavaScript, rumus, atau alur transaksi. */
-:root{
-  --castrol-green:#007a53;
-  --castrol-green-2:#00a878;
-  --castrol-dark:#071526;
-  --castrol-red:#e60012;
-  --castrol-lime:#b8e600;
-  --castrol-ink:#10243d;
-  --castrol-muted:#7d91ad;
-  --castrol-line:#dce5ef;
-  --castrol-soft:#f0f4f8;
-  --castrol-card:#fff;
-}
-html,body{background:#eef3f8!important;color:#10243d}
-body{background:linear-gradient(180deg,#f3f6fa 0%,#edf2f7 100%)!important}
-#mainHeader{
-  background:linear-gradient(105deg,#071426 0%,#062b27 58%,#003a2a 100%)!important;
-  border-bottom:1px solid rgba(0,220,156,.25)!important;
-  box-shadow:0 8px 24px rgba(4,18,36,.20)!important;
-}
-#mainHeader:after{height:3px;background:linear-gradient(90deg,#e60012 0 19%,#b8e600 19% 30%,#fff 30% 32%,#00a878 32% 100%)}
-#mainHeader .sidebar-toggle{background:#202a3c!important;border:1px solid #39445a!important;border-radius:12px!important}
-#mainHeader .sidebar-toggle:hover{background:#2c3850!important}
-#mainHeader .user-badge{background:#173c3a!important;color:#a7ffe3!important;border-color:#28645a!important}
-#leftNav.app-sidebar{
- background:#fff!important;border-right:1px solid #dce5ef!important;
- box-shadow:5px 0 22px rgba(19,43,72,.05)!important;backdrop-filter:none!important
-}
-.sidebar-item{border-radius:17px!important;min-height:58px!important;color:#344b68!important}
-.sidebar-item:hover{background:#eef8f4!important;color:#007a53!important;border-color:#d0e9df!important;transform:translateY(-1px)}
-.sidebar-item-active{
- color:#fff!important;background:linear-gradient(115deg,#007957,#00865c)!important;
- border-color:#00865c!important;box-shadow:0 5px 12px rgba(0,121,83,.17)!important
-}
-.sidebar-item-active .sidebar-icon{background:rgba(255,255,255,.18)!important;color:#fff!important;border-color:rgba(255,255,255,.15)!important;box-shadow:none!important}
-.sidebar-icon{background:#f0f4f8!important;border:1px solid #e7edf4!important;color:#4d6380!important;box-shadow:none!important}
-#mainPage{max-width:1280px!important}
-.tab-content{animation:castrolFade .18s ease both}
-#tabInput>h2,#tabRiwayat>div:first-child,#tabMonitoring>div:first-child,#tabOutletKontrak>div:first-child,#tabPricelist>div:first-child{
- border-color:#dce5ef!important;border-radius:18px!important
-}
-#tabInput .bg-white,#tabRiwayat .bg-white,#tabMonitoring .bg-white,#tabOutletKontrak .bg-white,#tabPricelist .bg-white{
- border-color:#dce5ef!important;box-shadow:0 2px 5px rgba(16,36,61,.045),0 10px 25px rgba(16,36,61,.035)!important
-}
-#tabInput input,#tabInput select,#tabInput textarea,#searchRiwayatInput,#searchMonitoringInput,#searchOutletKontrakInput,#filterQuarterSelect,#filterPricelistUpdate{
- border-color:#dce5ef!important;border-radius:13px!important;background:#fff!important;color:#10243d!important
-}
-#tabInput input:focus,#tabInput select:focus,#tabInput textarea:focus,#searchRiwayatInput:focus,#searchMonitoringInput:focus,#searchOutletKontrakInput:focus,#filterQuarterSelect:focus{
- border-color:#00a878!important;box-shadow:0 0 0 4px rgba(0,168,120,.11)!important;outline:none!important
-}
-#tabInput .bg-slate-50,#tabInput .bg-emerald-50\/40{background:#f7f9fc!important;border-color:#e2e9f1!important}
-#btnKirimOrder{background:linear-gradient(110deg,#ed0015,#c90010)!important;box-shadow:0 8px 18px rgba(230,0,18,.17)!important;border-radius:14px!important}
-#btnKirimOrder:hover{filter:brightness(1.04);transform:translateY(-1px)}
-#tabInput button.bg-emerald-700,#tabInput button:hover.bg-emerald-800{background:linear-gradient(120deg,#00845c,#006e4c)!important}
-#tabInput .bg-emerald-900{background:linear-gradient(120deg,#071526,#064637)!important;box-shadow:0 8px 20px rgba(0,65,47,.15)!important}
-#cartList>div,#listRiwayat>div{border-color:#e1e9f1!important;box-shadow:0 3px 10px rgba(16,36,61,.04)!important;border-radius:15px!important}
-#listRiwayat>div{border-left-color:#00a878!important;background:#fff!important}
-#listRiwayat button{transition:transform .16s ease,box-shadow .16s ease,background .16s ease!important}
-#listRiwayat button:hover{transform:translateY(-1px)}
-#listMonitoringTableBody tr:hover,#listOutletKontrakTableBody tr:hover{background:#f0faf6!important}
-button, [role="button"]{transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease}
-@media(max-width:768px){
- #mainPage{padding-left:12px!important;padding-right:12px!important}
- #leftNav.app-sidebar{box-shadow:12px 0 30px rgba(8,24,42,.14)!important}
- #tabInput>h2,#tabRiwayat>div:first-child,#tabMonitoring>div:first-child,#tabOutletKontrak>div:first-child,#tabPricelist>div:first-child{border-radius:14px!important}
-}
 </style>
