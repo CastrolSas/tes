@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ==========================================================================
   CASTROL EXECUTIVE PORTAL — PT Sukses Adi Surya
-  Index.html — client lengkap (dipakai berpasangan dengan Code.gs)
+  Index.html — frontend GitHub Pages (backend Code.gs melalui API JSONP)
   Fitur: Login tengah (tanpa gambar), Beranda, Input Transaksi 2 langkah
   (pencarian outlet DI DALAM dropdown, kartu TARGET & PENCAPAIAN hanya di
   langkah 2), Orders, PO Outlet, Outlet, Produk, Laporan (Harga Nett,
@@ -321,8 +321,10 @@
 
 <script>
 /* ================= KONFIG & STATE ================= */
-var LOGO_URL = '<?= LOGO_URL ?>';
-var WA_ADMIN = '<?= WA_ADMIN ?>';
+// Konfigurasi deployment GitHub Pages. Isi API_URL dengan URL Web App Google Apps Script (/exec).
+var API_URL = 'PASTE_URL_WEB_APP_GOOGLE_APPS_SCRIPT_DI_SINI';
+var LOGO_URL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjbF9zjGOOADFZIb2DyNfdj-3wi3z5cqLroA&s';
+var WA_ADMIN = '6285161199592';
 var BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 var BULAN_S = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
 var S = {
@@ -339,8 +341,35 @@ var S = {
 /* ================= HELPERS ================= */
 function $(id){return document.getElementById(id)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-function run(fn){var args=[].slice.call(arguments,1);return new Promise(function(res,rej){
-  google.script.run.withSuccessHandler(res).withFailureHandler(function(e){rej(e)})[fn].apply(null,args);})}
+// Bridge JSONP: GitHub Pages (origin berbeda) memanggil Google Apps Script Web App.
+// Semua fungsi bisnis tetap diproses di Code.gs; UI dan perhitungan frontend tidak diubah.
+var __gasJsonpSeq = 0;
+function run(fn){
+  var args=[].slice.call(arguments,1);
+  return new Promise(function(resolve,reject){
+    if(!API_URL || API_URL.indexOf('PASTE_URL_')===0){
+      reject(new Error('URL backend belum dikonfigurasi. Isi API_URL di Index.html dengan URL Web App Google Apps Script.')); return;
+    }
+    var cb='__gasJsonp_'+Date.now()+'_'+(++__gasJsonpSeq);
+    var script=document.createElement('script');
+    var done=false;
+    var timer=setTimeout(function(){finish(new Error('Backend tidak merespons. Periksa URL deployment dan koneksi internet.'));},30000);
+    function finish(err,value){
+      if(done)return; done=true; clearTimeout(timer);
+      try{delete window[cb]}catch(e){window[cb]=undefined}
+      if(script.parentNode)script.parentNode.removeChild(script);
+      if(err)reject(err);else resolve(value);
+    }
+    window[cb]=function(result){
+      if(result && result.__apiError) finish(new Error(result.message||'Terjadi kesalahan pada backend.'));
+      else finish(null,result);
+    };
+    script.onerror=function(){finish(new Error('Gagal menghubungi backend. Pastikan URL Web App benar dan akses deployment mengizinkan pengguna aplikasi.'));};
+    var qs='?api=1&fn='+encodeURIComponent(fn)+'&args='+encodeURIComponent(JSON.stringify(args))+'&callback='+encodeURIComponent(cb);
+    script.src=API_URL.replace(/\?$/,'')+qs;
+    document.head.appendChild(script);
+  });
+}
 function fmtN(v,d){d=(d==null?1:d);return Number(v||0).toLocaleString('id-ID',{minimumFractionDigits:d,maximumFractionDigits:d})}
 function fmtR(v){return 'Rp '+Math.round(Number(v||0)).toLocaleString('id-ID')}
 function fmtPct(v,d){return fmtN(v,(d==null?1:d))+'%'}
