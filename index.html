@@ -5818,8 +5818,61 @@ startAutoRefresh();
             document.getElementById('modalCancelBtn').style.display = 'none';
             document.getElementById('modalOkBtn').style.display = 'none';
 
-            // Tampilkan chart History Pengambilan saja; tooltip chart tidak diubah.
+            // Tampilkan Actual kuartal dari data Monitoring terlebih dahulu agar chart
+            // langsung terlihat saat diklik. History lengkap tetap diperbarui dari server.
+            renderMonitoringQuickActualChart(data);
             loadMonitoringHistoryChart(data);
+        }
+
+
+        function renderMonitoringQuickActualChart(data) {
+            const target = document.getElementById('monitoringDetailHistoryChart');
+            if (!target) return;
+
+            const values = [Number(data.m1 || 0), Number(data.m2 || 0), Number(data.m3 || 0)];
+            const qText = String(data.quarter || '');
+            let quarterNo = 0;
+            let year = new Date().getFullYear();
+            let match = qText.match(/(?:Q|QUARTAL)\s*([1-4])\s*[-/ ]*\s*((?:19|20)\d{2})?/i);
+            if (match) {
+                quarterNo = Number(match[1]) || 0;
+                if (match[2]) year = Number(match[2]);
+            }
+            if (!quarterNo) {
+                const currentMonth = new Date().getMonth() + 1;
+                quarterNo = Math.floor((currentMonth - 1) / 3) + 1;
+            }
+            const monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+            const labels = [0, 1, 2].map(function(i) {
+                return monthNames[(quarterNo - 1) * 3 + i] + ' ' + year;
+            });
+            const width = 540, height = 190, left = 42, right = 14, top = 20, bottom = 38;
+            const chartW = width - left - right, chartH = height - top - bottom;
+            const maxValue = Math.max.apply(null, values);
+            const safeMax = maxValue > 0 ? maxValue : 1;
+            const slotW = chartW / 3;
+            let grid = '', bars = '', labelsSvg = '';
+            for (let i = 0; i <= 4; i++) {
+                const y = top + chartH - chartH * i / 4;
+                const v = safeMax * i / 4;
+                grid += '<line x1="' + left + '" y1="' + y.toFixed(1) + '" x2="' + (width-right) + '" y2="' + y.toFixed(1) + '" stroke="#e8eef2"/>';
+                grid += '<text x="' + (left-7) + '" y="' + (y+3).toFixed(1) + '" text-anchor="end" font-size="9" fill="#94a3b8">' + v.toLocaleString('id-ID',{maximumFractionDigits:1}) + '</text>';
+            }
+            values.forEach(function(value, i) {
+                const center = left + slotW * i + slotW / 2;
+                const barH = value > 0 ? value / safeMax * chartH : 1;
+                const y = top + chartH - barH;
+                bars += '<rect x="' + (center-24).toFixed(1) + '" y="' + y.toFixed(1) + '" width="48" height="' + barH.toFixed(1) + '" rx="5" fill="#059669" opacity="' + (value > 0 ? '0.88' : '0.18') + '"/>';
+                bars += '<text x="' + center.toFixed(1) + '" y="' + Math.max(top-3,y-5).toFixed(1) + '" text-anchor="middle" font-size="10" font-weight="700" fill="#047857">' + value.toLocaleString('id-ID',{maximumFractionDigits:1}) + '</text>';
+                labelsSvg += '<text x="' + center.toFixed(1) + '" y="' + (height-14) + '" text-anchor="middle" font-size="10" fill="#64748b">' + labels[i] + '</text>';
+            });
+
+            target.innerHTML = '<div class="flex items-center justify-between gap-2">' +
+                '<div class="text-[10px] font-extrabold text-slate-700">Actual Monitoring</div>' +
+                '<div class="text-[9px] font-bold text-emerald-700">Tampil cepat · memperbarui history...</div></div>' +
+                '<div class="mt-2 w-full overflow-x-auto rounded-xl border border-slate-100 bg-slate-50/50">' +
+                '<svg viewBox="0 0 ' + width + ' ' + height + '" width="100%" style="min-width:360px;display:block" role="img" aria-label="Actual monitoring tiga bulan kuartal">' +
+                grid + bars + labelsSvg + '</svg></div>';
         }
 
 
@@ -5827,14 +5880,10 @@ startAutoRefresh();
             const target = document.getElementById('monitoringDetailHistoryChart');
             if (!target) return;
 
-            // Setiap kali Detail Monitoring dibuka, ambil data terbaru dari server.
-            // Jangan render cache browser karena bisa menampilkan history/tooltip lama.
+            // Selalu ambil history terbaru dari server, tetapi chart Actual sudah tampil
+            // dari data Monitoring sehingga pengguna tidak perlu menunggu respons server.
             const requestId = (window.__monitoringHistoryRequestId || 0) + 1;
             window.__monitoringHistoryRequestId = requestId;
-            target.innerHTML = `
-                <div class="text-[10px] font-extrabold text-slate-700">History Pengambilan</div>
-                <div class="text-[9px] text-slate-400 mt-1">Memuat data terbaru...</div>
-            `;
 
             google.script.run
                 .withSuccessHandler(function(result) {
