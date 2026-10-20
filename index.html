@@ -1493,7 +1493,7 @@ html,body{height:100%;}
     var isAppsScriptHost = host === 'script.google.com' || host === 'script.googleusercontent.com';
     if (isAppsScriptHost) return;
 
-    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxnCwj6qKqPrtZD4luXX5PPW1jlfQcVSzBPpo8HgCxnqFdydrQB0cDNXknFlteI0JIRUA/exec';
+    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5dkNkseL2AXyP4T3vRATCQEnRC3Ft5ho29iUObmj-Y3H-vRunigrQheYt3jzoBq-p/exec';
     var BRIDGE_URL = CASTROL_APPS_SCRIPT_URL + (CASTROL_APPS_SCRIPT_URL.indexOf('?') >= 0 ? '&' : '?') + 'bridge=1';
     var seq = 0;
     var pending = Object.create(null);
@@ -3348,6 +3348,7 @@ body{background:
                 </button>
 
                 <div class="sidebar-spacer"></div>
+                <div class="castrol-sidebar-tagline" aria-hidden="true">IT'S MORE<br>THAN JUST OIL.<br>IT'S LIQUID ENGINEERING.</div>
 
                 <div class="sidebar-bottom">
                     <div class="sidebar-user-item" title="Nama login" aria-label="Nama login">
@@ -3371,62 +3372,74 @@ body{background:
 
         <div class="p-4 flex-1 overflow-y-auto space-y-4">
             
-            <!-- LOGIN -->
-            <div id="loginPage" class="p-6 flex-1 flex flex-col justify-center">
-                <div class="text-center mb-6">
-                    <div class="inline-block bg-white p-2.5 rounded-full shadow-md mb-3 border border-emerald-100">
-                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjbF9zjGOOADFZIb2DyNfdj-3wi3z5cqLroA&s" alt="Logo Castrol" class="h-10 object-contain mx-auto">
-                    </div>
-                    <h2 class="text-2xl font-bold text-slate-800">Castrol PT Sukses Adi Surya</h2>
+            <!-- LOGIN — desain preview Castrol Executive Portal -->
+<div id="loginPage" class="castrol-auth-page">
+    <header class="castrol-auth-brand">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjbF9zjGOOADFZIb2DyNfdj-3wi3z5cqLroA&s" alt="Logo Castrol" class="castrol-auth-roundel">
+        <span class="castrol-auth-wordmark">Castrol</span>
+    </header>
+    <div class="castrol-auth-body">
+        <div class="castrol-auth-card">
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="castrol-auth-label" for="loginUser">Username</label>
+                    <input type="text" id="loginUser" name="username" required autocomplete="username" class="castrol-auth-input" placeholder="Masukkan username">
                 </div>
-                <form onsubmit="handleLogin(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
-                        <input type="text" id="loginUser" required class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-600 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-                        <input type="password" id="loginPass" required class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-600 focus:outline-none">
-                    </div>
-                    <div class="-mt-1 mb-1 text-right text-xs">
-                        <a href="https://wa.me/6285161199592" target="_blank" rel="noopener noreferrer" class="text-emerald-700 hover:text-emerald-800 font-semibold hover:underline">Lupa password? Hubungi saya.</a>
-                    </div>
-                    <button type="submit" id="loginSubmitBtn" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 rounded-lg shadow transition">Masuk</button>
-                </form>
-                <div class="mt-6 text-center text-sm">
-                    Belum punya akun? <button type="button" onclick="toggleAuthMode('register')" class="text-emerald-700 font-semibold">Daftar</button>
+                <div>
+                    <label class="castrol-auth-label" for="loginPass">Password</label>
+                    <input type="password" id="loginPass" name="password" required autocomplete="current-password" class="castrol-auth-input" placeholder="Masukkan password">
                 </div>
-            </div>
+                <div class="castrol-auth-forgot">
+                    <a href="https://wa.me/6285161199592" target="_blank" rel="noopener noreferrer">Lupa password? Hubungi saya.</a>
+                </div>
+                <button type="submit" id="loginSubmitBtn" class="castrol-auth-submit">Masuk</button>
+            </form>
+            <div class="castrol-auth-switch">Belum punya akun? <button type="button" onclick="toggleAuthMode('register')" class="castrol-auth-link">Daftar</button></div>
+        </div>
+    </div>
+    <footer class="castrol-auth-footer">
+        <p class="castrol-auth-tagline">IT'S MORE THAN JUST OIL.<br>IT'S LIQUID ENGINEERING.</p>
+        <p class="castrol-auth-sub">PT Sukses Adi Surya &mdash; Distributor Resmi Castrol</p>
+        <p class="castrol-auth-copy">&copy; <span class="castrol-auth-year">2026</span> PT Sukses Adi Surya</p>
+    </footer>
+</div>
 
-            <!-- REGISTER -->
-            <div id="registerPage" class="p-6 flex-1 flex flex-col justify-center hidden">
-                <div class="text-center mb-6">
-                    <div class="inline-block bg-white p-2.5 rounded-full shadow-md mb-3 border border-emerald-100">
-                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjbF9zjGOOADFZIb2DyNfdj-3wi3z5cqLroA&s" alt="Logo Castrol" class="h-8 object-contain mx-auto">
-                    </div>
-                    <h2 class="text-2xl font-bold text-slate-800">Daftar Akun</h2>
-                </div>
-                <form onsubmit="handleRegister(event)" class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Sales / DSR</label>
-                        <select id="regSalesName" required class="w-full border rounded-lg p-2.5 text-sm bg-white searchable-select"></select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
-                        <input type="text" id="regUser" required class="w-full border rounded-lg p-2.5 text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-                        <input type="password" id="regPass" required class="w-full border rounded-lg p-2.5 text-sm">
-                    </div>
-                    <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 rounded-lg transition">Daftar</button>
-                </form>
-                <div class="mt-6 text-center text-sm">
-                    Sudah punya akun? <button type="button" onclick="toggleAuthMode('login')" class="text-emerald-700 font-semibold">Login</button>
-                </div>
-            </div>
 
-            <!-- HALAMAN UTAMA -->
+<!-- REGISTER — desain preview Castrol Executive Portal -->
+<div id="registerPage" class="castrol-auth-page hidden">
+    <header class="castrol-auth-brand castrol-auth-brand-compact">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjbF9zjGOOADFZIb2DyNfdj-3wi3z5cqLroA&s" alt="Logo Castrol" class="castrol-auth-roundel castrol-auth-roundel-sm">
+        <p class="castrol-auth-brandtitle">Daftar Akun Baru</p>
+    </header>
+    <div class="castrol-auth-body">
+        <div class="castrol-auth-card">
+            <form onsubmit="handleRegister(event)" class="space-y-3">
+                <div>
+                    <label class="castrol-auth-label" for="regSalesName">Nama Sales / DSR</label>
+                    <select id="regSalesName" required class="castrol-auth-input searchable-select"></select>
+                </div>
+                <div>
+                    <label class="castrol-auth-label" for="regUser">Username</label>
+                    <input type="text" id="regUser" name="username" required autocomplete="username" class="castrol-auth-input" placeholder="Pilih username">
+                </div>
+                <div>
+                    <label class="castrol-auth-label" for="regPass">Password</label>
+                    <input type="password" id="regPass" name="password" required autocomplete="new-password" class="castrol-auth-input" placeholder="Buat password">
+                </div>
+                <button type="submit" class="castrol-auth-submit">Daftar</button>
+            </form>
+            <div class="castrol-auth-switch">Sudah punya akun? <button type="button" onclick="toggleAuthMode('login')" class="castrol-auth-link">Login</button></div>
+        </div>
+    </div>
+    <footer class="castrol-auth-footer">
+        <p class="castrol-auth-tagline">IT'S MORE THAN JUST OIL.<br>IT'S LIQUID ENGINEERING.</p>
+        <p class="castrol-auth-sub">PT Sukses Adi Surya &mdash; Distributor Resmi Castrol</p>
+        <p class="castrol-auth-copy">&copy; <span class="castrol-auth-year">2026</span> PT Sukses Adi Surya</p>
+    </footer>
+</div>
+
+
+<!-- HALAMAN UTAMA -->
             <div id="mainPage" class="hidden space-y-4">
                 
                 <!-- TAB BERANDA / DASHBOARD HARIAN -->
@@ -5954,7 +5967,7 @@ startAutoRefresh();
                 <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div class="rounded-xl border border-emerald-100 bg-emerald-50/60 px-3 py-2">
                         <div class="text-[8px] font-extrabold uppercase tracking-wider text-emerald-600">Order Terakhir</div>
-                        <div class="mt-0.5 text-sm font-black text-emerald-800">${lastOrderKarton.toLocaleString('id-ID',{maximumFractionDigits:1})} Karton</div>
+                        <div class="mt-0.5 text-sm font-black text-emerald-800">${lastOrderKarton.toLocaleString('id-ID',{maximumFractionDigits:1})} Dus</div>
                         <div class="text-[9px] font-semibold text-emerald-700">${escapeHtml(lastOrderLabel)}</div>
                     </div>
                 </div>
@@ -5968,7 +5981,7 @@ startAutoRefresh();
                         </svg>
                         <div id="monitorHistoryTooltip" style="display:none;position:fixed;z-index:2147483647;width:240px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);overflow:hidden;box-sizing:border-box;pointer-events:auto;padding:9px 11px;border-radius:12px;background:rgba(15,23,42,.97);box-shadow:0 8px 22px rgba(15,23,42,.28);color:#fff;font-size:10px;line-height:1.45;transform:none;">
                             <div id="monitorHistoryTooltipLabel" style="font-weight:800;font-size:10px;"></div>
-                            <div style="margin-top:3px;color:#d1fae5;">Order: <strong id="monitorHistoryTooltipVolume"></strong> Karton</div>
+                            <div style="margin-top:3px;color:#d1fae5;">Order: <strong id="monitorHistoryTooltipVolume"></strong> Dus</div>
                             <div style="color:#e2e8f0;">Rincian Transaksi:</div>
                             <div id="monitorHistoryTooltipDetails" style="margin-top:4px;max-height:180px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:thin;white-space:normal;overflow-wrap:anywhere;color:#f1f5f9;"></div>
                         </div>
@@ -12676,6 +12689,291 @@ function renderPencapaianCards(data) {
 /* Hanya sembunyikan kolom Pricelist pada tabel Harga Nett; Simulasi Invoice tidak diubah. */
 #tabHargaNett #hargaNettTableView table thead th:nth-child(2),
 #tabHargaNett #hargaNettTableView table tbody td:nth-child(2) { display: none !important; }
+</style>
+<style id="castrol-preview-theme">
+/* =========================================================
+   TEMA PREVIEW CASTROL EXECUTIVE PORTAL (visual-only)
+   - Sidebar hijau Castrol + tagline
+   - Header hijau Castrol
+   - Login/Register layar penuh hijau (logo atas, kartu tengah,
+     tagline bawah) sesuai preview
+   Tidak mengubah ID, fungsi JS, rumus, maupun struktur data.
+   ========================================================= */
+
+/* ---------- SIDEBAR ---------- */
+#leftNav.app-sidebar,
+#leftNav.app-sidebar:not(.is-collapsed){
+  background:linear-gradient(180deg,#10402a 0%,#0c3120 55%,#082417 100%)!important;
+  border-right:1px solid rgba(255,255,255,.08)!important;
+  box-shadow:6px 0 22px rgba(4,24,15,.35)!important;
+}
+#leftNav .sidebar-label{color:rgba(255,255,255,.45)!important;}
+#leftNav .sidebar-label.castrol-sidebar-logo img{
+  background:#fff!important;
+  border-radius:10px!important;
+  padding:4px 6px!important;
+  box-shadow:0 4px 14px rgba(0,0,0,.30)!important;
+}
+#leftNav .sidebar-item{color:rgba(255,255,255,.78)!important;}
+#leftNav .sidebar-item:hover{
+  color:#ffffff!important;
+  background:rgba(255,255,255,.09)!important;
+  border-color:rgba(255,255,255,.16)!important;
+}
+#leftNav .sidebar-item.sidebar-item-active{
+  color:#ffffff!important;
+  background:linear-gradient(180deg,rgba(0,166,81,.42) 0%,rgba(0,166,81,.20) 100%)!important;
+  border-color:rgba(0,166,81,.55)!important;
+  box-shadow:inset 3px 0 0 #00a651,0 6px 16px rgba(0,0,0,.22)!important;
+}
+#leftNav .sidebar-icon{
+  background:rgba(255,255,255,.12)!important;
+  box-shadow:none!important;
+}
+#leftNav .sidebar-item-active .sidebar-icon{
+  background:rgba(0,166,81,.45)!important;
+  box-shadow:0 3px 10px rgba(0,0,0,.25)!important;
+}
+#leftNav .sidebar-user-item{color:rgba(255,255,255,.78)!important;}
+#leftNav .sidebar-bottom{border-top:1px solid rgba(255,255,255,.14)!important;}
+#leftNav .sidebar-item-danger{color:#fca5a5!important;}
+#leftNav .sidebar-item-danger:hover{color:#fecaca!important;background:rgba(220,38,38,.18)!important;border-color:rgba(220,38,38,.35)!important;}
+.castrol-sidebar-tagline{
+  padding:10px 2px 6px;
+  text-align:center;
+  color:rgba(255,255,255,.92);
+  font-weight:800;
+  font-style:italic;
+  font-size:7.5px;
+  line-height:1.5;
+  letter-spacing:.04em;
+  text-shadow:0 1px 6px rgba(0,0,0,.35);
+}
+
+/* ---------- HEADER ---------- */
+#mainHeader{
+  background:linear-gradient(90deg,#10402a 0%,#0c3120 58%,#0a2b1c 100%)!important;
+  border-bottom:1px solid rgba(0,166,81,.28)!important;
+  box-shadow:0 4px 18px rgba(4,24,15,.28)!important;
+}
+#mainHeader h1{
+  font-style:italic;
+  font-weight:800;
+  letter-spacing:.05em;
+  font-size:15px!important;
+  color:#ffffff!important;
+  text-shadow:0 2px 8px rgba(0,0,0,.30);
+}
+.sidebar-toggle{
+  background:rgba(255,255,255,.10)!important;
+  border-color:rgba(255,255,255,.18)!important;
+  color:#e7f5ee!important;
+}
+.sidebar-toggle:hover{
+  color:#ffffff!important;
+  background:rgba(0,166,81,.30)!important;
+  border-color:rgba(0,166,81,.45)!important;
+}
+
+/* ---------- KONTEN ---------- */
+#app{background:#f3f6f4!important;}
+
+/* ---------- LOGIN & REGISTER (LAYAR PENUH) ---------- */
+#app > .p-4.flex-1.overflow-y-auto:has(#loginPage:not(.hidden)),
+#app > .p-4.flex-1.overflow-y-auto:has(#registerPage:not(.hidden)){
+  position:fixed!important;
+  inset:0!important;
+  width:100%!important;
+  height:100vh!important;
+  height:100dvh!important;
+  min-height:100vh!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  display:block!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  background-color:#0b2e1d!important;
+  background-image:
+    radial-gradient(circle at 18% 14%, rgba(0,166,81,.20) 0%, rgba(0,166,81,0) 44%),
+    radial-gradient(circle at 82% 80%, rgba(0,166,81,.17) 0%, rgba(0,166,81,0) 48%),
+    linear-gradient(160deg,#123f28 0%,#0c3120 52%,#071f14 100%)!important;
+  z-index:40!important;
+}
+body:has(#loginPage:not(.hidden)) #mainHeader,
+body:has(#registerPage:not(.hidden)) #mainHeader,
+body:has(#loginPage:not(.hidden)) #leftNav,
+body:has(#registerPage:not(.hidden)) #leftNav{display:none!important;}
+
+.castrol-auth-page{
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:0 20px max(18px, env(safe-area-inset-bottom));
+  box-sizing:border-box;
+}
+.castrol-auth-brand{
+  width:100%;
+  max-width:430px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding-top:34px;
+}
+.castrol-auth-brand-compact{flex-direction:column;gap:8px;padding-top:30px;}
+.castrol-auth-roundel{
+  width:44px;height:44px;object-fit:contain;
+  background:#fff;border-radius:9999px;padding:5px;
+  box-shadow:0 6px 18px rgba(0,0,0,.28);
+}
+.castrol-auth-roundel-sm{width:34px;height:34px;padding:4px;}
+.castrol-auth-wordmark{
+  color:#fff;font-weight:800;font-style:italic;font-size:26px;
+  letter-spacing:.4px;line-height:1;
+  text-shadow:0 2px 10px rgba(0,0,0,.25);
+}
+.castrol-auth-brandtitle{
+  margin:0;color:#fff;font-weight:800;font-size:16px;letter-spacing:.2px;
+  text-shadow:0 2px 8px rgba(0,0,0,.25);
+}
+.castrol-auth-body{
+  flex:1 1 auto;width:100%;
+  display:flex;align-items:center;justify-content:center;
+  padding:26px 0;
+}
+.castrol-auth-card{
+  width:100%;max-width:400px;
+  background:#fff;border-radius:18px;
+  box-shadow:0 18px 44px rgba(4,24,15,.35);
+  padding:26px 22px;
+  box-sizing:border-box;
+}
+.castrol-auth-cardtitle{
+  margin:0 0 14px;text-align:center;
+  font-size:18px;font-weight:800;color:#10241b;
+}
+.castrol-auth-label{
+  display:block;font-size:11px;font-weight:700;color:#3f5a4c;margin-bottom:5px;letter-spacing:.3px;
+}
+.castrol-auth-input{
+  width:100%;box-sizing:border-box;
+  border:1px solid #dbe5df;border-radius:11px;
+  padding:11px 13px;font-size:14px;color:#10241b;background:#fff;
+  outline:none;transition:border-color .15s ease, box-shadow .15s ease;
+  height:42px;
+}
+select.castrol-auth-input{height:auto;}
+.castrol-auth-input::placeholder{color:#9ab0a4;}
+.castrol-auth-input:focus{border-color:#00a651;box-shadow:0 0 0 3px rgba(0,166,81,.14);}
+.castrol-auth-forgot{margin-top:-4px;text-align:right;}
+.castrol-auth-forgot a{font-size:12px;font-weight:600;color:#047857;text-decoration:none;}
+.castrol-auth-forgot a:hover{text-decoration:underline;}
+.castrol-auth-submit{
+  width:100%;border:0;cursor:pointer;
+  background:linear-gradient(180deg,#00a651,#047f42);
+  color:#fff;font-weight:800;font-size:15px;
+  padding:12px 14px;border-radius:12px;
+  box-shadow:0 8px 18px rgba(0,120,60,.30);
+  transition:filter .15s ease, transform .08s ease;
+}
+.castrol-auth-submit:hover{filter:brightness(1.06);}
+.castrol-auth-submit:active{transform:translateY(1px);}
+.castrol-auth-submit:disabled{opacity:.7;cursor:progress;}
+.castrol-auth-switch{margin-top:16px;text-align:center;font-size:13px;color:#5b6f64;}
+.castrol-auth-link{
+  background:none;border:0;padding:0;cursor:pointer;
+  color:#047857;font-weight:800;font-size:13px;
+}
+.castrol-auth-link:hover{text-decoration:underline;}
+.castrol-auth-footer{
+  width:100%;max-width:520px;text-align:center;
+  padding-bottom:6px;
+}
+.castrol-auth-tagline{
+  margin:0;color:#ffffff;
+  font-weight:800;font-style:italic;
+  font-size:17px;line-height:1.35;
+  text-shadow:0 2px 10px rgba(0,0,0,.30);
+}
+.castrol-auth-sub{margin:7px 0 0;color:rgba(255,255,255,.62);font-size:12px;font-weight:600;}
+.castrol-auth-copy{margin:12px 0 0;color:rgba(255,255,255,.38);font-size:10.5px;}
+
+@media (min-width:768px){
+  .castrol-auth-brand{padding-top:44px;}
+  .castrol-auth-card{padding:30px 28px;}
+  .castrol-auth-tagline{font-size:21px;}
+  .castrol-sidebar-tagline{font-size:8.5px;}
+}
+</style>
+
+<script id="castrol-auth-year">
+(function(){
+  function castrolSetAuthYear(){
+    var y=String(new Date().getFullYear());
+    var els=document.querySelectorAll('.castrol-auth-year');
+    for(var i=0;i<els.length;i++){els[i].textContent=y;}
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',castrolSetAuthYear);}else{castrolSetAuthYear();}
+})();
+</script>
+
+<style id="castrol-auth-legacy-reset">
+/* Netralkan style login/register lama (kartu frosted) agar desain
+   layar penuh preview tampil bersih. ID & perilaku JS tidak berubah. */
+#loginPage.castrol-auth-page,#registerPage.castrol-auth-page{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:0!important;
+}
+#loginPage.castrol-auth-page>div:first-child,
+#registerPage.castrol-auth-page>div:first-child{margin-bottom:0!important;}
+#loginPage.castrol-auth-page label,
+#registerPage.castrol-auth-page label{
+  color:#3f5a4c!important;
+  font-size:11px!important;
+  font-weight:700!important;
+  letter-spacing:.3px;
+}
+#loginPage.castrol-auth-page input,
+#registerPage.castrol-auth-page input,
+#loginPage.castrol-auth-page select,
+#registerPage.castrol-auth-page select{
+  min-height:42px!important;
+  border-radius:11px!important;
+  background:#fff!important;
+  box-shadow:none!important;
+  padding:11px 13px!important;
+}
+#loginPage.castrol-auth-page input:focus,
+#registerPage.castrol-auth-page input:focus,
+#loginPage.castrol-auth-page select:focus,
+#registerPage.castrol-auth-page select:focus{
+  border-color:#00a651!important;
+  background:#fff!important;
+  box-shadow:0 0 0 3px rgba(0,166,81,.14)!important;
+}
+#loginPage.castrol-auth-page form button[type="submit"],
+#registerPage.castrol-auth-page form button[type="submit"]{
+  min-height:47px!important;
+  border-radius:12px!important;
+}
+</style>
+
+<style id="castrol-auth-hidden-fix">
+/* Pastikan class .hidden tetap menyembunyikan halaman auth
+   (menang atas display:flex .castrol-auth-page). */
+#loginPage.hidden,#registerPage.hidden{display:none!important;}
 </style>
 </body>
 </html>
