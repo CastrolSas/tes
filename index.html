@@ -548,6 +548,11 @@
 .riwayat-action-edit:hover,.riwayat-action-delete:hover,.cst-act-silver:hover{background:linear-gradient(160deg,#ffffff 0%,#edf0f3 38%,#d3d8dd 74%,#bcc2ca 100%);color:#49535e;}
 .riwayat-action-edit:active,.riwayat-action-delete:active,.cst-act-silver:active{transform:translateY(1px);box-shadow:0 1px 2px rgba(15,23,42,.18),inset 0 2px 4px rgba(15,23,42,.22);}
 .riwayat-action-edit svg,.riwayat-action-delete svg,.cst-act-silver svg{filter:drop-shadow(0 1px 1px rgba(15,23,42,.3)) drop-shadow(0 -0.5px 0 rgba(255,255,255,.55));}
+/* Task 40: svg ikon tombol cst-act (modal DETAIL ORDER) butuh ukuran eksplisit - svg tanpa
+   width/height menyusut 0x0 di dalam tombol ber-lebar otomatis (flex item). Beri display
+   inline-flex agar ikon terpusat & ukuran svg 16x16 agar ikon Edit/WA/Hapus tampak. */
+.cst-act-silver,.cst-act-wa{display:inline-flex;align-items:center;justify-content:center;}
+.cst-act-silver svg,.cst-act-wa svg{width:16px;height:16px;flex:none;}
 .riwayat-action-wa,.cst-act-wa{background:linear-gradient(160deg,#23c463 0%,#00a651 46%,#008a45 100%);color:#fff;box-shadow:0 3px 6px rgba(0,138,69,.34),0 1px 2px rgba(0,109,55,.28),inset 0 1.5px 0 rgba(255,255,255,.5),inset 0 -2px 3px rgba(0,77,39,.36);}
 .riwayat-action-wa:hover,.cst-act-wa:hover{background:linear-gradient(160deg,#2fd06e 0%,#00b35a 46%,#00964e 100%);}
 .riwayat-action-wa:active,.cst-act-wa:active{transform:translateY(1px);box-shadow:0 1px 2px rgba(0,109,55,.28),inset 0 2px 4px rgba(0,77,39,.32);}
