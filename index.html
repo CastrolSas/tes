@@ -3294,26 +3294,26 @@ body{background:
 <button type="button" onclick="switchTab('riwayat')" id="navRiwayat"
                         class="sidebar-item" title="Riwayat Transaksi" aria-label="Riwayat Transaksi">
                     <span class="sidebar-icon">📊</span>
-                    <span class="sidebar-text">Riwayat</span>
+                    <span class="sidebar-text">Riwayat Order</span>
                 </button>
 
                 <button type="button" onclick="switchTab('pencapaian')" id="navPencapaian"
                         class="sidebar-item sidebar-pencapaian-menu" title="Pencapaian Sales" aria-label="Pencapaian Sales"
                         style="display:flex !important; visibility:visible !important;">
                     <span class="sidebar-icon">🏆</span>
-                    <span class="sidebar-text">Pencapaian Sales</span>
+                    <span class="sidebar-text">Pencapaian Anda</span>
                 </button>
 
                 <button type="button" onclick="switchTab('monitoring')" id="navMonitoring"
                         class="sidebar-item" title="Monitoring Outlet" aria-label="Monitoring Outlet">
                     <span class="sidebar-icon">📈</span>
-                    <span class="sidebar-text">Monitoring</span>
+                    <span class="sidebar-text">Pencapaian Outlet</span>
                 </button>
 
                 <button type="button" onclick="switchTab('outletkontrak')" id="navOutletKontrak"
                         class="sidebar-item" title="Outlet Kontrak" aria-label="Outlet Kontrak">
                     <span class="sidebar-icon">📋</span>
-                    <span class="sidebar-text">Kontrak</span>
+                    <span class="sidebar-text">Outlet BWS Anda</span>
                 </button>
 
                 <button type="button" onclick="switchTab('outletbws')" id="navOutletBWS"
@@ -3334,7 +3334,7 @@ body{background:
                 </button>
 
                 <button type="button" onclick="switchTab('tambahcustomer')" id="navTambahCustomer"
-                        class="sidebar-item" title="Tambah Customer" aria-label="Tambah Customer">
+                        class="sidebar-item" title="Customer Anda" aria-label="Tambah Customer">
                     <span class="sidebar-icon">👤</span>
                     <span class="sidebar-text">Tambah Customer</span>
                 </button>
@@ -3755,10 +3755,17 @@ body{background:
                             </select>
                         </div>
                     </div>
-                    <div id="pencapaianLoading" class="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-sm">
-                        <div class="text-sm font-semibold text-slate-600">Memuat pencapaian...</div>
-                        <div class="text-[10px] text-slate-400 mt-1">Sabar ya boosss.</div>
+                    <div id="pencapaianLoading" class="bg-white border border-slate-200 rounded-2xl px-6 py-5 shadow-sm flex items-center justify-center gap-2" role="status" aria-busy="true">
+                        <span class="sr-only">Memuat data pencapaian</span>
+                        <span class="castrol-load-dot" aria-hidden="true"></span>
+                        <span class="castrol-load-dot" style="animation-delay:-.36s" aria-hidden="true"></span>
+                        <span class="castrol-load-dot" style="animation-delay:-.72s" aria-hidden="true"></span>
                     </div>
+                    <style>
+                    /* Task 36: loading Pencapaian = animasi dot saja (tanpa teks visual) */
+                    .castrol-load-dot{display:inline-block;width:10px;height:10px;border-radius:9999px;background:linear-gradient(135deg,#047857,#10b981);box-shadow:0 2px 8px rgba(16,185,129,.35);animation:castrolLoadDot 1.1s ease-in-out infinite}
+                    @keyframes castrolLoadDot{0%,80%,100%{transform:translateY(0) scale(.85);opacity:.45}40%{transform:translateY(-7px) scale(1);opacity:1}}
+                    </style>
                     <div id="pencapaianSalesList" class="space-y-3"></div>
                 </div>
 
