@@ -3405,6 +3405,7 @@ body{background:
 </div>
 
 
+
 <!-- REGISTER — desain preview Castrol Executive Portal -->
 <div id="registerPage" class="castrol-auth-page hidden">
     <header class="castrol-auth-brand castrol-auth-brand-compact">
@@ -3437,6 +3438,7 @@ body{background:
         <p class="castrol-auth-copy">&copy; <span class="castrol-auth-year">2026</span> PT Sukses Adi Surya</p>
     </footer>
 </div>
+
 
 
 <!-- HALAMAN UTAMA -->
@@ -4349,6 +4351,9 @@ body{background:
             
             let cancelBtn = document.getElementById('modalCancelBtn');
             let okBtn = document.getElementById('modalOkBtn');
+            // Task 38: modal detail menyembunyikan tombol OK (style display:none).
+            // Pulihkan selalu agar popup informasi/konfirmasi tidak kehilangan tombolnya.
+            okBtn.style.display = 'inline-block';
             cancelBtn.style.display = isConfirm ? 'inline-block' : 'none';
 
             // Popup informasi/berhasil/detail hanya memakai satu tombol Oke.
@@ -6479,7 +6484,14 @@ startAutoRefresh();
             editingOrderData=cached;
             document.getElementById('modalTitle').textContent='EDIT ORDER';
             document.getElementById('modalSubtitle').textContent='ID INPUT: '+editingOrderId;
+            // Task 38: modal detail (lihatDetail) menyembunyikan footer via detail-no-footer
+            // + style display:none pada tombol. Pulihkan footer & tombol agar form edit
+            // selalu memiliki tombol "Simpan Perubahan" dan "Batal".
+            clearDetailModalNoFooter();
+            var __editModalCard=document.querySelector('#customModal .modern-modal-card');
+            if(__editModalCard){__editModalCard.classList.remove('bws-detail-modal-card');__editModalCard.classList.remove('pencapaian-detail-modal-card');}
             document.getElementById('modalCancelBtn').style.display='inline-block';
+            document.getElementById('modalOkBtn').style.display='inline-block';
             document.getElementById('modalOkBtn').textContent='Simpan Perubahan';
             document.getElementById('customModal').style.display='flex';
             modalCallback=function(ok){if(ok)simpanEditOrder();};
@@ -6584,8 +6596,11 @@ startAutoRefresh();
                 var anotherEditOpen=!!editingOrderId&&editingOrderId!==saveOrderId;
                 if(editingOrderId===saveOrderId){editingOrderId='';editingOrderData=null;editOrderItems=[];}
                 if(res&&res.success){
-                    if(!anotherEditOpen)showModal('Berhasil',res.message||('Order '+saveOrderId+' tersimpan dan sedang diproses di latar belakang.'));
-                    // Data diperbarui otomatis setelah job latar belakang selesai berjalan.
+                    // Task 38: simpan kini sinkron -> konfirmasi terlihat + data dimuat
+                    // ulang seketika agar perubahan langsung tampil (bukan menunggu job).
+                    try{window._homeDsrCache={};}catch(eHomeCache){}
+                    if(!anotherEditOpen)showModal((res&&res.queued)?'Edit Diproses':'Edit Tersimpan',res.message||('Perubahan order '+saveOrderId+' sudah disimpan.'));
+                    try{loadRiwayat(true,true);}catch(eReloadNow){}
                     setTimeout(function(){ try{loadRiwayat(true,true);}catch(e){} }, 10000);
                 }else{
                     if(!anotherEditOpen)showModal('Gagal',res&&res.message?res.message:'Gagal menyimpan perubahan.');
