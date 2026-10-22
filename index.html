@@ -3818,7 +3818,6 @@ body{background:
                             <h2 class="text-base font-bold text-slate-800">Tagihan</h2>
                             <span id="tagihanCount" class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">0 tagihan</span>
                         </div>
-                        <p class="text-[9px] text-slate-400">Usia nota = tanggal order + 3 hari — status merah bila usia ≥ 45 hari; usia berhenti dihitung saat tagihan LUNAS.</p>
                     </div>
 
                     <div id="tagihanSummary" class="flex flex-wrap items-center gap-1.5 text-[9px]"></div>
@@ -3827,12 +3826,11 @@ body{background:
                         <div class="flex items-center justify-between gap-2 mb-2">
                             <div>
                                 <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Filter Tagihan</div>
-                                <div class="text-[9px] text-slate-400 mt-0.5">Klik baris tabel untuk melihat invoice. Gunakan tombol status per baris atau centang baris lalu ubah massal — tersimpan langsung di server.</div>
                             </div>
                             <button type="button" onclick="resetTagihanAllFilter()" class="shrink-0 text-[10px] font-bold text-slate-500 hover:text-emerald-700 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 transition">Reset</button>
                         </div>
-                        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-                            <div class="col-span-2 lg:col-span-4 relative">
+                        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                            <div class="col-span-2 lg:col-span-3 relative">
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -3845,9 +3843,6 @@ body{background:
                                     </svg>
                                 </button>
                             </div>
-                            <select id="filterTagihanOutlet" onchange="filterTagihan()" class="min-h-[42px] border border-slate-200 rounded-xl px-3 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                                <option value="">Semua Outlet</option>
-                            </select>
                             <div id="filterTagihanDsrWrap">
                                 <select id="filterTagihanDsr" onchange="filterTagihan()" class="w-full min-h-[42px] border border-slate-200 rounded-xl px-3 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                     <option value="">Semua DSR / Sales</option>
@@ -12843,6 +12838,18 @@ function tagihanStatusKelas(status, usia) {
     return st === 'LUNAS' ? 'text-emerald-700' : 'text-slate-600';
 }
 
+// Format semua tanggal di halaman Tagihan (tabel & invoice) sebagai
+// "DD MMMM YYYY" dengan nama bulan Indonesia, mis. "05 Maret 2024".
+function tagihanFormatTanggalID(value) {
+    const s = String(value == null ? '' : value).trim().slice(0, 10);
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return (value == null || String(value).trim() === '') ? '-' : String(value);
+    const NAMA_BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const idxBulan = Number(m[2]) - 1;
+    if (idxBulan < 0 || idxBulan > 11) return String(value);
+    return ('0' + Number(m[3])).slice(-2) + ' ' + NAMA_BULAN[idxBulan] + ' ' + m[1];
+}
+
 function loadTagihan(forceReload, silentRefresh) {
     const cacheKey = tagihanCacheKey();
     if (!Array.isArray(globalTagihanData) || globalTagihanData.length === 0) {
@@ -12916,7 +12923,6 @@ function populateTagihanFilters() {
     const uniqSorted = function(arr, mapper) {
         return [...new Set((arr || []).map(mapper).filter(Boolean))].sort(function(a,b){ return a.localeCompare(b, 'id'); });
     };
-    fill(document.getElementById('filterTagihanOutlet'), uniqSorted(globalTagihanData, function(i){ return String(i.outlet || '').trim(); }), 'Semua Outlet');
     fill(document.getElementById('filterTagihanDsr'), uniqSorted(globalTagihanData, function(i){ return String(i.dsr || '').trim(); }), 'Semua DSR / Sales');
     const dsrWrap = document.getElementById('filterTagihanDsrWrap');
     if (dsrWrap) dsrWrap.classList.toggle('hidden', !tagihanIsAdminScope());
@@ -12925,7 +12931,6 @@ function populateTagihanFilters() {
 function filterTagihan() {
     const searchEl = document.getElementById('searchTagihanInput');
     const keyword = String(searchEl && searchEl.value || '').trim().toUpperCase();
-    const outlet = String((document.getElementById('filterTagihanOutlet') || {}).value || '').trim().toUpperCase();
     const dsr = String((document.getElementById('filterTagihanDsr') || {}).value || '').trim().toUpperCase();
     const status = String((document.getElementById('filterTagihanStatus') || {}).value || '').trim().toUpperCase();
     const usiaF = String((document.getElementById('filterTagihanUsia') || {}).value || '').trim();
@@ -12934,7 +12939,6 @@ function filterTagihan() {
     const filtered = (globalTagihanData || []).filter(function(item) {
         const text = [item.outlet, item.id, item.dsr].map(function(v){ return String(v == null ? '' : v).toUpperCase(); }).join(' ');
         if (keyword && text.indexOf(keyword) === -1) return false;
-        if (outlet && String(item.outlet || '').trim().toUpperCase() !== outlet) return false;
         if (dsr && String(item.dsr || '').trim().toUpperCase() !== dsr) return false;
         const st = String(item.statusTagihan || 'BELUM LUNAS').trim().toUpperCase();
         if (status && st !== status) return false;
@@ -12943,7 +12947,11 @@ function filterTagihan() {
         if (usiaF === 'muda' && usia >= TAGIHAN_UMUR_MERAH) return false;
         return true;
     });
+    // BELUM LUNAS selalu ditampilkan paling atas; LUNAS tampil setelahnya.
     filtered.sort(function(a,b){
+        const sa = String(a.statusTagihan || 'BELUM LUNAS').toUpperCase(), sb = String(b.statusTagihan || 'BELUM LUNAS').toUpperCase();
+        const ba = (sa === 'LUNAS') ? 1 : 0, bb = (sb === 'LUNAS') ? 1 : 0;
+        if (ba !== bb) return ba - bb;
         const ua = tagihanUsiaHari(a.tanggalNota), ub = tagihanUsiaHari(b.tanggalNota);
         if (ub !== ua) return ub - ua;
         return new Date(String(a.tanggal || '')).getTime() - new Date(String(b.tanggal || '')).getTime();
@@ -12960,7 +12968,7 @@ function clearTagihanSearch() {
 }
 
 function resetTagihanAllFilter() {
-    ['searchTagihanInput','filterTagihanOutlet','filterTagihanDsr','filterTagihanStatus','filterTagihanUsia'].forEach(function(id) {
+    ['searchTagihanInput','filterTagihanDsr','filterTagihanStatus','filterTagihanUsia'].forEach(function(id) {
         const el = document.getElementById(id);
         if (el) el.value = '';
     });
@@ -13035,15 +13043,15 @@ function renderTagihanTable(data) {
         const rowSel = checked ? ' tagihan-row-selected' : '';
         return '<tr class="border-b border-slate-100 hover:bg-emerald-50/50 cursor-pointer' + rowSel + '" onclick="bukaInvoiceTagihan(\'' + escapeHtml(idKey) + '\')">' +
             '<td class="px-2.5 py-2.5 text-center"' + (item.isCash ? '' : ' onclick="event.stopPropagation()"') + '>' +
-            (item.isCash ? '<span class="text-slate-300" title="CASH otomatis Lunas">–</span>' : '<input type="checkbox" class="tagihan-row-check accent-emerald-600 w-4 h-4" data-tagihan-id="' + escapeHtml(idKey) + '" ' + (checked ? 'checked' : '') + ' aria-label="Pilih tagihan ' + escapeHtml(item.outlet || idKey) + '">') +
+            (item.isCash ? '<span class="text-slate-300" title="CASH">–</span>' : '<input type="checkbox" class="tagihan-row-check accent-emerald-600 w-4 h-4" data-tagihan-id="' + escapeHtml(idKey) + '" ' + (checked ? 'checked' : '') + ' aria-label="Pilih tagihan ' + escapeHtml(item.outlet || idKey) + '">') +
             '</td>' +
             '<td class="px-3 py-2.5 font-bold text-slate-700">' + escapeHtml(item.outlet || '-') + (showDsr && String(item.dsr || '') ? '<div class="text-[9px] text-slate-400 font-normal">DSR: ' + escapeHtml(item.dsr) + '</div>' : '') + '</td>' +
-            '<td class="px-3 py-2.5 whitespace-nowrap">' + escapeHtml(item.tanggal || '-') + '</td>' +
-            '<td class="px-3 py-2.5 whitespace-nowrap font-extrabold ' + (merah ? 'text-red-600' : 'text-slate-600') + '">' + usia + ' hari' + (st === 'LUNAS' && item.tanggalLunas ? '<div class="text-[8px] font-medium text-slate-400 font-normal">beku ' + escapeHtml(String(item.tanggalLunas).slice(0, 10)) + '</div>' : '') + '</td>' +
+            '<td class="px-3 py-2.5 whitespace-nowrap">' + escapeHtml(tagihanFormatTanggalID(item.tanggal)) + '</td>' +
+            '<td class="px-3 py-2.5 whitespace-nowrap font-extrabold ' + (merah ? 'text-red-600' : 'text-slate-600') + '">' + usia + ' hari</td>' +
             '<td class="px-3 py-2.5 text-right font-semibold whitespace-nowrap">Rp ' + Number(item.nominal || 0).toLocaleString('id-ID') + '</td>' +
             '<td class="px-3 py-2.5"' + (item.isCash ? '' : ' onclick="event.stopPropagation()"') + '>' +
-            '<span class="text-[10px] font-extrabold ' + statusKelas + '">' + escapeHtml(st) + '</span>' +
-            (item.isCash ? '<div class="mt-1"><span class="tg-badge-cash">CASH</span> <span class="text-[8px] text-slate-400 font-medium">otomatis Lunas</span></div>' : statusButtons(item, st)) +
+            '<span class="block whitespace-nowrap text-[10px] font-extrabold ' + statusKelas + '">' + escapeHtml(st) + '</span>' +
+            (item.isCash ? '<div class="mt-1"><span class="tg-badge-cash">CASH</span></div>' : statusButtons(item, st)) +
             '</td>' +
             '</tr>';
     }).join('');
@@ -13227,10 +13235,10 @@ function bukaInvoiceTagihan(idInput) {
     if (totalDus > 0) dusText += totalDus + ' Dus';
     if (totalPcs > 0) dusText += (dusText ? ' + ' : '') + totalPcs + ' Pcs';
     if (!dusText) dusText = '-';
-    const lunasInfo = (st === 'LUNAS' && item.tanggalLunas) ? '<div class="inv-cell"><div class="inv-label">Dilunasi Pada</div><div class="inv-val" style="color:#059669;">' + escapeHtml(String(item.tanggalLunas).slice(0, 10)) + '</div></div>' : '';
+    const lunasInfo = (st === 'LUNAS' && item.tanggalLunas) ? '<div class="inv-cell"><div class="inv-label">Dilunasi Pada</div><div class="inv-val" style="color:#059669;">' + escapeHtml(tagihanFormatTanggalID(item.tanggalLunas)) + '</div></div>' : '';
     document.getElementById('modalBody').innerHTML =
         '<div class="inv-head">' +
-            '<div><div class="inv-title">INVOICE</div><div class="inv-sub">Nota: ' + escapeHtml(item.tanggalNota || '-') + ' &middot; Order: ' + escapeHtml(item.tanggal || '-') + '</div></div>' +
+            '<div><div class="inv-title">INVOICE</div><div class="inv-sub">Nota: ' + escapeHtml(tagihanFormatTanggalID(item.tanggalNota)) + ' &middot; Order: ' + escapeHtml(tagihanFormatTanggalID(item.tanggal)) + '</div></div>' +
             '<div style="text-align:right;"><div class="inv-chip">' + escapeHtml(targetId) + '</div>' +
             '<div class="inv-stamp ' + (st === 'LUNAS' ? 'inv-stamp-lunas' : 'inv-stamp-belum') + '">' + escapeHtml(st) + '</div></div>' +
         '</div>' +
@@ -13238,10 +13246,10 @@ function bukaInvoiceTagihan(idInput) {
             '<div class="inv-grid">' +
                 '<div class="inv-cell"><div class="inv-label">Outlet</div><div class="inv-val">' + escapeHtml(item.outlet || '-') + '</div></div>' +
                 '<div class="inv-cell"><div class="inv-label">DSR / Sales</div><div class="inv-val">' + escapeHtml(item.dsr || '-') + '</div></div>' +
-                '<div class="inv-cell"><div class="inv-label">Tanggal Order</div><div class="inv-val">' + escapeHtml(item.tanggal || '-') + '</div></div>' +
-                '<div class="inv-cell"><div class="inv-label">Tanggal Nota (Order + 3)</div><div class="inv-val">' + escapeHtml(item.tanggalNota || '-') + '</div></div>' +
+                '<div class="inv-cell"><div class="inv-label">Tanggal Order</div><div class="inv-val">' + escapeHtml(tagihanFormatTanggalID(item.tanggal)) + '</div></div>' +
+                '<div class="inv-cell"><div class="inv-label">Tanggal Nota (Order + 3)</div><div class="inv-val">' + escapeHtml(tagihanFormatTanggalID(item.tanggalNota)) + '</div></div>' +
                 '<div class="inv-cell"><div class="inv-label">Pembayaran</div><div class="inv-val">' + escapeHtml(item.isCash ? 'CASH' : (item.payment || 'CREDIT')) + '</div></div>' +
-                '<div class="inv-cell"><div class="inv-label">Usia Nota</div><div class="inv-val' + (merah ? ' text-red-600' : '') + '">' + usia + ' hari' + (st === 'LUNAS' && item.tanggalLunas ? ' &middot; beku' : '') + '</div></div>' +
+                '<div class="inv-cell"><div class="inv-label">Usia Nota</div><div class="inv-val' + (merah ? ' text-red-600' : '') + '">' + usia + ' hari</div></div>' +
                 lunasInfo +
             '</div>' +
             '<div class="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Rincian Produk</div>' +
