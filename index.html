@@ -12512,8 +12512,6 @@ function renderApprovalList(data) {
 
 function approvalBulkControlsHtml() {
     return '<div class="flex flex-wrap items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl mb-3">' +
-        '<button type="button" onclick="pilihSemuaStatusApproval(\'APPROVE\')" class="px-3 py-1.5 rounded-md bg-white hover:bg-slate-100 text-emerald-700 text-[10px] font-bold border border-slate-200">APPROVE SEMUA</button>' +
-        '<button type="button" onclick="pilihSemuaStatusApproval(\'DECLINE\')" class="px-3 py-1.5 rounded-md bg-white hover:bg-slate-100 text-red-700 text-[10px] font-bold border border-slate-200">DECLINE SEMUA</button>' +
         '<button type="button" onclick="resetPilihanStatusApproval()" class="px-3 py-1.5 rounded-md bg-white hover:bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200">RESET</button>' +
         '<button type="button" onclick="doneBulkStatusApproval()" class="px-4 py-1.5 rounded-md bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-extrabold shadow-sm">DONE</button>' +
         '<span id="bulkStatusInfo" class="text-[10px] text-slate-500 font-semibold ml-auto">Pilih status pada masing-masing order lalu klik DONE.</span>' +
