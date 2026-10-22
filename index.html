@@ -120,6 +120,19 @@
         
         /* Pencapaian Sales selalu tampil di sidebar */
         .sidebar-pencapaian-menu { display: flex !important; visibility: visible !important; }
+
+        /* Task 52 — submenu Pencapaian (induk toggle: Monitoring + Pencapaian Sales) */
+        #leftNav .sidebar-group-menu { position: relative; }
+        #leftNav .sidebar-group-menu .sidebar-caret { position: absolute; top: 50%; right: 9px; width: 13px; height: 13px; margin-top: -7px; color: rgba(255,255,255,.82); transition: transform .2s ease; pointer-events: none; }
+        #leftNav .sidebar-group-menu.sidebar-item-active .sidebar-caret { color: #ffffff; }
+        #leftNav .sidebar-group-menu.sidebar-group-open .sidebar-caret { transform: rotate(180deg); }
+        #leftNav .sidebar-submenu { display: none; flex-direction: column; gap: 4px; width: 100%; padding: 2px 0 6px 5px; }
+        #leftNav .sidebar-submenu.sidebar-submenu-open { display: flex; }
+        #leftNav .sidebar-submenu .sidebar-submenu-item { min-height: 48px !important; height: 48px !important; padding-left: 10px !important; gap: 8px !important; border-radius: 11px !important; font-size: 10px !important; }
+        #leftNav .sidebar-submenu .sidebar-submenu-item .sidebar-icon { width: 24px !important; height: 24px !important; font-size: 12px !important; flex: 0 0 24px !important; }
+        @media (max-width: 767px) {
+            #leftNav .sidebar-submenu .sidebar-submenu-item { min-height: 38px !important; height: 38px !important; }
+        }
 .sidebar-item-danger { color:#dc2626; }
         .sidebar-item-danger:hover { color:#b91c1c; background:#fef2f2; border-color:#fecaca; }
 
@@ -3318,18 +3331,27 @@ body{background:
                     <span class="sidebar-text">Approval</span>
                 </button>
 
-                <button type="button" onclick="switchTab('pencapaian')" id="navPencapaian"
-                        class="sidebar-item sidebar-pencapaian-menu" title="Pencapaian Sales" aria-label="Pencapaian Sales"
+                <button type="button" onclick="togglePencapaianSubmenu()" id="navPencapaianGroup"
+                        class="sidebar-item sidebar-group-menu" title="Pencapaian" aria-label="Pencapaian" aria-expanded="false" aria-controls="submenuPencapaian"
                         style="display:flex !important; visibility:visible !important;">
-                    <span class="sidebar-icon">🏆</span>
-                    <span class="sidebar-text">Pencapaian Sales</span>
+                    <span class="sidebar-icon">🎯</span>
+                    <span class="sidebar-text">Pencapaian</span>
+                    <svg class="sidebar-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </button>
 
-                <button type="button" onclick="switchTab('monitoring')" id="navMonitoring"
-                        class="sidebar-item" title="Monitoring Outlet" aria-label="Monitoring Outlet">
-                    <span class="sidebar-icon">📈</span>
-                    <span class="sidebar-text">Monitoring</span>
-                </button>
+                <div id="submenuPencapaian" class="sidebar-submenu" role="menu" aria-label="Submenu Pencapaian">
+                    <button type="button" role="menuitem" onclick="switchTab('monitoring')" id="navMonitoring"
+                            class="sidebar-item sidebar-submenu-item" title="Monitoring Outlet" aria-label="Monitoring Outlet">
+                        <span class="sidebar-icon">📈</span>
+                        <span class="sidebar-text">Monitoring</span>
+                    </button>
+                    <button type="button" role="menuitem" onclick="switchTab('pencapaian')" id="navPencapaian"
+                            class="sidebar-item sidebar-submenu-item sidebar-pencapaian-menu" title="Pencapaian Sales" aria-label="Pencapaian Sales"
+                            style="display:flex !important; visibility:visible !important;">
+                        <span class="sidebar-icon">🏆</span>
+                        <span class="sidebar-text">Pencapaian Sales</span>
+                    </button>
+                </div>
 
                 <button type="button" onclick="switchTab('outletkontrak')" id="navOutletKontrak"
                         class="sidebar-item" title="Outlet Kontrak" aria-label="Outlet Kontrak">
@@ -10078,6 +10100,22 @@ startAutoRefresh();
             }
         }
 
+        // Task 52: submenu Pencapaian — buka/tutup grup menu (Monitoring + Pencapaian Sales).
+        function setPencapaianSubmenu(open) {
+            const wrap = document.getElementById('submenuPencapaian');
+            const group = document.getElementById('navPencapaianGroup');
+            if (wrap) wrap.classList.toggle('sidebar-submenu-open', !!open);
+            if (group) {
+                group.classList.toggle('sidebar-group-open', !!open);
+                group.setAttribute('aria-expanded', open ? 'true' : 'false');
+            }
+        }
+
+        function togglePencapaianSubmenu() {
+            const wrap = document.getElementById('submenuPencapaian');
+            setPencapaianSubmenu(!(wrap && wrap.classList.contains('sidebar-submenu-open')));
+        }
+
         function switchTab(tab) {
             const isAdminLogin = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
             if (tab === 'pengumumanadmin' && !isAdminLogin) { applyRoleVisibility(); return; }
@@ -10106,6 +10144,9 @@ startAutoRefresh();
                     el.className='sidebar-item hidden';
                 }else if(key==='approval' && !canApprovalMenu){
                     el.className='sidebar-item hidden';
+                }else if(key==='pencapaian' || key==='monitoring'){
+                    // Task 52: item submenu Pencapaian — kelas submenu dipertahankan, cukup toggle aktif.
+                    el.classList.toggle('sidebar-item-active', key===tab);
                 }else{
                     el.className=key===tab?'sidebar-item sidebar-item-active':'sidebar-item';
                 }
@@ -10118,6 +10159,12 @@ startAutoRefresh();
                     if(adminNav){ adminNav.classList.add('hidden'); adminNav.classList.remove('sidebar-item-active'); }
                 });
             }
+            // Task 52: induk submenu Pencapaian ikut aktif & submenu terbuka saat Monitoring/Pencapaian Sales dipilih.
+            const grpNav52 = document.getElementById('navPencapaianGroup');
+            if (grpNav52) {
+                grpNav52.classList.toggle('sidebar-item-active', tab==='pencapaian' || tab==='monitoring');
+            }
+            if(tab==='pencapaian' || tab==='monitoring') setPencapaianSubmenu(true);
             if(window.matchMedia&&window.matchMedia('(max-width:1023px)').matches){setSidebarState(true);}
 if(tab==='home'){loadHomeRebuild();startHomeRebuildAuto();}
 if(tab==='riwayat')loadRiwayat(false, true);
