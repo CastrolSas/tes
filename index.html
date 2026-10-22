@@ -13290,7 +13290,7 @@ function bukaInvoiceTagihan(idInput) {
     document.getElementById('modalBody').innerHTML =
         '<div id="invoicePrintArea">' +
         '<div class="inv-head">' +
-            '<div><div class="inv-title">INVOICE</div><div class="inv-sub">Invoice: ' + escapeHtml(tagihanFormatTanggalID(tagihanTanggalHariIniStr())) + ' &middot; Order: ' + escapeHtml(tagihanFormatTanggalID(item.tanggal)) + '</div></div>' +
+            '<div><div class="inv-title">INVOICE</div></div>' +
             '<div style="text-align:right;"><div class="inv-chip">' + escapeHtml(targetId) + '</div>' +
             '<div class="inv-stamp ' + (st === 'LUNAS' ? 'inv-stamp-lunas' : 'inv-stamp-belum') + '">' + escapeHtml(st) + '</div></div>' +
         '</div>' +
