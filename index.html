@@ -12791,7 +12791,12 @@ function doneBulkStatusApproval() {
         '.inv-totrow td{background:#f8fafc;font-weight:900;color:#0f172a;border-top:2px solid #e2e8f0;}' +
         '.inv-stamp{display:inline-block;padding:5px 14px;border:2.5px solid;border-radius:8px;font-weight:900;font-size:13px;letter-spacing:.12em;transform:rotate(-6deg);margin-top:8px;}' +
         '.inv-stamp-lunas{color:#059669;border-color:#059669;background:rgba(5,150,105,.06);}' +
-        '.inv-stamp-belum{color:#dc2626;border-color:#dc2626;background:rgba(220,38,38,.06);}';
+        '.inv-stamp-belum{color:#dc2626;border-color:#dc2626;background:rgba(220,38,38,.06);}' +
+        '.inv-val-merah{color:#dc2626;}' +
+        '.inv-seclabel{margin-bottom:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;}' +
+        '.inv-empty{padding:16px;text-align:center;color:#94a3b8;}' +
+        '.inv-print-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:12px;padding:10px 14px;border-radius:12px;border:1px solid #047857;background:#059669;color:#fff;font-weight:800;font-size:12px;letter-spacing:.05em;cursor:pointer;box-shadow:0 2px 0 #047857,0 3px 4px rgba(4,120,87,.25);transition:transform .05s ease,box-shadow .05s ease;-webkit-print-color-adjust:exact;print-color-adjust:exact;}' +
+        '.inv-print-btn:active{transform:translateY(2px);box-shadow:0 0 0 #047857;}';
     (document.head || document.documentElement).appendChild(st);
 })();
 var globalTagihanData = [];
@@ -12848,6 +12853,51 @@ function tagihanFormatTanggalID(value) {
     const idxBulan = Number(m[2]) - 1;
     if (idxBulan < 0 || idxBulan > 11) return String(value);
     return ('0' + Number(m[3])).slice(-2) + ' ' + NAMA_BULAN[idxBulan] + ' ' + m[1];
+}
+
+// Tanggal hari ini "yyyy-MM-dd" untuk Tanggal Invoice berjalan
+// (dihitung ulang setiap kali invoice dibuka).
+function tagihanTanggalHariIniStr() {
+    const n = new Date();
+    return n.getFullYear() + '-' + ('0' + (n.getMonth() + 1)).slice(-2) + '-' + ('0' + n.getDate()).slice(-2);
+}
+
+// Export PDF: salin konten invoice (#invoicePrintArea) + CSS invoice ke
+// iframe di luar layar lalu panggil window.print() — dialog cetak browser
+// menyediakan opsi "Simpan sebagai PDF" (desktop & mobile) tanpa library.
+var tagihanPrintBusy = false;
+function exportInvoiceTagihanPdf() {
+    if (tagihanPrintBusy) return;
+    const area = document.getElementById('invoicePrintArea');
+    if (!area || !area.innerHTML) {
+        showModal('Export PDF', 'Detail invoice tidak tersedia untuk dicetak.');
+        return;
+    }
+    tagihanPrintBusy = true;
+    const chipEl = document.getElementById('modalBody').querySelector('.inv-chip');
+    const safeId = String(chipEl ? chipEl.textContent : '').replace(/[^A-Za-z0-9._-]+/g, ' ').trim();
+    const css = (document.getElementById('tagihanPageCss') || {}).textContent || '';
+    const html = '<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><title>Invoice ' + safeId + '</title><style>' + css +
+        'html,body{margin:0;padding:14px 12px;background:#fff;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;}' +
+        '.inv-wrap{max-width:640px;margin:0 auto;}' +
+        '</style></head><body><div class="inv-wrap">' + area.innerHTML + '</div></body></html>';
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.setAttribute('title', 'Cetak Invoice');
+    iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:800px;height:600px;border:0;';
+    document.body.appendChild(iframe);
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+    setTimeout(function() {
+        try {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        } catch (ePrint) {}
+        tagihanPrintBusy = false;
+        setTimeout(function() { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); }, 60000);
+    }, 300);
 }
 
 function loadTagihan(forceReload, silentRefresh) {
@@ -13209,7 +13259,8 @@ function bukaInvoiceTagihan(idInput) {
     setDetailModalNoFooter();
     const modal = document.getElementById('customModal');
     document.getElementById('modalTitle').textContent = 'INVOICE TAGIHAN';
-    document.getElementById('modalSubtitle').textContent = 'ID INPUT: ' + targetId;
+    // ID Input tidak lagi ditampilkan di header modal invoice (permintaan user).
+    document.getElementById('modalSubtitle').textContent = '';
     document.getElementById('modalCancelBtn').style.display = 'none';
     document.getElementById('modalOkBtn').style.display = 'none';
     modal.style.display = 'flex';
@@ -13230,15 +13281,16 @@ function bukaInvoiceTagihan(idInput) {
             if (uu === 'DUS') totalDus += qty; else if (uu === 'PCS') totalPcs += qty;
         }
         return '<tr><td class="text-center text-slate-400 font-bold" style="width:34px;">' + (i + 1) + '</td><td class="font-semibold break-words">' + escapeHtml(nama) + '</td><td class="text-center font-bold" style="width:60px;">' + qty + '</td><td class="text-center" style="width:56px;">' + escapeHtml(sat) + '</td></tr>';
-    }).join('') : '<tr><td colspan="4" class="p-4 text-center text-slate-400">Tidak ada rincian produk.</td></tr>';
+    }).join('') : '<tr><td colspan="4" class="inv-empty">Tidak ada rincian produk.</td></tr>';
     let dusText = '';
     if (totalDus > 0) dusText += totalDus + ' Dus';
     if (totalPcs > 0) dusText += (dusText ? ' + ' : '') + totalPcs + ' Pcs';
     if (!dusText) dusText = '-';
     const lunasInfo = (st === 'LUNAS' && item.tanggalLunas) ? '<div class="inv-cell"><div class="inv-label">Dilunasi Pada</div><div class="inv-val" style="color:#059669;">' + escapeHtml(tagihanFormatTanggalID(item.tanggalLunas)) + '</div></div>' : '';
     document.getElementById('modalBody').innerHTML =
+        '<div id="invoicePrintArea">' +
         '<div class="inv-head">' +
-            '<div><div class="inv-title">INVOICE</div><div class="inv-sub">Nota: ' + escapeHtml(tagihanFormatTanggalID(item.tanggalNota)) + ' &middot; Order: ' + escapeHtml(tagihanFormatTanggalID(item.tanggal)) + '</div></div>' +
+            '<div><div class="inv-title">INVOICE</div><div class="inv-sub">Invoice: ' + escapeHtml(tagihanFormatTanggalID(tagihanTanggalHariIniStr())) + ' &middot; Order: ' + escapeHtml(tagihanFormatTanggalID(item.tanggal)) + '</div></div>' +
             '<div style="text-align:right;"><div class="inv-chip">' + escapeHtml(targetId) + '</div>' +
             '<div class="inv-stamp ' + (st === 'LUNAS' ? 'inv-stamp-lunas' : 'inv-stamp-belum') + '">' + escapeHtml(st) + '</div></div>' +
         '</div>' +
@@ -13247,19 +13299,22 @@ function bukaInvoiceTagihan(idInput) {
                 '<div class="inv-cell"><div class="inv-label">Outlet</div><div class="inv-val">' + escapeHtml(item.outlet || '-') + '</div></div>' +
                 '<div class="inv-cell"><div class="inv-label">DSR / Sales</div><div class="inv-val">' + escapeHtml(item.dsr || '-') + '</div></div>' +
                 '<div class="inv-cell"><div class="inv-label">Tanggal Order</div><div class="inv-val">' + escapeHtml(tagihanFormatTanggalID(item.tanggal)) + '</div></div>' +
-                '<div class="inv-cell"><div class="inv-label">Tanggal Nota (Order + 3)</div><div class="inv-val">' + escapeHtml(tagihanFormatTanggalID(item.tanggalNota)) + '</div></div>' +
+                '<div class="inv-cell"><div class="inv-label">Tanggal Invoice</div><div class="inv-val">' + escapeHtml(tagihanFormatTanggalID(tagihanTanggalHariIniStr())) + '</div></div>' +
                 '<div class="inv-cell"><div class="inv-label">Pembayaran</div><div class="inv-val">' + escapeHtml(item.isCash ? 'CASH' : (item.payment || 'CREDIT')) + '</div></div>' +
-                '<div class="inv-cell"><div class="inv-label">Usia Nota</div><div class="inv-val' + (merah ? ' text-red-600' : '') + '">' + usia + ' hari</div></div>' +
+                '<div class="inv-cell"><div class="inv-label">Usia Nota</div><div class="inv-val' + (merah ? ' inv-val-merah' : '') + '">' + usia + ' hari</div></div>' +
                 lunasInfo +
             '</div>' +
-            '<div class="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Rincian Produk</div>' +
+            '<div class="inv-seclabel">Rincian Produk</div>' +
             '<div class="overflow-x-auto"><table class="inv-table"><thead><tr><th style="width:34px;text-align:center;">No</th><th>Produk</th><th style="width:60px;text-align:center;">Qty</th><th style="width:56px;text-align:center;">Satuan</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>' +
             '<table class="inv-table" style="margin-top:10px;"><tbody>' +
                 '<tr><td>Volume</td><td style="text-align:right;font-weight:800;">' + escapeHtml(String(item.volume == null ? '0' : item.volume)) + ' L</td></tr>' +
                 '<tr class="inv-totrow"><td>TOTAL DUS</td><td style="text-align:right;">' + escapeHtml(dusText) + '</td></tr>' +
                 '<tr class="inv-totrow"><td>TOTAL VALUE</td><td style="text-align:right;">' + escapeHtml(rpVal) + '</td></tr>' +
             '</tbody></table>' +
-        '</div>';
+        '</div>' +
+        '</div>' +
+        '<button type="button" onclick="exportInvoiceTagihanPdf()" class="inv-print-btn" title="Simpan invoice sebagai PDF">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0;" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>EXPORT PDF</button>';
 }
 </script>
 
