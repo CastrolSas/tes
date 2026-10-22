@@ -12796,7 +12796,31 @@ function doneBulkStatusApproval() {
         '.inv-seclabel{margin-bottom:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;}' +
         '.inv-empty{padding:16px;text-align:center;color:#94a3b8;}' +
         '.inv-print-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:12px;padding:10px 14px;border-radius:12px;border:1px solid #047857;background:#059669;color:#fff;font-weight:800;font-size:12px;letter-spacing:.05em;cursor:pointer;box-shadow:0 2px 0 #047857,0 3px 4px rgba(4,120,87,.25);transition:transform .05s ease,box-shadow .05s ease;-webkit-print-color-adjust:exact;print-color-adjust:exact;}' +
-        '.inv-print-btn:active{transform:translateY(2px);box-shadow:0 0 0 #047857;}';
+        '.inv-print-btn:active{transform:translateY(2px);box-shadow:0 0 0 #047857;}' +
+        '.tg-only-mobile{display:none!important;}' +
+        '@media (max-width:767px){' +
+        '  .tg-only-mobile{display:inline-flex!important;}' +
+        '  #listTagihan .tg-card-wrap{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;}' +
+        '  #listTagihan .tg-card-wrap>div{overflow:visible!important;}' +
+        '  #listTagihan table{display:block;min-width:0!important;}' +
+        '  #listTagihan table thead{display:none!important;}' +
+        '  #listTagihan table tbody{display:block;}' +
+        '  #listTagihan table tbody tr{display:block;position:relative;background:#fff;border:1px solid #e2e8f0!important;border-radius:14px;margin:0 0 10px;padding:12px 12px 8px;box-shadow:0 1px 3px rgba(15,23,42,.08);cursor:pointer;}' +
+        '  #listTagihan table tbody tr.tagihan-row-selected{background:#ecfdf5;border-color:#6ee7b7!important;}' +
+        '  #listTagihan table tbody tr td{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0!important;border-bottom:1px dashed #e2e8f0!important;background:transparent!important;text-align:left!important;}' +
+        '  #listTagihan table tbody tr td:last-child{border-bottom:0!important;padding-bottom:3px!important;}' +
+        '  #listTagihan table tbody tr td::before{content:attr(data-label);font-size:8.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#94a3b8;flex-shrink:0;}' +
+        '  #listTagihan table tbody tr td:nth-child(1){position:absolute;top:10px;right:10px;padding:0!important;border:0!important;}' +
+        '  #listTagihan table tbody tr td:nth-child(1)::before{content:none!important;}' +
+        '  #listTagihan table tbody tr td:nth-child(1) input{width:20px;height:20px;}' +
+        '  #listTagihan table tbody tr td:nth-child(2){display:block;padding:0 36px 8px 0!important;border-bottom:1px solid #e2e8f0!important;font-size:12px;line-height:1.35;}' +
+        '  #listTagihan table tbody tr td:nth-child(2)::before{content:none!important;}' +
+        '  #listTagihan table tbody tr td:nth-child(5){font-size:12px;font-weight:800;}' +
+        '  #listTagihan table tbody tr td:nth-child(6){flex-wrap:wrap;row-gap:6px;}' +
+        '  #listTagihan table tbody tr td:nth-child(6)::before{align-self:center;}' +
+        '  #listTagihan table tbody tr td:nth-child(6)>span{margin-left:auto;}' +
+        '  #listTagihan table tbody tr td:nth-child(6)>div{flex-basis:100%;display:flex;justify-content:flex-end;margin-top:0!important;}' +
+        '}';
     (document.head || document.documentElement).appendChild(st);
 })();
 var globalTagihanData = [];
@@ -13059,6 +13083,7 @@ function tagihanPaginationHtml(totalShown, startIndex) {
 
 function tagihanBulkControlsHtml() {
     return '<div class="flex flex-wrap items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl mb-3">' +
+        '<label class="tg-only-mobile items-center gap-1.5 text-[10px] font-bold text-slate-600 cursor-pointer select-none"><input type="checkbox" id="tagihanCheckAllMobile" class="w-4 h-4 accent-emerald-600" onchange="pilihSemuaTagihan(this.checked)" aria-label="Pilih semua tagihan (tampilan kartu)">Semua</label>' +
         '<span id="tagihanBulkInfo" class="text-[10px] text-slate-500 font-semibold">Centang tagihan untuk pilihan massal.</span>' +
         '<div class="flex items-center gap-1.5 ml-auto">' +
         '<button type="button" id="tagihanBulkLunasBtn" onclick="terapkanStatusTagihanMassal(\'LUNAS\')" class="tg-btn tg-btn-lunas" disabled title="Tandai tagihan terpilih sebagai LUNAS">Tandai Lunas</button>' +
@@ -13096,10 +13121,10 @@ function renderTagihanTable(data) {
             (item.isCash ? '<span class="text-slate-300" title="CASH">–</span>' : '<input type="checkbox" class="tagihan-row-check accent-emerald-600 w-4 h-4" data-tagihan-id="' + escapeHtml(idKey) + '" ' + (checked ? 'checked' : '') + ' aria-label="Pilih tagihan ' + escapeHtml(item.outlet || idKey) + '">') +
             '</td>' +
             '<td class="px-3 py-2.5 font-bold text-slate-700">' + escapeHtml(item.outlet || '-') + (showDsr && String(item.dsr || '') ? '<div class="text-[9px] text-slate-400 font-normal">DSR: ' + escapeHtml(item.dsr) + '</div>' : '') + '</td>' +
-            '<td class="px-3 py-2.5 whitespace-nowrap">' + escapeHtml(tagihanFormatTanggalID(item.tanggal)) + '</td>' +
-            '<td class="px-3 py-2.5 whitespace-nowrap font-extrabold ' + (merah ? 'text-red-600' : 'text-slate-600') + '">' + usia + ' hari</td>' +
-            '<td class="px-3 py-2.5 text-right font-semibold whitespace-nowrap">Rp ' + Number(item.nominal || 0).toLocaleString('id-ID') + '</td>' +
-            '<td class="px-3 py-2.5"' + (item.isCash ? '' : ' onclick="event.stopPropagation()"') + '>' +
+            '<td class="px-3 py-2.5 whitespace-nowrap" data-label="Tanggal Order">' + escapeHtml(tagihanFormatTanggalID(item.tanggal)) + '</td>' +
+            '<td class="px-3 py-2.5 whitespace-nowrap font-extrabold ' + (merah ? 'text-red-600' : 'text-slate-600') + '" data-label="Usia Nota">' + usia + ' hari</td>' +
+            '<td class="px-3 py-2.5 text-right font-semibold whitespace-nowrap" data-label="Nominal">Rp ' + Number(item.nominal || 0).toLocaleString('id-ID') + '</td>' +
+            '<td class="px-3 py-2.5" data-label="Status"' + (item.isCash ? '' : ' onclick="event.stopPropagation()"') + '>' +
             '<span class="block whitespace-nowrap text-[10px] font-extrabold ' + statusKelas + '">' + escapeHtml(st) + '</span>' +
             (item.isCash ? '<div class="mt-1"><span class="tg-badge-cash">CASH</span></div>' : statusButtons(item, st)) +
             '</td>' +
@@ -13108,7 +13133,7 @@ function renderTagihanTable(data) {
     const selectableIds = rows.filter(function(item){ return !item.isCash; }).map(function(item){ return String(item.id || ''); });
     const allChecked = selectableIds.length > 0 && selectableIds.every(function(id){ return tagihanSelectedIds[id]; });
     container.innerHTML = tagihanBulkControlsHtml() +
-        '<div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left text-[10px] min-w-[720px]"><thead><tr class="bg-slate-50 border-b border-slate-200 text-[9px] uppercase tracking-wide text-slate-500">' +
+        '<div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden tg-card-wrap"><div class="overflow-x-auto"><table class="w-full text-left text-[10px] min-w-[720px]"><thead><tr class="bg-slate-50 border-b border-slate-200 text-[9px] uppercase tracking-wide text-slate-500">' +
         '<th class="px-2.5 py-2 text-center w-10"><input type="checkbox" id="tagihanCheckAll" class="accent-emerald-600 w-4 h-4" ' + (allChecked ? 'checked' : '') + ' aria-label="Pilih semua tagihan" onchange="pilihSemuaTagihan(this.checked)"></th>' +
         '<th class="px-3 py-2">Outlet</th><th class="px-3 py-2">Tanggal Order</th><th class="px-3 py-2">Usia Nota</th><th class="px-3 py-2 text-right">Nominal</th><th class="px-3 py-2">Status</th>' +
         '</tr></thead><tbody>' + body + '</tbody></table></div></div>' +
@@ -13124,12 +13149,17 @@ function updateTagihanBulkInfo() {
     const bB = document.getElementById('tagihanBulkBelumBtn');
     if (bL) bL.disabled = ids.length === 0;
     if (bB) bB.disabled = ids.length === 0;
+    const cbs = [...document.querySelectorAll('#listTagihan .tagihan-row-check')];
+    const checkedCount = cbs.filter(function(c){ return c.checked; }).length;
     const all = document.getElementById('tagihanCheckAll');
     if (all) {
-        const cbs = [...document.querySelectorAll('#listTagihan .tagihan-row-check')];
-        const checkedCount = cbs.filter(function(c){ return c.checked; }).length;
         all.checked = cbs.length > 0 && checkedCount === cbs.length;
         all.indeterminate = checkedCount > 0 && checkedCount < cbs.length;
+    }
+    const allM = document.getElementById('tagihanCheckAllMobile');
+    if (allM) {
+        allM.checked = cbs.length > 0 && checkedCount === cbs.length;
+        allM.indeterminate = checkedCount > 0 && checkedCount < cbs.length;
     }
 }
 
