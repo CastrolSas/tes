@@ -3818,21 +3818,16 @@ body{background:
                             <h2 class="text-base font-bold text-slate-800">Tagihan</h2>
                             <span id="tagihanCount" class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">0 tagihan</span>
                         </div>
-                        <p class="text-[9px] text-slate-400">Usia nota = tanggal order + 3 hari — status tagihan merah bila usia ≥ 45 hari.</p>
+                        <p class="text-[9px] text-slate-400">Usia nota = tanggal order + 3 hari — status merah bila usia ≥ 45 hari; usia berhenti dihitung saat tagihan LUNAS.</p>
                     </div>
 
                     <div id="tagihanSummary" class="flex flex-wrap items-center gap-1.5 text-[9px]"></div>
-
-                    <div class="flex items-center justify-end gap-1.5 mb-1" role="group" aria-label="Tampilan Tagihan">
-                        <button type="button" id="tagihanViewTableBtn" onclick="setTagihanView('table')" class="view-toggle-btn">▤ Tabel</button>
-                        <button type="button" id="tagihanViewChartBtn" onclick="setTagihanView('chart')" class="view-toggle-btn is-active">▥ Chart</button>
-                    </div>
 
                     <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
                         <div class="flex items-center justify-between gap-2 mb-2">
                             <div>
                                 <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Filter Tagihan</div>
-                                <div class="text-[9px] text-slate-400 mt-0.5">Pilih status LUNAS / BELUM LUNAS pada masing-masing tagihan lalu klik DONE — tersimpan langsung di server.</div>
+                                <div class="text-[9px] text-slate-400 mt-0.5">Klik baris tabel untuk melihat invoice. Gunakan tombol status per baris atau centang baris lalu ubah massal — tersimpan langsung di server.</div>
                             </div>
                             <button type="button" onclick="resetTagihanAllFilter()" class="shrink-0 text-[10px] font-bold text-slate-500 hover:text-emerald-700 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 transition">Reset</button>
                         </div>
@@ -7735,10 +7730,8 @@ startAutoRefresh();
                 ? { table: 'riwayatViewTableBtn', chart: 'riwayatViewChartBtn' }
                 : section === 'approval'
                     ? { table: 'approvalViewTableBtn', chart: 'approvalViewChartBtn' }
-                    : section === 'tagihan'
-                        ? { table: 'tagihanViewTableBtn', chart: 'tagihanViewChartBtn' }
-                        : { table: 'pencapaianViewTableBtn', chart: 'pencapaianViewChartBtn' };
-            const mode = section === 'riwayat' ? riwayatViewMode : (section === 'approval' ? approvalViewMode : (section === 'tagihan' ? tagihanViewMode : pencapaianViewMode));
+                    : { table: 'pencapaianViewTableBtn', chart: 'pencapaianViewChartBtn' };
+            const mode = section === 'riwayat' ? riwayatViewMode : (section === 'approval' ? approvalViewMode : pencapaianViewMode);
             ['table', 'chart'].forEach(function(key) {
                 const btn = document.getElementById(modes[key]);
                 if (btn) btn.classList.toggle('is-active', mode === key);
@@ -12768,17 +12761,50 @@ function doneBulkStatusApproval() {
 
 <script id="tagihan-page-v1">
 /* MENU TAGIHAN - usia nota dihitung dari tanggal order + 3 hari.
-   Berisi nominal tiap nota dan status pelunasannya (LUNAS / BELUM LUNAS).
-   Status tampil MERAH bila usia nota >= 45 hari. Skema perubahan status sama
-   dengan halaman Approval: pilih status per tagihan lalu klik DONE — disimpan
-   SINKRON via updateStatusTagihanSync (sales hanya untuk tagihan miliknya). */
+   Tampilan TABEL saja. Kolom: Outlet | Tanggal Order | Usia Nota | Nominal.
+   Transaksi CASH otomatis LUNAS tanpa tombol. Status diubah lewat TOMBOL timbul
+   per baris (ukuran tetap di mobile) atau centang massal (select all) lalu
+   Tandai Lunas / Tandai Belum Lunas. Klik baris membuka INVOICE (rincian order,
+   total dus, total value). Usia nota >= 45 hari tampil MERAH; usia BEKU pada
+   tanggal penerapan LUNAS. Disimpan SINKRON via updateStatusTagihanSync
+   (sales hanya untuk tagihan miliknya). */
+(function tagihanPageCssInject() {
+    if (document.getElementById('tagihanPageCss')) return;
+    const st = document.createElement('style');
+    st.id = 'tagihanPageCss';
+    st.textContent = '' +
+        '.tg-btn{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;padding:4px 10px;border-radius:8px;font-weight:800;font-size:10px;line-height:1.2;border:1px solid #cbd5e1;background:#fff;color:#475569;box-shadow:0 2px 0 #cbd5e1,0 3px 4px rgba(15,23,42,.12);cursor:pointer;transition:transform .05s ease,box-shadow .05s ease;}' +
+        '.tg-btn:active{transform:translateY(2px);box-shadow:0 0 0 #cbd5e1;}' +
+        '.tg-btn:disabled{opacity:.45;cursor:not-allowed;}' +
+        '.tg-btn-lunas.is-active{background:#059669;border-color:#047857;color:#fff;box-shadow:0 2px 0 #047857,0 3px 4px rgba(4,120,87,.25);}' +
+        '.tg-btn-belum.is-active{background:#d97706;border-color:#b45309;color:#fff;box-shadow:0 2px 0 #b45309,0 3px 4px rgba(180,83,9,.25);}' +
+        '.tg-badge-lunas{display:inline-flex;align-items:center;padding:3px 8px;border-radius:8px;font-weight:800;font-size:9px;background:#059669;color:#fff;border:1px solid #047857;box-shadow:0 2px 0 #047857;}' +
+        '.tg-badge-cash{display:inline-flex;align-items:center;padding:3px 6px;border-radius:8px;font-weight:800;font-size:8px;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;}' +
+        '.tagihan-row-selected td{background:#ecfdf5 !important;}' +
+        '.inv-head{background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;border-radius:12px 12px 0 0;}' +
+        '.inv-title{font-size:16px;font-weight:900;letter-spacing:.1em;}' +
+        '.inv-sub{font-size:9px;color:#94a3b8;font-weight:600;margin-top:2px;}' +
+        '.inv-chip{display:inline-block;font-size:9px;font-weight:800;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);padding:3px 8px;border-radius:999px;white-space:nowrap;}' +
+        '.inv-body{padding:12px 4px 4px;}' +
+        '.inv-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}' +
+        '.inv-cell{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:7px 9px;}' +
+        '.inv-label{font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;}' +
+        '.inv-val{font-size:11px;font-weight:800;color:#1e293b;margin-top:2px;word-break:break-word;}' +
+        '.inv-table{width:100%;border-collapse:collapse;font-size:10px;}' +
+        '.inv-table th{background:#f1f5f9;color:#475569;font-size:8px;text-transform:uppercase;letter-spacing:.06em;padding:6px 8px;border-bottom:1px solid #e2e8f0;text-align:left;}' +
+        '.inv-table td{padding:6px 8px;border-bottom:1px solid #f1f5f9;color:#334155;}' +
+        '.inv-totrow td{background:#f8fafc;font-weight:900;color:#0f172a;border-top:2px solid #e2e8f0;}' +
+        '.inv-stamp{display:inline-block;padding:5px 14px;border:2.5px solid;border-radius:8px;font-weight:900;font-size:13px;letter-spacing:.12em;transform:rotate(-6deg);margin-top:8px;}' +
+        '.inv-stamp-lunas{color:#059669;border-color:#059669;background:rgba(5,150,105,.06);}' +
+        '.inv-stamp-belum{color:#dc2626;border-color:#dc2626;background:rgba(220,38,38,.06);}';
+    (document.head || document.documentElement).appendChild(st);
+})();
 var globalTagihanData = [];
 var tagihanFilteredData = [];
 var tagihanPage = 1;
-var tagihanViewMode = 'chart';
 var tagihanLoading = false;
 var tagihanStatusInFlight = false;
-var selectedTagihanStatus = {};
+var tagihanSelectedIds = {};
 var TAGIHAN_UMUR_MERAH = 45;
 
 function tagihanIsAdminScope() {
@@ -12790,14 +12816,24 @@ function tagihanCacheKey() {
 }
 
 // Usia nota (hari) dihitung ulang saat render agar selalu akurat.
-function tagihanUsiaHari(tanggalNota) {
-    const m = String(tanggalNota || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+// Bila status LUNAS dan tanggal lunas diketahui, usia BEKU: berhenti dihitung
+// pada tanggal penerapan lunas (tidak bertambah lagi).
+function tagihanUsiaHari(item) {
+    const tglNota = (item && typeof item === 'object') ? item.tanggalNota : item;
+    const m = String(tglNota || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (!m) return 0;
     const nota = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
     if (isNaN(nota.getTime())) return 0;
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const days = Math.floor((today.getTime() - nota.getTime()) / 86400000);
+    let basis = null;
+    if (item && typeof item === 'object') {
+        const st = String(item.statusTagihan || '').toUpperCase();
+        const mL = String(item.tanggalLunas || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (st === 'LUNAS' && mL) basis = new Date(Number(mL[1]), Number(mL[2]) - 1, Number(mL[3]));
+    }
+    const ref = (basis && !isNaN(basis.getTime())) ? basis : today;
+    const days = Math.floor((ref.getTime() - nota.getTime()) / 86400000);
     return days < 0 ? 0 : days;
 }
 
@@ -12859,7 +12895,7 @@ function renderTagihanSummary() {
         totalNominal += nominal;
         const st = String(it.statusTagihan || 'BELUM LUNAS').toUpperCase();
         if (st === 'LUNAS') { lunas++; lunasNominal += nominal; } else { belum++; belumNominal += nominal; }
-        if (tagihanUsiaHari(it.tanggalNota) >= TAGIHAN_UMUR_MERAH) merah++;
+        if (tagihanUsiaHari(it) >= TAGIHAN_UMUR_MERAH) merah++;
     });
     const rp = function(n) { return 'Rp ' + Number(n || 0).toLocaleString('id-ID'); };
     const chip = 'inline-flex items-center gap-1 px-2 py-1 rounded-lg border bg-white font-bold';
@@ -12902,7 +12938,7 @@ function filterTagihan() {
         if (dsr && String(item.dsr || '').trim().toUpperCase() !== dsr) return false;
         const st = String(item.statusTagihan || 'BELUM LUNAS').trim().toUpperCase();
         if (status && st !== status) return false;
-        const usia = tagihanUsiaHari(item.tanggalNota);
+        const usia = tagihanUsiaHari(item);
         if (usiaF === 'merah' && usia < TAGIHAN_UMUR_MERAH) return false;
         if (usiaF === 'muda' && usia >= TAGIHAN_UMUR_MERAH) return false;
         return true;
@@ -12942,14 +12978,7 @@ function renderTagihanList(data) {
         container.innerHTML = '<div class="text-slate-400 text-center py-10 bg-white rounded-2xl border border-slate-100 shadow-sm"><div class="text-3xl mb-2">🧾</div><p class="text-xs font-medium">Tidak ada tagihan.</p></div>';
         return;
     }
-    if (tagihanViewMode === 'chart') { renderTagihanCards(data); updateViewToggleButtons('tagihan'); return; }
     renderTagihanTable(data);
-    updateViewToggleButtons('tagihan');
-}
-
-function setTagihanView(mode) {
-    tagihanViewMode = mode === 'chart' ? 'chart' : 'table';
-    renderTagihanList(tagihanFilteredData || []);
 }
 
 function changeTagihanPage(delta) {
@@ -12972,59 +13001,12 @@ function tagihanPaginationHtml(totalShown, startIndex) {
 
 function tagihanBulkControlsHtml() {
     return '<div class="flex flex-wrap items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl mb-3">' +
-        '<button type="button" onclick="resetPilihanStatusTagihan()" class="px-3 py-1.5 rounded-md bg-white hover:bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200">RESET</button>' +
-        '<button type="button" onclick="doneBulkStatusTagihan()" class="px-4 py-1.5 rounded-md bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-extrabold shadow-sm">DONE</button>' +
-        '<span id="tagihanBulkInfo" class="text-[10px] text-slate-500 font-semibold ml-auto">Pilih status pada masing-masing tagihan lalu klik DONE.</span>' +
-        '</div>';
-}
-
-function renderTagihanCards(data) {
-    const container = document.getElementById('listTagihan');
-    if (!container) return;
-    const totalPages = Math.max(1, Math.ceil(data.length / RIWAYAT_PAGE_SIZE));
-    if (tagihanPage > totalPages) tagihanPage = totalPages;
-    const startIndex = (tagihanPage - 1) * RIWAYAT_PAGE_SIZE;
-    const visibleData = data.slice(startIndex, startIndex + RIWAYAT_PAGE_SIZE);
-    const showDsr = tagihanIsAdminScope();
-    let cards = '';
-    visibleData.forEach(function(item, index) {
-        const st = String(item.statusTagihan || 'BELUM LUNAS').toUpperCase();
-        const usia = tagihanUsiaHari(item.tanggalNota);
-        const statusKelas = tagihanStatusKelas(st, usia);
-        const products = Array.isArray(item.products) ? item.products.filter(function(p){ return String(p || '').trim() !== ''; }) : [];
-        const productText = products.length ? products.map(function(p){ return escapeHtml(p); }).join('<br>') : '-';
-        const statusSelect = '<select onclick="event.stopPropagation()" class="tagihan-status-select w-full border border-slate-300 rounded-lg px-2.5 py-2 text-[10px] font-bold bg-white" data-tagihan-id="' + escapeHtml(item.id) + '" data-current-status="' + escapeHtml(st) + '" title="Ubah status tagihan">' +
-            '<option value="">' + escapeHtml(st) + ' / TIDAK DIUBAH</option>' +
-            '<option value="LUNAS" ' + (selectedTagihanStatus[String(item.id)] === 'LUNAS' ? 'selected' : '') + '>LUNAS</option>' +
-            '<option value="BELUM LUNAS" ' + (selectedTagihanStatus[String(item.id)] === 'BELUM LUNAS' ? 'selected' : '') + '>BELUM LUNAS</option>' +
-            '</select>';
-        const number = startIndex + index + 1;
-        const valueText = 'Rp ' + Number(item.nominal || 0).toLocaleString('id-ID');
-        cards += '<article class="riwayat-card group">' +
-            '<div class="riwayat-card-top">' +
-            '<div class="flex items-start gap-2 min-w-0">' +
-            '<div class="min-w-0">' +
-            '<div class="flex flex-wrap items-center gap-2"><span class="riwayat-card-number">#' + number + '</span><span class="text-[10px] text-slate-400 font-medium">Order: ' + escapeHtml(item.tanggal || '-') + '</span></div>' +
-            '<div class="riwayat-card-outlet mt-1">' + escapeHtml(item.outlet || '-') + '</div>' +
-            (showDsr && String(item.dsr || '') ? '<div class="text-[9px] text-slate-400 mt-0.5">DSR: ' + escapeHtml(item.dsr) + '</div>' : '') +
-            '</div>' +
-            '</div>' +
-            '<div class="shrink-0" onclick="event.stopPropagation()">' + statusSelect + '</div>' +
-            '</div>' +
-            '<div class="riwayat-card-products"><div class="riwayat-card-label">PRODUK</div><div class="riwayat-card-product-text">' + productText + '</div></div>' +
-            '<div class="riwayat-card-summary">' +
-            '<div class="riwayat-card-stat"><span class="riwayat-card-label">TGL NOTA</span><strong>' + escapeHtml(item.tanggalNota || '-') + '</strong></div>' +
-            '<div class="riwayat-card-stat"><span class="riwayat-card-label">USIA NOTA</span><strong>' + usia + ' hari</strong></div>' +
-            '<div class="riwayat-card-stat"><span class="riwayat-card-label">NOMINAL</span><strong>' + escapeHtml(valueText) + '</strong></div>' +
-            '</div>' +
-            '<div class="riwayat-card-footer" onclick="event.stopPropagation()">' +
-            '<span class="text-[9px] text-slate-400 font-medium">ID: ' + escapeHtml(item.id || '-') + '</span>' +
-            '<span class="text-[10px] font-extrabold ' + statusKelas + '" title="' + (usia >= TAGIHAN_UMUR_MERAH ? 'Usia nota sudah ' + usia + ' hari (lebih dari atau sama dengan 45 hari)' : 'Status tagihan') + '">' + escapeHtml(st) + '</span>' +
-            '</div>' +
-            '</article>';
-    });
-    container.innerHTML = '<div class="riwayat-cards-wrap">' + tagihanBulkControlsHtml() + '<div class="riwayat-cards-grid">' + cards + '</div>' + tagihanPaginationHtml(data.length, startIndex) + '</div>';
-    updateTagihanBulkInfo();
+        '<span id="tagihanBulkInfo" class="text-[10px] text-slate-500 font-semibold">Centang tagihan untuk pilihan massal.</span>' +
+        '<div class="flex items-center gap-1.5 ml-auto">' +
+        '<button type="button" id="tagihanBulkLunasBtn" onclick="terapkanStatusTagihanMassal(\'LUNAS\')" class="tg-btn tg-btn-lunas" disabled title="Tandai tagihan terpilih sebagai LUNAS">Tandai Lunas</button>' +
+        '<button type="button" id="tagihanBulkBelumBtn" onclick="terapkanStatusTagihanMassal(\'BELUM LUNAS\')" class="tg-btn tg-btn-belum" disabled title="Tandai tagihan terpilih sebagai BELUM LUNAS">Tandai Belum Lunas</button>' +
+        '<button type="button" onclick="resetPilihanStatusTagihan()" class="tg-btn" title="Bersihkan pilihan">RESET</button>' +
+        '</div></div>';
 }
 
 function renderTagihanTable(data) {
@@ -13035,89 +13017,154 @@ function renderTagihanTable(data) {
     const startIndex = (tagihanPage - 1) * RIWAYAT_PAGE_SIZE;
     const rows = data.slice(startIndex, startIndex + RIWAYAT_PAGE_SIZE);
     const showDsr = tagihanIsAdminScope();
-    const statusSelect = function(item, st) {
-        return '<select onclick="event.stopPropagation()" class="tagihan-status-select w-full border border-slate-300 rounded-lg px-2 py-1.5 text-[9px] font-bold bg-white" data-tagihan-id="' + escapeHtml(item.id) + '" data-current-status="' + escapeHtml(st) + '" title="Ubah status tagihan">' +
-            '<option value="">' + escapeHtml(st) + ' / TIDAK DIUBAH</option>' +
-            '<option value="LUNAS" ' + (selectedTagihanStatus[String(item.id)] === 'LUNAS' ? 'selected' : '') + '>LUNAS</option>' +
-            '<option value="BELUM LUNAS" ' + (selectedTagihanStatus[String(item.id)] === 'BELUM LUNAS' ? 'selected' : '') + '>BELUM LUNAS</option>' +
-            '</select>';
+    // Tombol status timbul (ukuran tetap, tidak melebar di mobile).
+    const statusButtons = function(item, st) {
+        const aktifLunas = st === 'LUNAS';
+        return '<div class="inline-flex items-center gap-1 mt-1">' +
+            '<button type="button" onclick="ubahStatusTagihanSatuan(\'' + escapeHtml(item.id) + '\',\'LUNAS\')" class="tg-btn tg-btn-lunas' + (aktifLunas ? ' is-active' : '') + '" title="Tandai LUNAS">Lunas</button>' +
+            '<button type="button" onclick="ubahStatusTagihanSatuan(\'' + escapeHtml(item.id) + '\',\'BELUM LUNAS\')" class="tg-btn tg-btn-belum' + (!aktifLunas ? ' is-active' : '') + '" title="Tandai BELUM LUNAS">Belum</button>' +
+            '</div>';
     };
     const body = rows.map(function(item, index) {
         const st = String(item.statusTagihan || 'BELUM LUNAS').toUpperCase();
-        const usia = tagihanUsiaHari(item.tanggalNota);
+        const usia = tagihanUsiaHari(item);
         const statusKelas = tagihanStatusKelas(st, usia);
-        const number = startIndex + index + 1;
-        return '<tr class="border-b border-slate-100 hover:bg-emerald-50/50">' +
-            '<td class="px-3 py-2.5 font-bold text-slate-500">#' + number + '</td>' +
+        const idKey = String(item.id || '');
+        const checked = !!tagihanSelectedIds[idKey];
+        const merah = usia >= TAGIHAN_UMUR_MERAH;
+        const rowSel = checked ? ' tagihan-row-selected' : '';
+        return '<tr class="border-b border-slate-100 hover:bg-emerald-50/50 cursor-pointer' + rowSel + '" onclick="bukaInvoiceTagihan(\'' + escapeHtml(idKey) + '\')">' +
+            '<td class="px-2.5 py-2.5 text-center"' + (item.isCash ? '' : ' onclick="event.stopPropagation()"') + '>' +
+            (item.isCash ? '<span class="text-slate-300" title="CASH otomatis Lunas">–</span>' : '<input type="checkbox" class="tagihan-row-check accent-emerald-600 w-4 h-4" data-tagihan-id="' + escapeHtml(idKey) + '" ' + (checked ? 'checked' : '') + ' aria-label="Pilih tagihan ' + escapeHtml(item.outlet || idKey) + '">') +
+            '</td>' +
+            '<td class="px-3 py-2.5 font-bold text-slate-700">' + escapeHtml(item.outlet || '-') + (showDsr && String(item.dsr || '') ? '<div class="text-[9px] text-slate-400 font-normal">DSR: ' + escapeHtml(item.dsr) + '</div>' : '') + '</td>' +
             '<td class="px-3 py-2.5 whitespace-nowrap">' + escapeHtml(item.tanggal || '-') + '</td>' +
-            '<td class="px-3 py-2.5 whitespace-nowrap">' + escapeHtml(item.tanggalNota || '-') + '</td>' +
-            '<td class="px-3 py-2.5 whitespace-nowrap font-bold">' + usia + ' hari</td>' +
-            '<td class="px-3 py-2.5 font-bold text-slate-700">' + escapeHtml(item.outlet || '-') + (showDsr ? '<div class="text-[9px] text-slate-400 font-normal">DSR: ' + escapeHtml(item.dsr || '-') + '</div>' : '') + '</td>' +
-            '<td class="px-3 py-2.5 text-right font-semibold">Rp ' + Number(item.nominal || 0).toLocaleString('id-ID') + '</td>' +
-            '<td class="px-3 py-2.5"><span class="text-[10px] font-extrabold ' + statusKelas + '">' + escapeHtml(st) + '</span></td>' +
-            '<td class="px-3 py-2.5">' + statusSelect(item, st) + '</td>' +
+            '<td class="px-3 py-2.5 whitespace-nowrap font-extrabold ' + (merah ? 'text-red-600' : 'text-slate-600') + '">' + usia + ' hari' + (st === 'LUNAS' && item.tanggalLunas ? '<div class="text-[8px] font-medium text-slate-400 font-normal">beku ' + escapeHtml(String(item.tanggalLunas).slice(0, 10)) + '</div>' : '') + '</td>' +
+            '<td class="px-3 py-2.5 text-right font-semibold whitespace-nowrap">Rp ' + Number(item.nominal || 0).toLocaleString('id-ID') + '</td>' +
+            '<td class="px-3 py-2.5"' + (item.isCash ? '' : ' onclick="event.stopPropagation()"') + '>' +
+            '<span class="text-[10px] font-extrabold ' + statusKelas + '">' + escapeHtml(st) + '</span>' +
+            (item.isCash ? '<div class="mt-1"><span class="tg-badge-cash">CASH</span> <span class="text-[8px] text-slate-400 font-medium">otomatis Lunas</span></div>' : statusButtons(item, st)) +
+            '</td>' +
             '</tr>';
     }).join('');
+    const selectableIds = rows.filter(function(item){ return !item.isCash; }).map(function(item){ return String(item.id || ''); });
+    const allChecked = selectableIds.length > 0 && selectableIds.every(function(id){ return tagihanSelectedIds[id]; });
     container.innerHTML = tagihanBulkControlsHtml() +
-        '<div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left text-[10px] min-w-[900px]"><thead><tr class="bg-slate-50 border-b border-slate-200 text-[9px] uppercase tracking-wide text-slate-500"><th class="px-3 py-2">No</th><th class="px-3 py-2">Tgl Order</th><th class="px-3 py-2">Tgl Nota</th><th class="px-3 py-2">Usia</th><th class="px-3 py-2">Outlet</th><th class="px-3 py-2 text-right">Nominal</th><th class="px-3 py-2">Status Tagihan</th><th class="px-3 py-2">Ubah Status</th></tr></thead><tbody>' + body + '</tbody></table></div></div>' +
+        '<div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left text-[10px] min-w-[720px]"><thead><tr class="bg-slate-50 border-b border-slate-200 text-[9px] uppercase tracking-wide text-slate-500">' +
+        '<th class="px-2.5 py-2 text-center w-10"><input type="checkbox" id="tagihanCheckAll" class="accent-emerald-600 w-4 h-4" ' + (allChecked ? 'checked' : '') + ' aria-label="Pilih semua tagihan" onchange="pilihSemuaTagihan(this.checked)"></th>' +
+        '<th class="px-3 py-2">Outlet</th><th class="px-3 py-2">Tanggal Order</th><th class="px-3 py-2">Usia Nota</th><th class="px-3 py-2 text-right">Nominal</th><th class="px-3 py-2">Status</th>' +
+        '</tr></thead><tbody>' + body + '</tbody></table></div></div>' +
         tagihanPaginationHtml(data.length, startIndex);
     updateTagihanBulkInfo();
 }
 
 function updateTagihanBulkInfo() {
-    let lunas = 0, belum = 0;
-    document.querySelectorAll('#listTagihan .tagihan-status-select').forEach(function(select) {
-        const v = String(select.value || '').toUpperCase();
-        if (v === 'LUNAS') lunas++;
-        if (v === 'BELUM LUNAS') belum++;
-    });
+    const ids = Object.keys(tagihanSelectedIds).filter(function(k){ return tagihanSelectedIds[k]; });
     const info = document.getElementById('tagihanBulkInfo');
-    if (info) info.textContent = (lunas + belum) > 0
-        ? 'LUNAS: ' + lunas + ' | BELUM LUNAS: ' + belum + ' | Total dipilih: ' + (lunas + belum)
-        : 'Pilih status pada masing-masing tagihan lalu klik DONE.';
+    if (info) info.textContent = ids.length > 0 ? (ids.length + ' tagihan dipilih') : 'Centang tagihan untuk pilihan massal.';
+    const bL = document.getElementById('tagihanBulkLunasBtn');
+    const bB = document.getElementById('tagihanBulkBelumBtn');
+    if (bL) bL.disabled = ids.length === 0;
+    if (bB) bB.disabled = ids.length === 0;
+    const all = document.getElementById('tagihanCheckAll');
+    if (all) {
+        const cbs = [...document.querySelectorAll('#listTagihan .tagihan-row-check')];
+        const checkedCount = cbs.filter(function(c){ return c.checked; }).length;
+        all.checked = cbs.length > 0 && checkedCount === cbs.length;
+        all.indeterminate = checkedCount > 0 && checkedCount < cbs.length;
+    }
 }
 
 function resetPilihanStatusTagihan() {
-    document.querySelectorAll('#listTagihan .tagihan-status-select').forEach(function(select) {
-        const id = String(select.dataset.tagihanId || '').trim();
-        select.value = '';
-        if (id) delete selectedTagihanStatus[id];
+    tagihanSelectedIds = {};
+    document.querySelectorAll('#listTagihan .tagihan-row-check').forEach(function(cb) { cb.checked = false; });
+    syncTagihanRowHighlight();
+    updateTagihanBulkInfo();
+}
+
+function syncTagihanRowHighlight() {
+    document.querySelectorAll('#listTagihan .tagihan-row-check').forEach(function(cb) {
+        const tr = cb.closest('tr');
+        if (tr) tr.classList.toggle('tagihan-row-selected', cb.checked);
     });
+}
+
+// Select all: centang SEMUA tagihan hasil filter (non-CASH) di semua halaman.
+function pilihSemuaTagihan(checked) {
+    (tagihanFilteredData || []).forEach(function(item) {
+        const id = String(item.id || '').trim();
+        if (!id || item.isCash) return;
+        if (checked) tagihanSelectedIds[id] = true; else delete tagihanSelectedIds[id];
+    });
+    document.querySelectorAll('#listTagihan .tagihan-row-check').forEach(function(cb) {
+        const id = String(cb.dataset.tagihanId || '').trim();
+        if (id) cb.checked = !!tagihanSelectedIds[id];
+    });
+    syncTagihanRowHighlight();
     updateTagihanBulkInfo();
 }
 
 document.addEventListener('change', function(e) {
-    if (e.target && e.target.classList.contains('tagihan-status-select')) {
-        const select = e.target;
-        const id = String(select.dataset.tagihanId || '').trim();
-        const value = String(select.value || '').trim().toUpperCase();
+    if (e.target && e.target.classList && e.target.classList.contains('tagihan-row-check')) {
+        const id = String(e.target.dataset.tagihanId || '').trim();
         if (id) {
-            if (value === 'LUNAS' || value === 'BELUM LUNAS') selectedTagihanStatus[id] = value;
-            else delete selectedTagihanStatus[id];
+            if (e.target.checked) tagihanSelectedIds[id] = true; else delete tagihanSelectedIds[id];
         }
+        syncTagihanRowHighlight();
         updateTagihanBulkInfo();
     }
 });
 
-// Proses DONE — disimpan SINKRON lewat updateStatusTagihanSync sehingga status
-// benar-benar tersimpan di server sebelum konfirmasi ditampilkan.
-function doneBulkStatusTagihan() {
-    const changes = [];
-    document.querySelectorAll('#listTagihan .tagihan-status-select').forEach(function(select) {
-        const id = String(select.dataset.tagihanId || '').trim();
-        const newStatus = String(select.value || '').trim().toUpperCase();
-        const oldStatus = String(select.dataset.currentStatus || '').toUpperCase();
-        if (id && (newStatus === 'LUNAS' || newStatus === 'BELUM LUNAS') && newStatus !== oldStatus) {
-            changes.push({ id: id, status: newStatus });
-        }
-    });
-    if (!changes.length) {
-        showModal('Tidak Ada Perubahan', 'Silakan pilih LUNAS atau BELUM LUNAS pada minimal satu tagihan.');
+// Ubah status SATU tagihan lewat tombol — disimpan SINKRON lewat
+// updateStatusTagihanSync sehingga status benar-benar tersimpan di server
+// sebelum popup konfirmasi ditampilkan.
+function ubahStatusTagihanSatuan(idInput, statusBaru) {
+    const id = String(idInput || '').trim();
+    const target = String(statusBaru || '').trim().toUpperCase();
+    if (!id || (target !== 'LUNAS' && target !== 'BELUM LUNAS')) return;
+    if (tagihanStatusInFlight) return;
+    const item = (globalTagihanData || []).find(function(x){ return String(x.id || '').trim() === id; });
+    if (item && item.isCash) {
+        showModal('Tagihan CASH', 'Transaksi CASH otomatis berstatus LUNAS dan tidak perlu diubah.');
         return;
     }
-    const lunas = changes.filter(function(x){ return x.status === 'LUNAS'; }).length;
-    const belum = changes.length - lunas;
-    showModal('Konfirmasi Status Tagihan', 'Akan diproses ' + changes.length + ' tagihan. LUNAS: ' + lunas + ' BELUM LUNAS: ' + belum + ' Lanjutkan?', true, function(isOk) {
+    const cur = String(item && item.statusTagihan || '').toUpperCase();
+    if (cur === target) {
+        showModal('Status Sudah Sama', 'Status tagihan ini sudah ' + (cur || '-') + '.');
+        return;
+    }
+    tagihanStatusInFlight = true;
+    showLoading(true);
+    google.script.run
+        .withSuccessHandler(function(res) {
+            tagihanStatusInFlight = false;
+            showLoading(false);
+            if (!res || res.success === false) {
+                showModal('Gagal Simpan Tagihan', (res && res.message) ? res.message : 'Perubahan status tagihan tidak tersimpan. Silakan coba lagi.');
+                return;
+            }
+            showModal('Tagihan Tersimpan', (res && res.message) ? res.message : ('Status tagihan ' + id + ' kini ' + target + '.'));
+            try { loadTagihan(true, true); } catch (eReload) {}
+        })
+        .withFailureHandler(function(err) {
+            tagihanStatusInFlight = false;
+            showLoading(false);
+            showModal('Gagal Simpan Tagihan', (err && err.message ? err.message : 'Terjadi kesalahan saat menyimpan status tagihan.'));
+        })
+        .updateStatusTagihanSync([{ id: id, status: target }], currentUsernameInput, currentUser);
+}
+
+// Pilihan massal: terapkan satu status ke SEMUA tagihan yang dicentang.
+function terapkanStatusTagihanMassal(statusBaru) {
+    const target = String(statusBaru || '').trim().toUpperCase();
+    if (target !== 'LUNAS' && target !== 'BELUM LUNAS') return;
+    if (tagihanStatusInFlight) return;
+    const changes = Object.keys(tagihanSelectedIds).filter(function(k){ return tagihanSelectedIds[k]; }).map(function(id){ return { id: id, status: target }; });
+    if (!changes.length) {
+        showModal('Tidak Ada Pilihan', 'Centang minimal satu tagihan terlebih dahulu.');
+        return;
+    }
+    showModal('Konfirmasi Status Tagihan', 'Ubah status ' + changes.length + ' tagihan terpilih menjadi ' + target + '?', true, function(isOk) {
         if (!isOk || tagihanStatusInFlight) return;
         tagihanStatusInFlight = true;
         showLoading(true);
@@ -13125,13 +13172,13 @@ function doneBulkStatusTagihan() {
             .withSuccessHandler(function(res) {
                 tagihanStatusInFlight = false;
                 showLoading(false);
-                changes.forEach(function(ch) { delete selectedTagihanStatus[String(ch.id)]; });
-                try { loadTagihan(true, true); } catch (eReload) {}
                 if (!res || res.success === false) {
                     showModal('Gagal Simpan Tagihan', (res && res.message) ? res.message : 'Perubahan status tagihan tidak tersimpan. Silakan coba lagi.');
                     return;
                 }
                 showModal('Tagihan Tersimpan', (res && res.message) ? res.message : (changes.length + ' tagihan diperbarui.'));
+                resetPilihanStatusTagihan();
+                try { loadTagihan(true, true); } catch (eReload) {}
             })
             .withFailureHandler(function(err) {
                 tagihanStatusInFlight = false;
@@ -13140,6 +13187,71 @@ function doneBulkStatusTagihan() {
             })
             .updateStatusTagihanSync(changes, currentUsernameInput, currentUser);
     });
+}
+
+// Klik baris tabel -> modal INVOICE (menyerupai invoice): rincian order,
+// total dus dan total value.
+function bukaInvoiceTagihan(idInput) {
+    const targetId = String(idInput == null ? '' : idInput).trim();
+    const item = (globalTagihanData || []).find(function(x){ return String(x.id || '').trim() === targetId; });
+    if (!item) {
+        showModal('Invoice Tidak Ditemukan', 'Data tagihan untuk ' + (targetId || '-') + ' tidak tersedia.');
+        return;
+    }
+    setDetailModalNoFooter();
+    const modal = document.getElementById('customModal');
+    document.getElementById('modalTitle').textContent = 'INVOICE TAGIHAN';
+    document.getElementById('modalSubtitle').textContent = 'ID INPUT: ' + targetId;
+    document.getElementById('modalCancelBtn').style.display = 'none';
+    document.getElementById('modalOkBtn').style.display = 'none';
+    modal.style.display = 'flex';
+    const st = String(item.statusTagihan || 'BELUM LUNAS').toUpperCase();
+    const usia = tagihanUsiaHari(item);
+    const merah = usia >= TAGIHAN_UMUR_MERAH;
+    const rpVal = 'Rp ' + Number(item.nominal || 0).toLocaleString('id-ID');
+    let totalDus = 0, totalPcs = 0;
+    const products = Array.isArray(item.products) ? item.products.filter(function(p){ return String(p || '').trim() !== ''; }) : [];
+    const rowsHtml = products.length ? products.map(function(p, i) {
+        const m = String(p).match(/^(.*?)(?:\s+-\s*)([0-9]+(?:[.,][0-9]+)?)\s*(PCS|Pcs|DUS|Dus|UNIT|Unit)$/i);
+        let nama = String(p), qty = '-', sat = '-';
+        if (m) {
+            nama = String(m[1] || '').trim() || String(p);
+            qty = Number(String(m[2]).replace(',', '.'));
+            sat = String(m[3] || '').trim();
+            const uu = sat.toUpperCase();
+            if (uu === 'DUS') totalDus += qty; else if (uu === 'PCS') totalPcs += qty;
+        }
+        return '<tr><td class="text-center text-slate-400 font-bold" style="width:34px;">' + (i + 1) + '</td><td class="font-semibold break-words">' + escapeHtml(nama) + '</td><td class="text-center font-bold" style="width:60px;">' + qty + '</td><td class="text-center" style="width:56px;">' + escapeHtml(sat) + '</td></tr>';
+    }).join('') : '<tr><td colspan="4" class="p-4 text-center text-slate-400">Tidak ada rincian produk.</td></tr>';
+    let dusText = '';
+    if (totalDus > 0) dusText += totalDus + ' Dus';
+    if (totalPcs > 0) dusText += (dusText ? ' + ' : '') + totalPcs + ' Pcs';
+    if (!dusText) dusText = '-';
+    const lunasInfo = (st === 'LUNAS' && item.tanggalLunas) ? '<div class="inv-cell"><div class="inv-label">Dilunasi Pada</div><div class="inv-val" style="color:#059669;">' + escapeHtml(String(item.tanggalLunas).slice(0, 10)) + '</div></div>' : '';
+    document.getElementById('modalBody').innerHTML =
+        '<div class="inv-head">' +
+            '<div><div class="inv-title">INVOICE</div><div class="inv-sub">Nota: ' + escapeHtml(item.tanggalNota || '-') + ' &middot; Order: ' + escapeHtml(item.tanggal || '-') + '</div></div>' +
+            '<div style="text-align:right;"><div class="inv-chip">' + escapeHtml(targetId) + '</div>' +
+            '<div class="inv-stamp ' + (st === 'LUNAS' ? 'inv-stamp-lunas' : 'inv-stamp-belum') + '">' + escapeHtml(st) + '</div></div>' +
+        '</div>' +
+        '<div class="inv-body">' +
+            '<div class="inv-grid">' +
+                '<div class="inv-cell"><div class="inv-label">Outlet</div><div class="inv-val">' + escapeHtml(item.outlet || '-') + '</div></div>' +
+                '<div class="inv-cell"><div class="inv-label">DSR / Sales</div><div class="inv-val">' + escapeHtml(item.dsr || '-') + '</div></div>' +
+                '<div class="inv-cell"><div class="inv-label">Tanggal Order</div><div class="inv-val">' + escapeHtml(item.tanggal || '-') + '</div></div>' +
+                '<div class="inv-cell"><div class="inv-label">Tanggal Nota (Order + 3)</div><div class="inv-val">' + escapeHtml(item.tanggalNota || '-') + '</div></div>' +
+                '<div class="inv-cell"><div class="inv-label">Pembayaran</div><div class="inv-val">' + escapeHtml(item.isCash ? 'CASH' : (item.payment || 'CREDIT')) + '</div></div>' +
+                '<div class="inv-cell"><div class="inv-label">Usia Nota</div><div class="inv-val' + (merah ? ' text-red-600' : '') + '">' + usia + ' hari' + (st === 'LUNAS' && item.tanggalLunas ? ' &middot; beku' : '') + '</div></div>' +
+                lunasInfo +
+            '</div>' +
+            '<div class="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Rincian Produk</div>' +
+            '<div class="overflow-x-auto"><table class="inv-table"><thead><tr><th style="width:34px;text-align:center;">No</th><th>Produk</th><th style="width:60px;text-align:center;">Qty</th><th style="width:56px;text-align:center;">Satuan</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>' +
+            '<table class="inv-table" style="margin-top:10px;"><tbody>' +
+                '<tr><td>Volume</td><td style="text-align:right;font-weight:800;">' + escapeHtml(String(item.volume == null ? '0' : item.volume)) + ' L</td></tr>' +
+                '<tr class="inv-totrow"><td>TOTAL DUS</td><td style="text-align:right;">' + escapeHtml(dusText) + '</td></tr>' +
+                '<tr class="inv-totrow"><td>TOTAL VALUE</td><td style="text-align:right;">' + escapeHtml(rpVal) + '</td></tr>' +
+            '</tbody></table>' +
+        '</div>';
 }
 </script>
 
