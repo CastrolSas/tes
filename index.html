@@ -3306,6 +3306,12 @@ body{background:
                     <span class="sidebar-text">Riwayat</span>
                 </button>
 
+                <button type="button" onclick="switchTab('tagihan')" id="navTagihan"
+                        class="sidebar-item" title="Tagihan" aria-label="Tagihan">
+                    <span class="sidebar-icon">🧾</span>
+                    <span class="sidebar-text">Tagihan</span>
+                </button>
+
                 <button type="button" onclick="switchTab('approval')" id="navApproval"
                         class="sidebar-item hidden" title="Approval Status Order" aria-label="Approval Status Order">
                     <span class="sidebar-icon">✅</span>
@@ -3802,6 +3808,70 @@ body{background:
                     </div>
 
                     <div id="listApproval" class="space-y-2.5 text-xs">
+                        <p class="text-slate-400 text-center py-6">Memuat...</p>
+                    </div>
+                </div>
+
+                <div id="tabTagihan" class="tab-content hidden space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-base font-bold text-slate-800">Tagihan</h2>
+                            <span id="tagihanCount" class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">0 tagihan</span>
+                        </div>
+                        <p class="text-[9px] text-slate-400">Usia nota = tanggal order + 3 hari — status tagihan merah bila usia ≥ 45 hari.</p>
+                    </div>
+
+                    <div id="tagihanSummary" class="flex flex-wrap items-center gap-1.5 text-[9px]"></div>
+
+                    <div class="flex items-center justify-end gap-1.5 mb-1" role="group" aria-label="Tampilan Tagihan">
+                        <button type="button" id="tagihanViewTableBtn" onclick="setTagihanView('table')" class="view-toggle-btn">▤ Tabel</button>
+                        <button type="button" id="tagihanViewChartBtn" onclick="setTagihanView('chart')" class="view-toggle-btn is-active">▥ Chart</button>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <div>
+                                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Filter Tagihan</div>
+                                <div class="text-[9px] text-slate-400 mt-0.5">Pilih status LUNAS / BELUM LUNAS pada masing-masing tagihan lalu klik DONE — tersimpan langsung di server.</div>
+                            </div>
+                            <button type="button" onclick="resetTagihanAllFilter()" class="shrink-0 text-[10px] font-bold text-slate-500 hover:text-emerald-700 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 transition">Reset</button>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                            <div class="col-span-2 lg:col-span-4 relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </span>
+                                <input type="text" id="searchTagihanInput" oninput="filterTagihan()" placeholder="Cari outlet atau ID..." class="w-full pl-9 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm transition">
+                                <button type="button" id="clearTagihanSearchBtn" onclick="clearTagihanSearch()" class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 hidden">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <select id="filterTagihanOutlet" onchange="filterTagihan()" class="min-h-[42px] border border-slate-200 rounded-xl px-3 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="">Semua Outlet</option>
+                            </select>
+                            <div id="filterTagihanDsrWrap">
+                                <select id="filterTagihanDsr" onchange="filterTagihan()" class="w-full min-h-[42px] border border-slate-200 rounded-xl px-3 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="">Semua DSR / Sales</option>
+                                </select>
+                            </div>
+                            <select id="filterTagihanStatus" onchange="filterTagihan()" class="min-h-[42px] border border-slate-200 rounded-xl px-3 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="">Semua Status</option>
+                                <option value="LUNAS">LUNAS</option>
+                                <option value="BELUM LUNAS">BELUM LUNAS</option>
+                            </select>
+                            <select id="filterTagihanUsia" onchange="filterTagihan()" class="min-h-[42px] border border-slate-200 rounded-xl px-3 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="">Semua Usia</option>
+                                <option value="merah">Usia ≥ 45 hari</option>
+                                <option value="muda">Usia &lt; 45 hari</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="listTagihan" class="space-y-2.5 text-xs">
                         <p class="text-slate-400 text-center py-6">Memuat...</p>
                     </div>
                 </div>
@@ -4321,6 +4391,7 @@ body{background:
             // Tidak memakai loading overlay dan tidak menonaktifkan UI. Semua data disegarkan paralel.
             const run = function(fn) { try { fn(); } catch(e) { console.warn('Global refresh:', e); } };
             run(function(){ loadRiwayat(true, true); });
+            run(function(){ loadTagihan(true, true); });
             run(function(){ loadMonitoring(true, true); });
             run(function(){ loadOutletKontrak(true, true); });
             run(function(){ loadOutletBWSAdmin(true, true); });
@@ -7664,8 +7735,10 @@ startAutoRefresh();
                 ? { table: 'riwayatViewTableBtn', chart: 'riwayatViewChartBtn' }
                 : section === 'approval'
                     ? { table: 'approvalViewTableBtn', chart: 'approvalViewChartBtn' }
-                    : { table: 'pencapaianViewTableBtn', chart: 'pencapaianViewChartBtn' };
-            const mode = section === 'riwayat' ? riwayatViewMode : (section === 'approval' ? approvalViewMode : pencapaianViewMode);
+                    : section === 'tagihan'
+                        ? { table: 'tagihanViewTableBtn', chart: 'tagihanViewChartBtn' }
+                        : { table: 'pencapaianViewTableBtn', chart: 'pencapaianViewChartBtn' };
+            const mode = section === 'riwayat' ? riwayatViewMode : (section === 'approval' ? approvalViewMode : (section === 'tagihan' ? tagihanViewMode : pencapaianViewMode));
             ['table', 'chart'].forEach(function(key) {
                 const btn = document.getElementById(modes[key]);
                 if (btn) btn.classList.toggle('is-active', mode === key);
@@ -10023,8 +10096,8 @@ startAutoRefresh();
             // Task 43: Approval hanya untuk admin / akun tanpa nama sales.
             const canApprovalMenu = isAdminLogin || String(currentUser || '').trim() === '';
             if (tab === 'approval' && !canApprovalMenu) { applyRoleVisibility(); return; }
-            const tabMap = {home:'tabHome',input:'tabInput',riwayat:'tabRiwayat',approval:'tabApproval',pencapaian:'tabPencapaian',monitoring:'tabMonitoring',outletkontrak:'tabOutletKontrak',outletbws:'tabOutletBWS',tambahcustomer:'tabTambahCustomer',pricelist:'tabPricelist',harganett:'tabHargaNett',pesananoutlet:'tabPesananOutlet',pengumumanadmin:'tabPengumumanAdmin'};
-            const navMap = {home:'navHome',input:'navInput',riwayat:'navRiwayat',approval:'navApproval',pencapaian:'navPencapaian',monitoring:'navMonitoring',outletkontrak:'navOutletKontrak',outletbws:'navOutletBWS',tambahcustomer:'navTambahCustomer',pricelist:'navPricelist',harganett:'navHargaNett',pesananoutlet:'navPesananOutlet',pengumumanadmin:'navPengumumanAdmin'};
+            const tabMap = {home:'tabHome',input:'tabInput',riwayat:'tabRiwayat',approval:'tabApproval',tagihan:'tabTagihan',pencapaian:'tabPencapaian',monitoring:'tabMonitoring',outletkontrak:'tabOutletKontrak',outletbws:'tabOutletBWS',tambahcustomer:'tabTambahCustomer',pricelist:'tabPricelist',harganett:'tabHargaNett',pesananoutlet:'tabPesananOutlet',pengumumanadmin:'tabPengumumanAdmin'};
+            const navMap = {home:'navHome',input:'navInput',riwayat:'navRiwayat',approval:'navApproval',tagihan:'navTagihan',pencapaian:'navPencapaian',monitoring:'navMonitoring',outletkontrak:'navOutletKontrak',outletbws:'navOutletBWS',tambahcustomer:'navTambahCustomer',pricelist:'navPricelist',harganett:'navHargaNett',pesananoutlet:'navPesananOutlet',pengumumanadmin:'navPengumumanAdmin'};
             Object.keys(tabMap).forEach(function(key){
                 const el=document.getElementById(tabMap[key]);
                 if(!el) return;
@@ -10061,6 +10134,7 @@ startAutoRefresh();
 if(tab==='home'){loadHomeRebuild();startHomeRebuildAuto();}
 if(tab==='riwayat')loadRiwayat(false, true);
 if(tab==='approval')loadApproval(false, true);
+if(tab==='tagihan')loadTagihan(false, true);
             if(tab==='pencapaian')loadPencapaianSales(false, true);
             if(tab==='monitoring')loadMonitoring(false, true);
             if(tab==='outletkontrak')loadOutletKontrak(false, true);
@@ -12687,6 +12761,384 @@ function doneBulkStatusApproval() {
                 showModal('Gagal Approval', (err && err.message ? err.message : 'Terjadi kesalahan saat mengubah status.'));
             })
             .updateOrderStatusBatchSync(changes, currentUsernameInput, currentUser);
+    });
+}
+</script>
+
+
+<script id="tagihan-page-v1">
+/* MENU TAGIHAN - usia nota dihitung dari tanggal order + 3 hari.
+   Berisi nominal tiap nota dan status pelunasannya (LUNAS / BELUM LUNAS).
+   Status tampil MERAH bila usia nota >= 45 hari. Skema perubahan status sama
+   dengan halaman Approval: pilih status per tagihan lalu klik DONE — disimpan
+   SINKRON via updateStatusTagihanSync (sales hanya untuk tagihan miliknya). */
+var globalTagihanData = [];
+var tagihanFilteredData = [];
+var tagihanPage = 1;
+var tagihanViewMode = 'chart';
+var tagihanLoading = false;
+var tagihanStatusInFlight = false;
+var selectedTagihanStatus = {};
+var TAGIHAN_UMUR_MERAH = 45;
+
+function tagihanIsAdminScope() {
+    return String(currentUsernameInput||'').trim().toLowerCase()==='admin' || String(currentUser||'').trim()==='';
+}
+
+function tagihanCacheKey() {
+    return 'TAGIHAN_' + String(currentUsernameInput||'').toUpperCase() + '_' + String(currentUser||'').toUpperCase();
+}
+
+// Usia nota (hari) dihitung ulang saat render agar selalu akurat.
+function tagihanUsiaHari(tanggalNota) {
+    const m = String(tanggalNota || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return 0;
+    const nota = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    if (isNaN(nota.getTime())) return 0;
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const days = Math.floor((today.getTime() - nota.getTime()) / 86400000);
+    return days < 0 ? 0 : days;
+}
+
+function tagihanStatusKelas(status, usia) {
+    const st = String(status || 'BELUM LUNAS').toUpperCase();
+    if (Number(usia || 0) >= TAGIHAN_UMUR_MERAH) return 'text-red-600';
+    return st === 'LUNAS' ? 'text-emerald-700' : 'text-slate-600';
+}
+
+function loadTagihan(forceReload, silentRefresh) {
+    const cacheKey = tagihanCacheKey();
+    if (!Array.isArray(globalTagihanData) || globalTagihanData.length === 0) {
+        const cachedLocal = appLocalCacheGet(cacheKey);
+        if (Array.isArray(cachedLocal) && cachedLocal.length) globalTagihanData = cachedLocal;
+    }
+    const hasCached = Array.isArray(globalTagihanData) && globalTagihanData.length > 0;
+    if (!forceReload && hasCached) {
+        populateTagihanFilters();
+        filterTagihan();
+        if (appLocalCacheIsFresh(cacheKey, 60000)) return;
+        silentRefresh = true;
+    }
+    if (tagihanLoading) return;
+    tagihanLoading = true;
+    const container = document.getElementById('listTagihan');
+    if (forceReload && hasCached) filterTagihan();
+    if (!silentRefresh) {
+        if (!hasCached && container) container.innerHTML = '<p class="text-slate-400 text-center py-6">Memuat...</p>';
+        showLoading(true);
+    }
+    const salesArg = tagihanIsAdminScope() ? '' : String(currentUser||'').trim();
+    google.script.run.withSuccessHandler(function(res) {
+        tagihanLoading = false;
+        if (!silentRefresh) showLoading(false);
+        handleTagihanLoaded(res);
+    }).withFailureHandler(function(err) {
+        tagihanLoading = false;
+        if (!silentRefresh) showLoading(false);
+        if (container) container.innerHTML = '<div class="text-red-500 text-center py-6 text-xs">Gagal memuat tagihan: ' + escapeHtml(err && err.message ? err.message : 'Terjadi kesalahan.') + '</div>';
+        const badge = document.getElementById('tagihanCount');
+        if (badge) badge.textContent = '0 tagihan';
+    }).getTagihanData(salesArg, currentUsernameInput);
+}
+
+function handleTagihanLoaded(res) {
+    globalTagihanData = (res && Array.isArray(res.data)) ? res.data : [];
+    appLocalCacheSet(tagihanCacheKey(), globalTagihanData);
+    populateTagihanFilters();
+    filterTagihan();
+}
+
+function renderTagihanSummary() {
+    const el = document.getElementById('tagihanSummary');
+    if (!el) return;
+    const items = globalTagihanData || [];
+    let totalNominal = 0, lunas = 0, lunasNominal = 0, belum = 0, belumNominal = 0, merah = 0;
+    items.forEach(function(it) {
+        const nominal = Number(it.nominal || 0);
+        totalNominal += nominal;
+        const st = String(it.statusTagihan || 'BELUM LUNAS').toUpperCase();
+        if (st === 'LUNAS') { lunas++; lunasNominal += nominal; } else { belum++; belumNominal += nominal; }
+        if (tagihanUsiaHari(it.tanggalNota) >= TAGIHAN_UMUR_MERAH) merah++;
+    });
+    const rp = function(n) { return 'Rp ' + Number(n || 0).toLocaleString('id-ID'); };
+    const chip = 'inline-flex items-center gap-1 px-2 py-1 rounded-lg border bg-white font-bold';
+    el.innerHTML =
+        '<span class="' + chip + ' border-slate-200 text-slate-600">Total: <span class="text-slate-800">' + escapeHtml(rp(totalNominal)) + '</span></span>' +
+        '<span class="' + chip + ' border-amber-200 text-amber-700">Belum Lunas: ' + escapeHtml(rp(belumNominal)) + ' (' + belum + ')</span>' +
+        '<span class="' + chip + ' border-emerald-200 text-emerald-700">Lunas: ' + escapeHtml(rp(lunasNominal)) + ' (' + lunas + ')</span>' +
+        '<span class="' + chip + ' border-red-200 text-red-600">Usia ≥ 45 hari: ' + merah + ' tagihan</span>';
+}
+
+function populateTagihanFilters() {
+    const fill = function(sel, values, label) {
+        if (!sel) return;
+        const prev = String(sel.value || '');
+        sel.innerHTML = '<option value="">' + label + '</option>' + values.map(function(v){ return '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>'; }).join('');
+        if (values.indexOf(prev) !== -1) sel.value = prev;
+    };
+    const uniqSorted = function(arr, mapper) {
+        return [...new Set((arr || []).map(mapper).filter(Boolean))].sort(function(a,b){ return a.localeCompare(b, 'id'); });
+    };
+    fill(document.getElementById('filterTagihanOutlet'), uniqSorted(globalTagihanData, function(i){ return String(i.outlet || '').trim(); }), 'Semua Outlet');
+    fill(document.getElementById('filterTagihanDsr'), uniqSorted(globalTagihanData, function(i){ return String(i.dsr || '').trim(); }), 'Semua DSR / Sales');
+    const dsrWrap = document.getElementById('filterTagihanDsrWrap');
+    if (dsrWrap) dsrWrap.classList.toggle('hidden', !tagihanIsAdminScope());
+}
+
+function filterTagihan() {
+    const searchEl = document.getElementById('searchTagihanInput');
+    const keyword = String(searchEl && searchEl.value || '').trim().toUpperCase();
+    const outlet = String((document.getElementById('filterTagihanOutlet') || {}).value || '').trim().toUpperCase();
+    const dsr = String((document.getElementById('filterTagihanDsr') || {}).value || '').trim().toUpperCase();
+    const status = String((document.getElementById('filterTagihanStatus') || {}).value || '').trim().toUpperCase();
+    const usiaF = String((document.getElementById('filterTagihanUsia') || {}).value || '').trim();
+    const clearBtn = document.getElementById('clearTagihanSearchBtn');
+    if (clearBtn) clearBtn.classList.toggle('hidden', !keyword);
+    const filtered = (globalTagihanData || []).filter(function(item) {
+        const text = [item.outlet, item.id, item.dsr].map(function(v){ return String(v == null ? '' : v).toUpperCase(); }).join(' ');
+        if (keyword && text.indexOf(keyword) === -1) return false;
+        if (outlet && String(item.outlet || '').trim().toUpperCase() !== outlet) return false;
+        if (dsr && String(item.dsr || '').trim().toUpperCase() !== dsr) return false;
+        const st = String(item.statusTagihan || 'BELUM LUNAS').trim().toUpperCase();
+        if (status && st !== status) return false;
+        const usia = tagihanUsiaHari(item.tanggalNota);
+        if (usiaF === 'merah' && usia < TAGIHAN_UMUR_MERAH) return false;
+        if (usiaF === 'muda' && usia >= TAGIHAN_UMUR_MERAH) return false;
+        return true;
+    });
+    filtered.sort(function(a,b){
+        const ua = tagihanUsiaHari(a.tanggalNota), ub = tagihanUsiaHari(b.tanggalNota);
+        if (ub !== ua) return ub - ua;
+        return new Date(String(a.tanggal || '')).getTime() - new Date(String(b.tanggal || '')).getTime();
+    });
+    tagihanFilteredData = filtered;
+    tagihanPage = 1;
+    renderTagihanList(filtered);
+}
+
+function clearTagihanSearch() {
+    const el = document.getElementById('searchTagihanInput');
+    if (el) el.value = '';
+    filterTagihan();
+}
+
+function resetTagihanAllFilter() {
+    ['searchTagihanInput','filterTagihanOutlet','filterTagihanDsr','filterTagihanStatus','filterTagihanUsia'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    filterTagihan();
+}
+
+function renderTagihanList(data) {
+    const container = document.getElementById('listTagihan');
+    if (!container) return;
+    if (!Array.isArray(data)) data = [];
+    const countBadge = document.getElementById('tagihanCount');
+    if (countBadge) countBadge.textContent = data.length + ' tagihan';
+    renderTagihanSummary();
+    if (data.length === 0) {
+        container.innerHTML = '<div class="text-slate-400 text-center py-10 bg-white rounded-2xl border border-slate-100 shadow-sm"><div class="text-3xl mb-2">🧾</div><p class="text-xs font-medium">Tidak ada tagihan.</p></div>';
+        return;
+    }
+    if (tagihanViewMode === 'chart') { renderTagihanCards(data); updateViewToggleButtons('tagihan'); return; }
+    renderTagihanTable(data);
+    updateViewToggleButtons('tagihan');
+}
+
+function setTagihanView(mode) {
+    tagihanViewMode = mode === 'chart' ? 'chart' : 'table';
+    renderTagihanList(tagihanFilteredData || []);
+}
+
+function changeTagihanPage(delta) {
+    const total = Math.max(1, Math.ceil((tagihanFilteredData || []).length / RIWAYAT_PAGE_SIZE));
+    tagihanPage = Math.max(1, Math.min(total, tagihanPage + Number(delta || 0)));
+    renderTagihanList(tagihanFilteredData || []);
+}
+
+function tagihanPaginationHtml(totalShown, startIndex) {
+    const totalPages = Math.max(1, Math.ceil(totalShown / RIWAYAT_PAGE_SIZE));
+    if (totalPages <= 1) return '';
+    return '<div class="flex items-center justify-between gap-2 mt-3 px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-[10px]">' +
+        '<span class="text-slate-500">Menampilkan ' + (startIndex + 1) + '-' + Math.min(startIndex + RIWAYAT_PAGE_SIZE, totalShown) + ' dari ' + totalShown + ' tagihan</span>' +
+        '<div class="flex items-center gap-1">' +
+        '<button type="button" onclick="changeTagihanPage(-1)" class="px-2.5 py-1.5 rounded-lg border bg-white ' + (tagihanPage <= 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-100') + '" ' + (tagihanPage <= 1 ? 'disabled' : '') + '>‹</button>' +
+        '<span class="px-2 font-bold">Halaman ' + tagihanPage + '/' + totalPages + '</span>' +
+        '<button type="button" onclick="changeTagihanPage(1)" class="px-2.5 py-1.5 rounded-lg border bg-white ' + (tagihanPage >= totalPages ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-100') + '" ' + (tagihanPage >= totalPages ? 'disabled' : '') + '>›</button>' +
+        '</div></div>';
+}
+
+function tagihanBulkControlsHtml() {
+    return '<div class="flex flex-wrap items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl mb-3">' +
+        '<button type="button" onclick="resetPilihanStatusTagihan()" class="px-3 py-1.5 rounded-md bg-white hover:bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200">RESET</button>' +
+        '<button type="button" onclick="doneBulkStatusTagihan()" class="px-4 py-1.5 rounded-md bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-extrabold shadow-sm">DONE</button>' +
+        '<span id="tagihanBulkInfo" class="text-[10px] text-slate-500 font-semibold ml-auto">Pilih status pada masing-masing tagihan lalu klik DONE.</span>' +
+        '</div>';
+}
+
+function renderTagihanCards(data) {
+    const container = document.getElementById('listTagihan');
+    if (!container) return;
+    const totalPages = Math.max(1, Math.ceil(data.length / RIWAYAT_PAGE_SIZE));
+    if (tagihanPage > totalPages) tagihanPage = totalPages;
+    const startIndex = (tagihanPage - 1) * RIWAYAT_PAGE_SIZE;
+    const visibleData = data.slice(startIndex, startIndex + RIWAYAT_PAGE_SIZE);
+    const showDsr = tagihanIsAdminScope();
+    let cards = '';
+    visibleData.forEach(function(item, index) {
+        const st = String(item.statusTagihan || 'BELUM LUNAS').toUpperCase();
+        const usia = tagihanUsiaHari(item.tanggalNota);
+        const statusKelas = tagihanStatusKelas(st, usia);
+        const products = Array.isArray(item.products) ? item.products.filter(function(p){ return String(p || '').trim() !== ''; }) : [];
+        const productText = products.length ? products.map(function(p){ return escapeHtml(p); }).join('<br>') : '-';
+        const statusSelect = '<select onclick="event.stopPropagation()" class="tagihan-status-select w-full border border-slate-300 rounded-lg px-2.5 py-2 text-[10px] font-bold bg-white" data-tagihan-id="' + escapeHtml(item.id) + '" data-current-status="' + escapeHtml(st) + '" title="Ubah status tagihan">' +
+            '<option value="">' + escapeHtml(st) + ' / TIDAK DIUBAH</option>' +
+            '<option value="LUNAS" ' + (selectedTagihanStatus[String(item.id)] === 'LUNAS' ? 'selected' : '') + '>LUNAS</option>' +
+            '<option value="BELUM LUNAS" ' + (selectedTagihanStatus[String(item.id)] === 'BELUM LUNAS' ? 'selected' : '') + '>BELUM LUNAS</option>' +
+            '</select>';
+        const number = startIndex + index + 1;
+        const valueText = 'Rp ' + Number(item.nominal || 0).toLocaleString('id-ID');
+        cards += '<article class="riwayat-card group">' +
+            '<div class="riwayat-card-top">' +
+            '<div class="flex items-start gap-2 min-w-0">' +
+            '<div class="min-w-0">' +
+            '<div class="flex flex-wrap items-center gap-2"><span class="riwayat-card-number">#' + number + '</span><span class="text-[10px] text-slate-400 font-medium">Order: ' + escapeHtml(item.tanggal || '-') + '</span></div>' +
+            '<div class="riwayat-card-outlet mt-1">' + escapeHtml(item.outlet || '-') + '</div>' +
+            (showDsr && String(item.dsr || '') ? '<div class="text-[9px] text-slate-400 mt-0.5">DSR: ' + escapeHtml(item.dsr) + '</div>' : '') +
+            '</div>' +
+            '</div>' +
+            '<div class="shrink-0" onclick="event.stopPropagation()">' + statusSelect + '</div>' +
+            '</div>' +
+            '<div class="riwayat-card-products"><div class="riwayat-card-label">PRODUK</div><div class="riwayat-card-product-text">' + productText + '</div></div>' +
+            '<div class="riwayat-card-summary">' +
+            '<div class="riwayat-card-stat"><span class="riwayat-card-label">TGL NOTA</span><strong>' + escapeHtml(item.tanggalNota || '-') + '</strong></div>' +
+            '<div class="riwayat-card-stat"><span class="riwayat-card-label">USIA NOTA</span><strong>' + usia + ' hari</strong></div>' +
+            '<div class="riwayat-card-stat"><span class="riwayat-card-label">NOMINAL</span><strong>' + escapeHtml(valueText) + '</strong></div>' +
+            '</div>' +
+            '<div class="riwayat-card-footer" onclick="event.stopPropagation()">' +
+            '<span class="text-[9px] text-slate-400 font-medium">ID: ' + escapeHtml(item.id || '-') + '</span>' +
+            '<span class="text-[10px] font-extrabold ' + statusKelas + '" title="' + (usia >= TAGIHAN_UMUR_MERAH ? 'Usia nota sudah ' + usia + ' hari (lebih dari atau sama dengan 45 hari)' : 'Status tagihan') + '">' + escapeHtml(st) + '</span>' +
+            '</div>' +
+            '</article>';
+    });
+    container.innerHTML = '<div class="riwayat-cards-wrap">' + tagihanBulkControlsHtml() + '<div class="riwayat-cards-grid">' + cards + '</div>' + tagihanPaginationHtml(data.length, startIndex) + '</div>';
+    updateTagihanBulkInfo();
+}
+
+function renderTagihanTable(data) {
+    const container = document.getElementById('listTagihan');
+    if (!container) return;
+    const totalPages = Math.max(1, Math.ceil(data.length / RIWAYAT_PAGE_SIZE));
+    if (tagihanPage > totalPages) tagihanPage = totalPages;
+    const startIndex = (tagihanPage - 1) * RIWAYAT_PAGE_SIZE;
+    const rows = data.slice(startIndex, startIndex + RIWAYAT_PAGE_SIZE);
+    const showDsr = tagihanIsAdminScope();
+    const statusSelect = function(item, st) {
+        return '<select onclick="event.stopPropagation()" class="tagihan-status-select w-full border border-slate-300 rounded-lg px-2 py-1.5 text-[9px] font-bold bg-white" data-tagihan-id="' + escapeHtml(item.id) + '" data-current-status="' + escapeHtml(st) + '" title="Ubah status tagihan">' +
+            '<option value="">' + escapeHtml(st) + ' / TIDAK DIUBAH</option>' +
+            '<option value="LUNAS" ' + (selectedTagihanStatus[String(item.id)] === 'LUNAS' ? 'selected' : '') + '>LUNAS</option>' +
+            '<option value="BELUM LUNAS" ' + (selectedTagihanStatus[String(item.id)] === 'BELUM LUNAS' ? 'selected' : '') + '>BELUM LUNAS</option>' +
+            '</select>';
+    };
+    const body = rows.map(function(item, index) {
+        const st = String(item.statusTagihan || 'BELUM LUNAS').toUpperCase();
+        const usia = tagihanUsiaHari(item.tanggalNota);
+        const statusKelas = tagihanStatusKelas(st, usia);
+        const number = startIndex + index + 1;
+        return '<tr class="border-b border-slate-100 hover:bg-emerald-50/50">' +
+            '<td class="px-3 py-2.5 font-bold text-slate-500">#' + number + '</td>' +
+            '<td class="px-3 py-2.5 whitespace-nowrap">' + escapeHtml(item.tanggal || '-') + '</td>' +
+            '<td class="px-3 py-2.5 whitespace-nowrap">' + escapeHtml(item.tanggalNota || '-') + '</td>' +
+            '<td class="px-3 py-2.5 whitespace-nowrap font-bold">' + usia + ' hari</td>' +
+            '<td class="px-3 py-2.5 font-bold text-slate-700">' + escapeHtml(item.outlet || '-') + (showDsr ? '<div class="text-[9px] text-slate-400 font-normal">DSR: ' + escapeHtml(item.dsr || '-') + '</div>' : '') + '</td>' +
+            '<td class="px-3 py-2.5 text-right font-semibold">Rp ' + Number(item.nominal || 0).toLocaleString('id-ID') + '</td>' +
+            '<td class="px-3 py-2.5"><span class="text-[10px] font-extrabold ' + statusKelas + '">' + escapeHtml(st) + '</span></td>' +
+            '<td class="px-3 py-2.5">' + statusSelect(item, st) + '</td>' +
+            '</tr>';
+    }).join('');
+    container.innerHTML = tagihanBulkControlsHtml() +
+        '<div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left text-[10px] min-w-[900px]"><thead><tr class="bg-slate-50 border-b border-slate-200 text-[9px] uppercase tracking-wide text-slate-500"><th class="px-3 py-2">No</th><th class="px-3 py-2">Tgl Order</th><th class="px-3 py-2">Tgl Nota</th><th class="px-3 py-2">Usia</th><th class="px-3 py-2">Outlet</th><th class="px-3 py-2 text-right">Nominal</th><th class="px-3 py-2">Status Tagihan</th><th class="px-3 py-2">Ubah Status</th></tr></thead><tbody>' + body + '</tbody></table></div></div>' +
+        tagihanPaginationHtml(data.length, startIndex);
+    updateTagihanBulkInfo();
+}
+
+function updateTagihanBulkInfo() {
+    let lunas = 0, belum = 0;
+    document.querySelectorAll('#listTagihan .tagihan-status-select').forEach(function(select) {
+        const v = String(select.value || '').toUpperCase();
+        if (v === 'LUNAS') lunas++;
+        if (v === 'BELUM LUNAS') belum++;
+    });
+    const info = document.getElementById('tagihanBulkInfo');
+    if (info) info.textContent = (lunas + belum) > 0
+        ? 'LUNAS: ' + lunas + ' | BELUM LUNAS: ' + belum + ' | Total dipilih: ' + (lunas + belum)
+        : 'Pilih status pada masing-masing tagihan lalu klik DONE.';
+}
+
+function resetPilihanStatusTagihan() {
+    document.querySelectorAll('#listTagihan .tagihan-status-select').forEach(function(select) {
+        const id = String(select.dataset.tagihanId || '').trim();
+        select.value = '';
+        if (id) delete selectedTagihanStatus[id];
+    });
+    updateTagihanBulkInfo();
+}
+
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.classList.contains('tagihan-status-select')) {
+        const select = e.target;
+        const id = String(select.dataset.tagihanId || '').trim();
+        const value = String(select.value || '').trim().toUpperCase();
+        if (id) {
+            if (value === 'LUNAS' || value === 'BELUM LUNAS') selectedTagihanStatus[id] = value;
+            else delete selectedTagihanStatus[id];
+        }
+        updateTagihanBulkInfo();
+    }
+});
+
+// Proses DONE — disimpan SINKRON lewat updateStatusTagihanSync sehingga status
+// benar-benar tersimpan di server sebelum konfirmasi ditampilkan.
+function doneBulkStatusTagihan() {
+    const changes = [];
+    document.querySelectorAll('#listTagihan .tagihan-status-select').forEach(function(select) {
+        const id = String(select.dataset.tagihanId || '').trim();
+        const newStatus = String(select.value || '').trim().toUpperCase();
+        const oldStatus = String(select.dataset.currentStatus || '').toUpperCase();
+        if (id && (newStatus === 'LUNAS' || newStatus === 'BELUM LUNAS') && newStatus !== oldStatus) {
+            changes.push({ id: id, status: newStatus });
+        }
+    });
+    if (!changes.length) {
+        showModal('Tidak Ada Perubahan', 'Silakan pilih LUNAS atau BELUM LUNAS pada minimal satu tagihan.');
+        return;
+    }
+    const lunas = changes.filter(function(x){ return x.status === 'LUNAS'; }).length;
+    const belum = changes.length - lunas;
+    showModal('Konfirmasi Status Tagihan', 'Akan diproses ' + changes.length + ' tagihan. LUNAS: ' + lunas + ' BELUM LUNAS: ' + belum + ' Lanjutkan?', true, function(isOk) {
+        if (!isOk || tagihanStatusInFlight) return;
+        tagihanStatusInFlight = true;
+        showLoading(true);
+        google.script.run
+            .withSuccessHandler(function(res) {
+                tagihanStatusInFlight = false;
+                showLoading(false);
+                changes.forEach(function(ch) { delete selectedTagihanStatus[String(ch.id)]; });
+                try { loadTagihan(true, true); } catch (eReload) {}
+                if (!res || res.success === false) {
+                    showModal('Gagal Simpan Tagihan', (res && res.message) ? res.message : 'Perubahan status tagihan tidak tersimpan. Silakan coba lagi.');
+                    return;
+                }
+                showModal('Tagihan Tersimpan', (res && res.message) ? res.message : (changes.length + ' tagihan diperbarui.'));
+            })
+            .withFailureHandler(function(err) {
+                tagihanStatusInFlight = false;
+                showLoading(false);
+                showModal('Gagal Simpan Tagihan', (err && err.message ? err.message : 'Terjadi kesalahan saat menyimpan status tagihan.'));
+            })
+            .updateStatusTagihanSync(changes, currentUsernameInput, currentUser);
     });
 }
 </script>
