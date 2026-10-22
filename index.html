@@ -13203,6 +13203,24 @@ document.addEventListener('change', function(e) {
     }
 });
 
+// Terapkan status baru ke data lokal lalu render ulang SEKETIKA sehingga tanda
+// tombol Lunas/Belum, badge status, usia nota, dan ringkasan berpindah otomatis
+// tanpa menunggu refresh data dari server (server tetap di-refresh di belakang).
+// Semantik tanggalLunas menyalin updateStatusTagihanSync di Code.gs:
+// LUNAS -> tanggal hari ini; BELUM LUNAS -> dikosongkan (usia berjalan lagi).
+function tagihanTerapkanStatusLokal(changes) {
+    (changes || []).forEach(function(ch) {
+        const id = String((ch && ch.id) || '').trim();
+        const st = String((ch && ch.status) || '').trim().toUpperCase();
+        if (!id || (st !== 'LUNAS' && st !== 'BELUM LUNAS')) return;
+        const it = (globalTagihanData || []).find(function(x){ return String(x.id || '').trim() === id; });
+        if (!it) return;
+        it.statusTagihan = st;
+        it.tanggalLunas = (st === 'LUNAS') ? tagihanTanggalHariIniStr() : '';
+    });
+    try { renderTagihanList(tagihanFilteredData || []); } catch (eLocal) {}
+}
+
 // Ubah status SATU tagihan lewat tombol — disimpan SINKRON lewat
 // updateStatusTagihanSync sehingga status benar-benar tersimpan di server
 // sebelum popup konfirmasi ditampilkan.
@@ -13231,6 +13249,7 @@ function ubahStatusTagihanSatuan(idInput, statusBaru) {
                 showModal('Gagal Simpan Tagihan', (res && res.message) ? res.message : 'Perubahan status tagihan tidak tersimpan. Silakan coba lagi.');
                 return;
             }
+            tagihanTerapkanStatusLokal([{ id: id, status: target }]);
             showModal('Tagihan Tersimpan', (res && res.message) ? res.message : ('Status tagihan ' + id + ' kini ' + target + '.'));
             try { loadTagihan(true, true); } catch (eReload) {}
         })
@@ -13264,6 +13283,7 @@ function terapkanStatusTagihanMassal(statusBaru) {
                     showModal('Gagal Simpan Tagihan', (res && res.message) ? res.message : 'Perubahan status tagihan tidak tersimpan. Silakan coba lagi.');
                     return;
                 }
+                tagihanTerapkanStatusLokal(changes);
                 showModal('Tagihan Tersimpan', (res && res.message) ? res.message : (changes.length + ' tagihan diperbarui.'));
                 resetPilihanStatusTagihan();
                 try { loadTagihan(true, true); } catch (eReload) {}
