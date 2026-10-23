@@ -13123,15 +13123,10 @@ function produkOutletUpdateLabel() {
 function produkOutletOptionRow(g) {
     const lbl = String(g.label || '').trim();
     const off = produkOutletGroupAllOff(g) ? '<span class="shrink-0 text-[9px] font-bold text-red-500 uppercase tracking-wide border border-red-200 bg-red-50 rounded-full px-1.5 py-0.5">non-aktif</span>' : '';
-    let sub = '';
-    if (g.members.length > 1) {
-        const names = g.members.map(function(p) { return String(p.nama || '').trim(); }).join(', ');
-        sub = '<div class="text-[10px] text-slate-400 mt-0.5 truncate">' + g.members.length + ' produk: ' + escapeHtml(names) + '</div>';
-    }
     return '<button type="button" data-po-name="' + escapeHtml(lbl) + '" onclick="selectProdukOutletOption(this.getAttribute(\'data-po-name\'))" class="w-full text-left px-3 py-2 hover:bg-emerald-50 border-b border-slate-50 transition">' +
         '<div class="flex items-center justify-between gap-2">' +
             '<span class="font-semibold text-slate-700 truncate text-xs">' + escapeHtml(lbl) + '</span>' + off +
-        '</div>' + sub +
+        '</div>' +
     '</button>';
 }
 
@@ -13356,7 +13351,6 @@ function renderProdukOutlet() {
 function openProdukOutletDetail(outletName) {
     const oName = String(outletName == null ? '' : outletName).trim();
     if (!oName || !produkOutletSelected) return;
-    const grp = produkOutletFindGroup(produkOutletSelected);
     const rows = (produkOutletRowsCache[produkOutletSelected] || []).filter(function(r) {
         return String(r.outlet || '').trim() === oName;
     });
@@ -13375,23 +13369,6 @@ function openProdukOutletDetail(outletName) {
         '</tr>';
     }).join('');
     const totalLabel = (tDus > 0 ? (Math.round(tDus * 10) / 10) + ' Dus' : '') + (tDus > 0 && tPcs > 0 ? ' / ' : '') + (tPcs > 0 ? (Math.round(tPcs * 10) / 10) + ' Pcs' : '');
-    // Task 55: kartu produk mengikuti grup "Produk by" — 1 produk: format lama; multi: daftar anggota.
-    let produkCard = '';
-    if (grp && grp.members.length > 1) {
-        const lines = grp.members.map(function(p) {
-            return '<div class="mt-1 font-semibold text-slate-700 truncate">' + escapeHtml(String(p.nama || '').trim()) + '</div>';
-        }).join('');
-        produkCard = '<div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3">' +
-            '<div class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Produk by</div>' +
-            '<div class="font-bold text-slate-800 mt-0.5">' + escapeHtml(produkOutletSelected) + ' <span class="font-normal text-slate-500 text-[10px]">(' + grp.members.length + ' produk)</span></div>' +
-            '<div class="mt-1.5 border-t border-emerald-100 pt-0.5">' + lines + '</div>' +
-        '</div>';
-    } else {
-        produkCard = '<div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3">' +
-            '<div class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Produk</div>' +
-            '<div class="font-bold text-slate-800 mt-0.5">' + escapeHtml(produkOutletSelected) + '</div>' +
-        '</div>';
-    }
     setDetailModalNoFooter();
     const modal = document.getElementById('customModal');
     if (!modal) return;
@@ -13402,7 +13379,6 @@ function openProdukOutletDetail(outletName) {
     modal.style.display = 'flex';
     document.getElementById('modalBody').innerHTML =
         '<div class="space-y-3 text-xs">' +
-            produkCard +
             '<div>' +
                 '<div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Rincian Order - ' + escapeHtml(oName) + ' (' + rows.length + ' transaksi)</div>' +
                 '<div class="overflow-x-auto"><table class="w-full text-xs min-w-[420px]">' +
