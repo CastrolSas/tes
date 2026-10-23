@@ -3316,7 +3316,7 @@ body{background:
 <button type="button" onclick="switchTab('riwayat')" id="navRiwayat"
                         class="sidebar-item" title="Riwayat Transaksi" aria-label="Riwayat Transaksi">
                     <span class="sidebar-icon">📊</span>
-                    <span class="sidebar-text">Riwayat Order</span>
+                    <span class="sidebar-text">Riwayat</span>
                 </button>
 
                 <button type="button" onclick="switchTab('tagihan')" id="navTagihan"
@@ -3343,20 +3343,20 @@ body{background:
                     <button type="button" role="menuitem" onclick="switchTab('monitoring')" id="navMonitoring"
                             class="sidebar-item sidebar-submenu-item" title="Monitoring Outlet" aria-label="Monitoring Outlet">
                         <span class="sidebar-icon">📈</span>
-                        <span class="sidebar-text">Outlet</span>
+                        <span class="sidebar-text">Monitoring</span>
                     </button>
                     <button type="button" role="menuitem" onclick="switchTab('pencapaian')" id="navPencapaian"
                             class="sidebar-item sidebar-submenu-item sidebar-pencapaian-menu" title="Pencapaian Sales" aria-label="Pencapaian Sales"
                             style="display:flex !important; visibility:visible !important;">
                         <span class="sidebar-icon">🏆</span>
-                        <span class="sidebar-text">Sales</span>
+                        <span class="sidebar-text">Pencapaian Sales</span>
                     </button>
                 </div>
 
                 <button type="button" onclick="switchTab('outletkontrak')" id="navOutletKontrak"
                         class="sidebar-item" title="Outlet Kontrak" aria-label="Outlet Kontrak">
                     <span class="sidebar-icon">📋</span>
-                    <span class="sidebar-text">Outlet Kontrak</span>
+                    <span class="sidebar-text">Kontrak</span>
                 </button>
 
                 <button type="button" onclick="switchTab('outletbws')" id="navOutletBWS"
@@ -3385,6 +3385,12 @@ body{background:
                         class="sidebar-item" title="Pesanan Outlet" aria-label="Pesanan Outlet">
                     <span class="sidebar-icon">📦</span>
                     <span class="sidebar-text">Pesanan Outlet</span>
+                </button>
+
+                <button type="button" onclick="switchTab('produkbyoutlet')" id="navProdukOutlet"
+                        class="sidebar-item" title="Produk by Outlet" aria-label="Produk by Outlet">
+                    <span class="sidebar-icon">🧴</span>
+                    <span class="sidebar-text">Produk by Outlet</span>
                 </button>
 
 
@@ -3831,6 +3837,32 @@ body{background:
 
                     <div id="listApproval" class="space-y-2.5 text-xs">
                         <p class="text-slate-400 text-center py-6">Memuat...</p>
+                    </div>
+                </div>
+
+                <div id="tabProdukOutlet" class="tab-content hidden space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-base font-bold text-slate-800">Produk by Outlet</h2>
+                            <span id="produkOutletCount" class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">0 outlet</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Filter Produk</div>
+                            <button type="button" onclick="resetProdukOutletFilter()" class="shrink-0 text-[10px] font-bold text-slate-500 hover:text-emerald-700 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 transition">Reset</button>
+                        </div>
+                        <select id="filterProdukOutlet" onchange="onProdukOutletChange()" class="w-full py-2.5 px-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500">
+                            <option value="">Memuat daftar produk...</option>
+                        </select>
+                        <p class="text-[10px] text-slate-400 mt-1.5">Daftar berisi semua produk, termasuk yang tidak aktif (OFF). Pilih produk untuk melihat outlet yang pernah bertransaksi.</p>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                        <div id="produkOutletTableWrap" class="overflow-x-auto">
+                            <div class="p-6 text-center text-xs text-slate-400">Pilih produk di filter untuk melihat daftar outlet yang pernah bertransaksi.</div>
+                        </div>
                     </div>
                 </div>
 
@@ -4410,6 +4442,7 @@ body{background:
             run(function(){ loadTambahCustomer(true, true); });
             run(function(){ loadPricelist(true, true); });
             run(function(){ loadPesananOutlet(true, true); });
+            run(function(){ loadProdukByOutlet(true, true); });
             run(function(){ loadPencapaianSales(true, true); });
             run(function(){ loadPencapaianSalesFilter(); });
             run(function(){ loadInputMasterData(); });
@@ -10122,8 +10155,8 @@ startAutoRefresh();
             // Task 43: Approval hanya untuk admin / akun tanpa nama sales.
             const canApprovalMenu = isAdminLogin || String(currentUser || '').trim() === '';
             if (tab === 'approval' && !canApprovalMenu) { applyRoleVisibility(); return; }
-            const tabMap = {home:'tabHome',input:'tabInput',riwayat:'tabRiwayat',approval:'tabApproval',tagihan:'tabTagihan',pencapaian:'tabPencapaian',monitoring:'tabMonitoring',outletkontrak:'tabOutletKontrak',outletbws:'tabOutletBWS',tambahcustomer:'tabTambahCustomer',pricelist:'tabPricelist',harganett:'tabHargaNett',pesananoutlet:'tabPesananOutlet',pengumumanadmin:'tabPengumumanAdmin'};
-            const navMap = {home:'navHome',input:'navInput',riwayat:'navRiwayat',approval:'navApproval',tagihan:'navTagihan',pencapaian:'navPencapaian',monitoring:'navMonitoring',outletkontrak:'navOutletKontrak',outletbws:'navOutletBWS',tambahcustomer:'navTambahCustomer',pricelist:'navPricelist',harganett:'navHargaNett',pesananoutlet:'navPesananOutlet',pengumumanadmin:'navPengumumanAdmin'};
+            const tabMap = {home:'tabHome',input:'tabInput',riwayat:'tabRiwayat',approval:'tabApproval',tagihan:'tabTagihan',pencapaian:'tabPencapaian',monitoring:'tabMonitoring',outletkontrak:'tabOutletKontrak',outletbws:'tabOutletBWS',tambahcustomer:'tabTambahCustomer',pricelist:'tabPricelist',harganett:'tabHargaNett',pesananoutlet:'tabPesananOutlet',produkbyoutlet:'tabProdukOutlet',pengumumanadmin:'tabPengumumanAdmin'};
+            const navMap = {home:'navHome',input:'navInput',riwayat:'navRiwayat',approval:'navApproval',tagihan:'navTagihan',pencapaian:'navPencapaian',monitoring:'navMonitoring',outletkontrak:'navOutletKontrak',outletbws:'navOutletBWS',tambahcustomer:'navTambahCustomer',pricelist:'navPricelist',harganett:'navHargaNett',pesananoutlet:'navPesananOutlet',produkbyoutlet:'navProdukOutlet',pengumumanadmin:'navPengumumanAdmin'};
             Object.keys(tabMap).forEach(function(key){
                 const el=document.getElementById(tabMap[key]);
                 if(!el) return;
@@ -10178,6 +10211,8 @@ if(tab==='tagihan')loadTagihan(false, true);
             if(tab==='pricelist')loadPricelist(false, true);
             if(tab==='harganett')loadHargaNett(false);
             if(tab==='pesananoutlet')loadPesananOutlet(false, true);
+            // Task 53: halaman Produk by Outlet.
+            if(tab==='produkbyoutlet')loadProdukByOutlet(false);
             if(tab==='pengumumanadmin')loadPengumumanAdmin();
         }
 
@@ -13011,6 +13046,128 @@ function handleTagihanLoaded(res) {
     appLocalCacheSet(tagihanCacheKey(), globalTagihanData);
     populateTagihanFilters();
     filterTagihan();
+}
+
+// ===== Task 53: PRODUK BY OUTLET =====
+let produkOutletProdukList = null;
+let produkOutletRowsCache = {};
+let produkOutletSelected = '';
+let produkOutletLoading = false;
+
+function populateProdukOutletFilter() {
+    const sel = document.getElementById('filterProdukOutlet');
+    if (!sel || !Array.isArray(produkOutletProdukList)) return;
+    const prev = produkOutletSelected;
+    const list = produkOutletProdukList.slice().sort(function(a, b) {
+        return String(a.nama || '').localeCompare(String(b.nama || ''), 'id', { sensitivity: 'base' });
+    });
+    sel.innerHTML = '<option value="">- Pilih produk -</option>' + list.map(function(p) {
+        const nm = String(p.nama || '').trim();
+        const label = nm + (p.aktif === false ? ' - non-aktif' : '');
+        return '<option value="' + escapeHtml(nm) + '">' + escapeHtml(label) + '</option>';
+    }).join('');
+    if (prev && list.some(function(p) { return String(p.nama || '').trim() === prev; })) sel.value = prev;
+}
+
+function onProdukOutletChange() {
+    const sel = document.getElementById('filterProdukOutlet');
+    produkOutletSelected = sel ? String(sel.value || '').trim() : '';
+    if (!produkOutletSelected) { renderProdukOutlet(); return; }
+    if (produkOutletRowsCache[produkOutletSelected]) { renderProdukOutlet(); return; }
+    loadProdukByOutlet(false);
+}
+
+function resetProdukOutletFilter() {
+    produkOutletSelected = '';
+    const sel = document.getElementById('filterProdukOutlet');
+    if (sel) sel.value = '';
+    renderProdukOutlet();
+}
+
+function loadProdukByOutlet(forceReload, silentRefresh) {
+    if (produkOutletLoading) return;
+    const needList53 = !Array.isArray(produkOutletProdukList) || produkOutletProdukList.length === 0;
+    const needRows = !!produkOutletSelected && (forceReload || !produkOutletRowsCache[produkOutletSelected]);
+    // Semua sudah tersedia di memori: cukup render ulang tanpa panggilan server.
+    if (!needList53 && !needRows) { renderProdukOutlet(); return; }
+    produkOutletLoading = true;
+    if (!silentRefresh) {
+        const wrap = document.getElementById('produkOutletTableWrap');
+        if (wrap && (!produkOutletSelected || needRows)) wrap.innerHTML = '<div class="p-6 text-center text-xs text-slate-400">Memuat data produk...</div>';
+        showLoading(true);
+    }
+    const salesArg = tagihanIsAdminScope() ? '' : String(currentUser || '').trim();
+    google.script.run.withSuccessHandler(function(res) {
+        produkOutletLoading = false;
+        if (!silentRefresh) showLoading(false);
+        if (!res || res.success === false) {
+            const wrap = document.getElementById('produkOutletTableWrap');
+            if (wrap) wrap.innerHTML = '<div class="p-6 text-center text-xs text-red-500">Gagal memuat: ' + escapeHtml((res && res.message) || 'kesalahan tidak diketahui') + '</div>';
+            return;
+        }
+        if (Array.isArray(res.produkList) && res.produkList.length) {
+            produkOutletProdukList = res.produkList;
+            populateProdukOutletFilter();
+        }
+        if (produkOutletSelected && Array.isArray(res.rows)) {
+            produkOutletRowsCache[produkOutletSelected] = res.rows;
+        }
+        renderProdukOutlet();
+    }).withFailureHandler(function(err) {
+        produkOutletLoading = false;
+        if (!silentRefresh) showLoading(false);
+        const wrap = document.getElementById('produkOutletTableWrap');
+        if (wrap) wrap.innerHTML = '<div class="p-6 text-center text-xs text-red-500">Gagal memuat: ' + escapeHtml(err && err.message ? err.message : 'kesalahan jaringan') + '</div>';
+    }).getProdukByOutletData(produkOutletSelected || '', !!forceReload, salesArg, currentUsernameInput);
+}
+
+function produkOutletFormatVolume(dus, pcs) {
+    if (Number(dus) > 0) return (Math.round(Number(dus) * 10) / 10) + ' Dus';
+    return (Math.round(Number(pcs) * 10) / 10) + ' Pcs';
+}
+
+function renderProdukOutlet() {
+    const wrap = document.getElementById('produkOutletTableWrap');
+    const badge = document.getElementById('produkOutletCount');
+    if (!wrap) return;
+    if (!produkOutletSelected) {
+        if (badge) badge.textContent = '0 outlet';
+        wrap.innerHTML = '<div class="p-6 text-center text-xs text-slate-400">Pilih produk di filter untuk melihat daftar outlet yang pernah bertransaksi.</div>';
+        return;
+    }
+    const rows = produkOutletRowsCache[produkOutletSelected] || [];
+    let totalDus = 0, totalPcs = 0;
+    const outletSet = [];
+    rows.forEach(function(r) {
+        totalDus += Number(r.dus) || 0; totalPcs += Number(r.pcs) || 0;
+        const o = String(r.outlet || '').trim();
+        if (o && outletSet.indexOf(o) === -1) outletSet.push(o);
+    });
+    if (badge) badge.textContent = rows.length + ' transaksi - ' + outletSet.length + ' outlet';
+    if (!rows.length) {
+        wrap.innerHTML = '<div class="p-6 text-center text-xs text-slate-400">Tidak ada transaksi untuk produk <b>' + escapeHtml(produkOutletSelected) + '</b>.</div>';
+        return;
+    }
+    const body = rows.map(function(r, i) {
+        return '<tr class="border-t border-slate-100 hover:bg-emerald-50/40 transition">' +
+            '<td class="px-3 py-2.5 text-slate-400 text-center">' + (i + 1) + '</td>' +
+            '<td class="px-3 py-2.5 font-semibold text-slate-700">' + escapeHtml(String(r.outlet || '-')) + '</td>' +
+            '<td class="px-3 py-2.5 text-slate-600">' + escapeHtml(tagihanFormatTanggalID(r.tanggal)) + '</td>' +
+            '<td class="px-3 py-2.5 font-bold text-emerald-700 text-right whitespace-nowrap">' + escapeHtml(produkOutletFormatVolume(r.dus, r.pcs)) + '</td>' +
+        '</tr>';
+    }).join('');
+    const totalLabel = (totalDus > 0 ? (Math.round(totalDus * 10) / 10) + ' Dus' : '') + (totalDus > 0 && totalPcs > 0 ? ' / ' : '') + (totalPcs > 0 ? (Math.round(totalPcs * 10) / 10) + ' Pcs' : '');
+    wrap.innerHTML = '<table class="w-full text-xs min-w-[520px]">' +
+        '<thead><tr class="bg-emerald-50 text-emerald-800 uppercase tracking-wide text-[10px]">' +
+            '<th class="px-3 py-2.5 text-center w-10">No</th>' +
+            '<th class="px-3 py-2.5 text-left">Nama Outlet</th>' +
+            '<th class="px-3 py-2.5 text-left">Tanggal Order</th>' +
+            '<th class="px-3 py-2.5 text-right">Volume Order</th>' +
+        '</tr></thead><tbody>' + body +
+        '<tr class="border-t-2 border-emerald-200 bg-emerald-50/60 font-extrabold text-emerald-800">' +
+            '<td colspan="3" class="px-3 py-2.5 uppercase tracking-wide">Total</td>' +
+            '<td class="px-3 py-2.5 text-right whitespace-nowrap">' + escapeHtml(totalLabel || '0') + '</td>' +
+        '</tr></tbody></table>';
 }
 
 function renderTagihanSummary() {
