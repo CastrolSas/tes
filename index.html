@@ -3870,7 +3870,7 @@ body{background:
                                 <div id="produkOutletOptions" class="max-h-64 overflow-y-auto po-outlet-options"></div>
                             </div>
                         </div>
-                        <p class="text-[10px] text-slate-400 mt-1.5">Daftar memuat semua produk (termasuk yang tidak aktif/OFF) lengkap dengan harga &amp; tanggal update pricelist. Gunakan kolom pencarian di dalam dropdown untuk mencari produk.</p>
+                        <p class="text-[10px] text-slate-400 mt-1.5">Isi dropdown mengikuti kolom "Produk by" di sheet PRODUK — semua produk (termasuk yang tidak aktif/OFF) dikelompokkan berdasarkan nilainya; produk dengan kolom kosong memakai nama produknya. Gunakan kolom pencarian untuk mencari.</p>
                     </div>
 
                     <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
@@ -13074,12 +13074,34 @@ function produkOutletSorted() {
     });
 }
 
-function produkOutletFindMeta(nm) {
-    const key = String(nm || '').trim().toUpperCase().replace(/\s+/g, ' ');
-    if (!Array.isArray(produkOutletProdukList)) return null;
-    return produkOutletProdukList.find(function(p) {
-        return String(p.nama || '').trim().toUpperCase().replace(/\s+/g, ' ') === key;
+function produkOutletGroupKey(p) {
+    return String(p && p.produkBy ? p.produkBy : (p && p.nama) || '').trim();
+}
+
+function produkOutletGroups() {
+    // Task 55: kelompokkan produk berdasarkan kolom T "Produk by" (fallback: nama produk).
+    if (!Array.isArray(produkOutletProdukList)) return [];
+    const map = {};
+    produkOutletSorted().forEach(function(p) {
+        const k = produkOutletGroupKey(p) || String(p.nama || '').trim();
+        if (!k) return;
+        if (!map[k]) map[k] = [];
+        map[k].push(p);
+    });
+    return Object.keys(map).sort(function(a, b) {
+        return a.localeCompare(b, 'id', { sensitivity: 'base' });
+    }).map(function(k) { return { label: k, members: map[k] }; });
+}
+
+function produkOutletFindGroup(lbl) {
+    const key = String(lbl || '').trim().toUpperCase().replace(/\s+/g, ' ');
+    return produkOutletGroups().find(function(g) {
+        return String(g.label || '').trim().toUpperCase().replace(/\s+/g, ' ') === key;
     }) || null;
+}
+
+function produkOutletGroupAllOff(g) {
+    return !!g && g.members.length > 0 && g.members.every(function(p) { return p.aktif === false; });
 }
 
 function produkOutletUpdateLabel() {
@@ -13090,22 +13112,26 @@ function produkOutletUpdateLabel() {
         lbl.className = 'truncate text-slate-400';
         return;
     }
-    const meta = produkOutletFindMeta(produkOutletSelected);
-    lbl.textContent = produkOutletSelected + (meta && meta.aktif === false ? ' (non-aktif)' : '');
+    const g = produkOutletFindGroup(produkOutletSelected);
+    let txt = produkOutletSelected;
+    if (g && g.members.length > 1) txt += ' (' + g.members.length + ' produk)';
+    if (produkOutletGroupAllOff(g)) txt += ' (non-aktif)';
+    lbl.textContent = txt;
     lbl.className = 'truncate font-semibold text-slate-800';
 }
 
-function produkOutletOptionRow(p) {
-    const nm = String(p.nama || '').trim();
-    const hargaTxt = Number(p.harga) > 0 ? formatRupiah(p.harga) : 'Rp -';
-    const updRaw = String(p.updatePricelist || '').trim();
-    const updTxt = updRaw ? tagihanFormatTanggalID(updRaw) : '-';
-    const off = p.aktif === false ? '<span class="shrink-0 text-[9px] font-bold text-red-500 uppercase tracking-wide border border-red-200 bg-red-50 rounded-full px-1.5 py-0.5">non-aktif</span>' : '';
-    return '<button type="button" data-po-name="' + escapeHtml(nm) + '" onclick="selectProdukOutletOption(this.getAttribute(\'data-po-name\'))" class="w-full text-left px-3 py-2 hover:bg-emerald-50 border-b border-slate-50 transition">' +
+function produkOutletOptionRow(g) {
+    const lbl = String(g.label || '').trim();
+    const off = produkOutletGroupAllOff(g) ? '<span class="shrink-0 text-[9px] font-bold text-red-500 uppercase tracking-wide border border-red-200 bg-red-50 rounded-full px-1.5 py-0.5">non-aktif</span>' : '';
+    let sub = '';
+    if (g.members.length > 1) {
+        const names = g.members.map(function(p) { return String(p.nama || '').trim(); }).join(', ');
+        sub = '<div class="text-[10px] text-slate-400 mt-0.5 truncate">' + g.members.length + ' produk: ' + escapeHtml(names) + '</div>';
+    }
+    return '<button type="button" data-po-name="' + escapeHtml(lbl) + '" onclick="selectProdukOutletOption(this.getAttribute(\'data-po-name\'))" class="w-full text-left px-3 py-2 hover:bg-emerald-50 border-b border-slate-50 transition">' +
         '<div class="flex items-center justify-between gap-2">' +
-            '<span class="font-semibold text-slate-700 truncate text-xs">' + escapeHtml(nm) + '</span>' + off +
-        '</div>' +
-        '<div class="text-[10px] text-slate-400 mt-0.5">' + escapeHtml(hargaTxt) + ' <span class="text-slate-300 mx-1">|</span> Update Pricelist: ' + escapeHtml(updTxt) + '</div>' +
+            '<span class="font-semibold text-slate-700 truncate text-xs">' + escapeHtml(lbl) + '</span>' + off +
+        '</div>' + sub +
     '</button>';
 }
 
@@ -13118,9 +13144,12 @@ function renderProdukOutletOptions() {
     }
     const qEl = document.getElementById('produkOutletSearch');
     const term = String((qEl && qEl.value) || '').trim().toLowerCase();
-    const list = produkOutletSorted().filter(function(p) {
+    const list = produkOutletGroups().filter(function(g) {
         if (!term) return true;
-        return String(p.nama || '').toLowerCase().indexOf(term) !== -1 || String(p.kode || '').toLowerCase().indexOf(term) !== -1;
+        if (String(g.label || '').toLowerCase().indexOf(term) !== -1) return true;
+        return g.members.some(function(p) {
+            return String(p.nama || '').toLowerCase().indexOf(term) !== -1 || String(p.kode || '').toLowerCase().indexOf(term) !== -1;
+        });
     });
     if (!list.length) {
         box.innerHTML = '<div class="px-3 py-4 text-center text-xs text-slate-400">Produk tidak ditemukan.</div>';
@@ -13142,9 +13171,11 @@ function openProdukOutletDropdown() {
     if (!panel) return;
     panel.classList.remove('hidden');
     if (btn) btn.setAttribute('aria-expanded', 'true');
-    renderProdukOutletOptions();
+    // Task 55b: kosongkan pencarian sebelum render agar sisa filter tidak tertinggal.
     const search = document.getElementById('produkOutletSearch');
-    if (search) { search.value = ''; setTimeout(function(){ try { search.focus(); } catch (e) {} }, 30); }
+    if (search) search.value = '';
+    renderProdukOutletOptions();
+    if (search) { setTimeout(function(){ try { search.focus(); } catch (e) {} }, 30); }
 }
 
 function closeProdukOutletDropdown() {
@@ -13175,7 +13206,7 @@ function produkOutletSearchKeydown(ev) {
 
 function populateProdukOutletFilter() {
     if (!Array.isArray(produkOutletProdukList)) return;
-    if (produkOutletSelected && !produkOutletFindMeta(produkOutletSelected)) produkOutletSelected = '';
+    if (produkOutletSelected && !produkOutletFindGroup(produkOutletSelected)) produkOutletSelected = '';
     produkOutletUpdateLabel();
     renderProdukOutletOptions();
 }
@@ -13221,6 +13252,9 @@ function loadProdukByOutlet(forceReload, silentRefresh) {
     // Task 54: catat produk yang diminta saat request agar respons lama (produk lain)
     // tidak menimpa cache maupun render produk yang sedang dipilih user.
     const req = produkOutletSelected || '';
+    // Task 55: kirim semua nama produk anggota grup "Produk by" yang dipilih.
+    const reqGrp = req ? produkOutletFindGroup(req) : null;
+    const reqNames = req ? (reqGrp ? reqGrp.members.map(function(p) { return String(p.nama || '').trim(); }) : [req]) : '';
     google.script.run.withSuccessHandler(function(res) {
         produkOutletLoading = false;
         if (!silentRefresh) showLoading(false);
@@ -13249,7 +13283,7 @@ function loadProdukByOutlet(forceReload, silentRefresh) {
             if (wrap) wrap.innerHTML = '<div class="p-6 text-center text-xs text-red-500">Gagal memuat: ' + escapeHtml(err && err.message ? err.message : 'kesalahan jaringan') + '</div>';
         }
         produkOutletSettleAntrean();
-    }).getProdukByOutletData(req, !!forceReload, salesArg, currentUsernameInput);
+    }).getProdukByOutletData(reqNames, !!forceReload, salesArg, currentUsernameInput);
 }
 
 // Task 54: bila pilihan user berubah ketika request sebelumnya masih berjalan,
@@ -13322,28 +13356,57 @@ function renderProdukOutlet() {
 function openProdukOutletDetail(outletName) {
     const oName = String(outletName == null ? '' : outletName).trim();
     if (!oName || !produkOutletSelected) return;
+    const grp = produkOutletFindGroup(produkOutletSelected);
     const rows = (produkOutletRowsCache[produkOutletSelected] || []).filter(function(r) {
         return String(r.outlet || '').trim() === oName;
     });
     if (!rows.length) {
-        showModal('Detail Tidak Tersedia', 'Tidak ada transaksi untuk outlet ' + oName + ' pada produk ' + produkOutletSelected + '.');
+        showModal('Detail Tidak Tersedia', 'Tidak ada transaksi untuk outlet ' + oName + ' pada ' + produkOutletSelected + '.');
         return;
     }
-    const meta = produkOutletFindMeta(produkOutletSelected);
     let tDus = 0, tPcs = 0;
     const trHtml = rows.map(function(r, i) {
         tDus += Number(r.dus) || 0; tPcs += Number(r.pcs) || 0;
         return '<tr class="border-t border-slate-100">' +
             '<td class="px-3 py-2.5 text-slate-400 text-center">' + (i + 1) + '</td>' +
+            '<td class="px-3 py-2.5 text-slate-700">' + escapeHtml(String(r.produk || '').trim() || '-') + '</td>' +
             '<td class="px-3 py-2.5 text-slate-700">' + escapeHtml(tagihanFormatTanggalID(r.tanggal)) + '</td>' +
             '<td class="px-3 py-2.5 font-bold text-emerald-700 text-right whitespace-nowrap">' + escapeHtml(produkOutletFormatVolume(r.dus, r.pcs)) + '</td>' +
         '</tr>';
     }).join('');
     const totalLabel = (tDus > 0 ? (Math.round(tDus * 10) / 10) + ' Dus' : '') + (tDus > 0 && tPcs > 0 ? ' / ' : '') + (tPcs > 0 ? (Math.round(tPcs * 10) / 10) + ' Pcs' : '');
-    const hargaTxt = meta && Number(meta.harga) > 0 ? formatRupiah(meta.harga) : 'Rp -';
-    const updRaw = meta ? String(meta.updatePricelist || '').trim() : '';
-    const updTxt = updRaw ? tagihanFormatTanggalID(updRaw) : '-';
-    const offBadge = meta && meta.aktif === false ? '<span class="text-[9px] font-bold text-red-500 uppercase tracking-wide border border-red-200 bg-red-50 rounded-full px-1.5 py-0.5">non-aktif</span>' : '';
+    // Task 55: kartu produk mengikuti grup "Produk by" — 1 produk: format lama; multi: daftar anggota.
+    let produkCard = '';
+    if (grp && grp.members.length > 1) {
+        const lines = grp.members.map(function(p) {
+            const hTxt = Number(p.harga) > 0 ? formatRupiah(p.harga) : 'Rp -';
+            const uRaw = String(p.updatePricelist || '').trim();
+            const uTxt = uRaw ? tagihanFormatTanggalID(uRaw) : '-';
+            const b = p.aktif === false ? ' <span class="shrink-0 text-[9px] font-bold text-red-500 uppercase tracking-wide border border-red-200 bg-red-50 rounded-full px-1.5 py-0.5">non-aktif</span>' : '';
+            return '<div class="flex items-center justify-between gap-2 mt-1">' +
+                '<span class="font-semibold text-slate-700 truncate">' + escapeHtml(String(p.nama || '').trim()) + '</span>' +
+                '<span class="text-[10px] text-slate-500 whitespace-nowrap">' + escapeHtml(hTxt) + ' <span class="text-slate-300 mx-0.5">|</span> Update Pricelist: ' + escapeHtml(uTxt) + '</span>' + b +
+            '</div>';
+        }).join('');
+        produkCard = '<div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3">' +
+            '<div class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Produk by</div>' +
+            '<div class="font-bold text-slate-800 mt-0.5">' + escapeHtml(produkOutletSelected) + ' <span class="font-normal text-slate-500 text-[10px]">(' + grp.members.length + ' produk)</span></div>' +
+            '<div class="mt-1.5 border-t border-emerald-100 pt-0.5">' + lines + '</div>' +
+        '</div>';
+    } else {
+        const meta = grp && grp.members[0] ? grp.members[0] : null;
+        const hargaTxt = meta && Number(meta.harga) > 0 ? formatRupiah(meta.harga) : 'Rp -';
+        const updRaw = meta ? String(meta.updatePricelist || '').trim() : '';
+        const updTxt = updRaw ? tagihanFormatTanggalID(updRaw) : '-';
+        const offBadge = meta && meta.aktif === false ? '<span class="text-[9px] font-bold text-red-500 uppercase tracking-wide border border-red-200 bg-red-50 rounded-full px-1.5 py-0.5">non-aktif</span>' : '';
+        produkCard = '<div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3">' +
+            '<div class="flex items-center justify-between gap-2">' +
+                '<span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Produk</span>' + offBadge +
+            '</div>' +
+            '<div class="font-bold text-slate-800 mt-0.5">' + escapeHtml(produkOutletSelected) + '</div>' +
+            '<div class="text-[10px] text-slate-500 mt-0.5">' + escapeHtml(hargaTxt) + ' <span class="text-slate-300 mx-1">|</span> Update Pricelist: ' + escapeHtml(updTxt) + '</div>' +
+        '</div>';
+    }
     setDetailModalNoFooter();
     const modal = document.getElementById('customModal');
     if (!modal) return;
@@ -13354,23 +13417,18 @@ function openProdukOutletDetail(outletName) {
     modal.style.display = 'flex';
     document.getElementById('modalBody').innerHTML =
         '<div class="space-y-3 text-xs">' +
-            '<div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3">' +
-                '<div class="flex items-center justify-between gap-2">' +
-                    '<span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Produk</span>' + offBadge +
-                '</div>' +
-                '<div class="font-bold text-slate-800 mt-0.5">' + escapeHtml(produkOutletSelected) + '</div>' +
-                '<div class="text-[10px] text-slate-500 mt-0.5">' + escapeHtml(hargaTxt) + ' <span class="text-slate-300 mx-1">|</span> Update Pricelist: ' + escapeHtml(updTxt) + '</div>' +
-            '</div>' +
+            produkCard +
             '<div>' +
                 '<div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Rincian Order - ' + escapeHtml(oName) + ' (' + rows.length + ' transaksi)</div>' +
-                '<div class="overflow-x-auto"><table class="w-full text-xs min-w-[320px]">' +
+                '<div class="overflow-x-auto"><table class="w-full text-xs min-w-[420px]">' +
                     '<thead><tr class="bg-emerald-50 text-emerald-800 uppercase tracking-wide text-[10px]">' +
                         '<th class="px-3 py-2 text-center w-10">No</th>' +
+                        '<th class="px-3 py-2 text-left">Nama Produk</th>' +
                         '<th class="px-3 py-2 text-left">Tanggal Order</th>' +
                         '<th class="px-3 py-2 text-right">Volume Order</th>' +
                     '</tr></thead><tbody>' + trHtml +
                     '<tr class="border-t-2 border-emerald-200 bg-emerald-50/60 font-extrabold text-emerald-800">' +
-                        '<td colspan="2" class="px-3 py-2 uppercase tracking-wide">Total</td>' +
+                        '<td colspan="3" class="px-3 py-2 uppercase tracking-wide">Total</td>' +
                         '<td class="px-3 py-2 text-right whitespace-nowrap">' + escapeHtml(totalLabel || '0') + '</td>' +
                     '</tr></tbody></table></div>' +
             '</div>' +
