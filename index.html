@@ -13379,10 +13379,7 @@ function openProdukOutletDetail(outletName) {
     let produkCard = '';
     if (grp && grp.members.length > 1) {
         const lines = grp.members.map(function(p) {
-            const b = p.aktif === false ? ' <span class="shrink-0 text-[9px] font-bold text-red-500 uppercase tracking-wide border border-red-200 bg-red-50 rounded-full px-1.5 py-0.5">non-aktif</span>' : '';
-            return '<div class="flex items-center justify-between gap-2 mt-1">' +
-                '<span class="font-semibold text-slate-700 truncate">' + escapeHtml(String(p.nama || '').trim()) + '</span>' + b +
-            '</div>';
+            return '<div class="mt-1 font-semibold text-slate-700 truncate">' + escapeHtml(String(p.nama || '').trim()) + '</div>';
         }).join('');
         produkCard = '<div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3">' +
             '<div class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Produk by</div>' +
@@ -13390,12 +13387,8 @@ function openProdukOutletDetail(outletName) {
             '<div class="mt-1.5 border-t border-emerald-100 pt-0.5">' + lines + '</div>' +
         '</div>';
     } else {
-        const meta = grp && grp.members[0] ? grp.members[0] : null;
-        const offBadge = meta && meta.aktif === false ? '<span class="text-[9px] font-bold text-red-500 uppercase tracking-wide border border-red-200 bg-red-50 rounded-full px-1.5 py-0.5">non-aktif</span>' : '';
         produkCard = '<div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3">' +
-            '<div class="flex items-center justify-between gap-2">' +
-                '<span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Produk</span>' + offBadge +
-            '</div>' +
+            '<div class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Produk</div>' +
             '<div class="font-bold text-slate-800 mt-0.5">' + escapeHtml(produkOutletSelected) + '</div>' +
         '</div>';
     }
