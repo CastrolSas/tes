@@ -13379,13 +13379,9 @@ function openProdukOutletDetail(outletName) {
     let produkCard = '';
     if (grp && grp.members.length > 1) {
         const lines = grp.members.map(function(p) {
-            const hTxt = Number(p.harga) > 0 ? formatRupiah(p.harga) : 'Rp -';
-            const uRaw = String(p.updatePricelist || '').trim();
-            const uTxt = uRaw ? tagihanFormatTanggalID(uRaw) : '-';
             const b = p.aktif === false ? ' <span class="shrink-0 text-[9px] font-bold text-red-500 uppercase tracking-wide border border-red-200 bg-red-50 rounded-full px-1.5 py-0.5">non-aktif</span>' : '';
             return '<div class="flex items-center justify-between gap-2 mt-1">' +
-                '<span class="font-semibold text-slate-700 truncate">' + escapeHtml(String(p.nama || '').trim()) + '</span>' +
-                '<span class="text-[10px] text-slate-500 whitespace-nowrap">' + escapeHtml(hTxt) + ' <span class="text-slate-300 mx-0.5">|</span> Update Pricelist: ' + escapeHtml(uTxt) + '</span>' + b +
+                '<span class="font-semibold text-slate-700 truncate">' + escapeHtml(String(p.nama || '').trim()) + '</span>' + b +
             '</div>';
         }).join('');
         produkCard = '<div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3">' +
@@ -13395,16 +13391,12 @@ function openProdukOutletDetail(outletName) {
         '</div>';
     } else {
         const meta = grp && grp.members[0] ? grp.members[0] : null;
-        const hargaTxt = meta && Number(meta.harga) > 0 ? formatRupiah(meta.harga) : 'Rp -';
-        const updRaw = meta ? String(meta.updatePricelist || '').trim() : '';
-        const updTxt = updRaw ? tagihanFormatTanggalID(updRaw) : '-';
         const offBadge = meta && meta.aktif === false ? '<span class="text-[9px] font-bold text-red-500 uppercase tracking-wide border border-red-200 bg-red-50 rounded-full px-1.5 py-0.5">non-aktif</span>' : '';
         produkCard = '<div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3">' +
             '<div class="flex items-center justify-between gap-2">' +
                 '<span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Produk</span>' + offBadge +
             '</div>' +
             '<div class="font-bold text-slate-800 mt-0.5">' + escapeHtml(produkOutletSelected) + '</div>' +
-            '<div class="text-[10px] text-slate-500 mt-0.5">' + escapeHtml(hargaTxt) + ' <span class="text-slate-300 mx-1">|</span> Update Pricelist: ' + escapeHtml(updTxt) + '</div>' +
         '</div>';
     }
     setDetailModalNoFooter();
