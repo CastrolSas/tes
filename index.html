@@ -3183,6 +3183,41 @@ body{background:
 /* Sembunyikan menu dan halaman Pricelist tanpa menghapus sumber data/fungsi yang mungkin dipakai fitur lain. */
 #navPricelist, #tabPricelist { display: none !important; }
 </style>
+<style id="castrol-mobile-frame-fit-fix">
+/* Task 60 (lanjutan user: "masih terpotong, mungkin terpotong oleh frame") —
+   tabel ber-min-width besar di dalam wadah scroll-x terpotong di tepi kartu
+   (frame) tanpa indikasi bisa digeser; scrollbar di iOS tersembunyi. Solusi:
+   (1) halaman tidak boleh melebar dari layar; (2) select2 asli (tersembunyi)
+   kembali 1px agar kotak hantu tak memicu geser horizontal di halaman Input;
+   (3) di layar mobile tabel utama dibuat pas lebar kartu — teks kolom melipat
+   sehingga tidak ada kolom terpotong — dan tabel yang memang banyak kolom
+   tetap bisa digeser dengan scrollbar yang terlihat. Desktop tidak berubah. */
+html, body { max-width: 100%; overflow-x: hidden; }
+select.select2-hidden-accessible { width: 1px !important; max-width: 1px !important; min-width: 0 !important; }
+#tabInput select#inputOutlet.select2-hidden-accessible { width: 1px !important; max-width: 1px !important; }
+@media (max-width: 767px) {
+  /* Beranda — tabel outlet harian pas di kartu (padding ramping utk layar 320-360px) */
+  #tabHome .cst-outlet-table { min-width: 0 !important; }
+  #tabHome .cst-outlet-table th, #tabHome .cst-outlet-table td { white-space: normal !important; padding-left: 5px !important; padding-right: 5px !important; }
+  #tabHome .cst-outlet-table td.cst-td-nilai { white-space: nowrap !important; }
+  /* Produk by Outlet — tabel utama pas di kartu (desktop tetap min-w 480) */
+  #produkOutletTableWrap table { min-width: 0 !important; }
+  #produkOutletTableWrap th, #produkOutletTableWrap td { white-space: normal; }
+  #produkOutletTableWrap td.text-right { white-space: nowrap; }
+  /* Modal detail — tabel rincian pas di modal */
+  #modalBody table[class*="min-w-"] { min-width: 0 !important; }
+  #modalBody table[class*="min-w-"] th, #modalBody table[class*="min-w-"] td { white-space: normal; }
+  #modalBody table[class*="min-w-"] td.text-right { white-space: nowrap; }
+  /* Pencapaian — tabel bulanan pas di kartu (padding ramping di mobile) */
+  #tabPencapaian table[class*="min-w-"] { min-width: 0 !important; }
+  #tabPencapaian table[class*="min-w-"] th, #tabPencapaian table[class*="min-w-"] td { white-space: normal; padding-left: 6px !important; padding-right: 6px !important; }
+  /* Tabel banyak kolom tetap bisa digeser, dengan scrollbar yang terlihat */
+  .overflow-x-auto, .cst-table-scroll { scrollbar-width: thin; scrollbar-color: #9db4a6 #eef2ef; }
+  .overflow-x-auto::-webkit-scrollbar { height: 9px; }
+  .overflow-x-auto::-webkit-scrollbar-track { background: #eef2ef; border-radius: 9px; }
+  .overflow-x-auto::-webkit-scrollbar-thumb { background: #9db4a6; border-radius: 9px; }
+}
+</style>
 <style id="castrol-mobile-input-zoom-fix">
 /* Task 60: cegah iOS Safari auto-zoom saat input difokus (font-size < 16px memicu
    zoom otomatis sehingga tampilan mobile terlihat terpotong). Semua field form di
