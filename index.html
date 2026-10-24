@@ -3183,6 +3183,18 @@ body{background:
 /* Sembunyikan menu dan halaman Pricelist tanpa menghapus sumber data/fungsi yang mungkin dipakai fitur lain. */
 #navPricelist, #tabPricelist { display: none !important; }
 </style>
+<style id="castrol-mobile-input-zoom-fix">
+/* Task 60: cegah iOS Safari auto-zoom saat input difokus (font-size < 16px memicu
+   zoom otomatis sehingga tampilan mobile terlihat terpotong). Semua field form di
+   layar mobile memakai 16px (standar iOS); desktop tidak berubah. */
+@media (max-width: 767px) {
+  input, select, textarea { font-size: 16px !important; }
+}
+/* Task 60: pengaman panel dropdown Produk by Outlet — tidak pernah melebihi lebar
+   viewport; daftar opsi tanpa scroll horizontal. */
+#produkOutletDropdownPanel { max-width: calc(100vw - 24px); }
+.po-outlet-options { overflow-x: hidden; }
+</style>
 </head>
 <body class="bg-slate-50 font-sans">
 
