@@ -3183,6 +3183,14 @@ body{background:
 /* Sembunyikan menu dan halaman Pricelist tanpa menghapus sumber data/fungsi yang mungkin dipakai fitur lain. */
 #navPricelist, #tabPricelist { display: none !important; }
 </style>
+<style id="castrol-menu-submenu-distinct">
+/* Task 61: pembeda Menu induk vs Submenu — submenu menjorok dengan garis
+   vertikal hijau di kiri; menu induk (grup) diberi garis pemisah tipis di
+   bawahnya agar hierarki terlihat jelas. */
+.sidebar-submenu { border-left: 2px solid rgba(5,150,105,.28); margin-left: 16px; }
+.sidebar-group-menu::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: -5px; height: 1px; background: rgba(15,23,42,.10); }
+.sidebar-group-menu .sidebar-text { letter-spacing: .02em; }
+</style>
 <style id="castrol-mobile-frame-fit-fix">
 /* Task 60 (lanjutan user: "masih terpotong, mungkin terpotong oleh frame") —
    tabel ber-min-width besar di dalam wadah scroll-x terpotong di tepi kartu
@@ -3355,28 +3363,41 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                     <span class="sidebar-text">Beranda</span>
                 </button>
 
-                <button type="button" onclick="switchTab('input')" id="navInput"
-                        class="sidebar-item sidebar-item-active" title="Input Order" aria-label="Input Order">
-                    <span class="sidebar-icon">🛒</span>
-                    <span class="sidebar-text">Input</span>
-                </button>
-<button type="button" onclick="switchTab('riwayat')" id="navRiwayat"
-                        class="sidebar-item" title="Riwayat Transaksi" aria-label="Riwayat Transaksi">
-                    <span class="sidebar-icon">📊</span>
-                    <span class="sidebar-text">Riwayat</span>
+                <button type="button" onclick="toggleSidebarGroup('submenuPemesanan', this.id)" id="navPemesananGroup"
+                        class="sidebar-item sidebar-group-menu" title="Pemesanan &amp; Riwayat" aria-label="Pemesanan &amp; Riwayat" aria-expanded="false" aria-controls="submenuPemesanan"
+                        style="display:flex !important; visibility:visible !important;">
+                    <span class="sidebar-icon">🗂️</span>
+                    <span class="sidebar-text">Pemesanan &amp; Riwayat</span>
+                    <svg class="sidebar-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </button>
 
-                <button type="button" onclick="switchTab('tagihan')" id="navTagihan"
-                        class="sidebar-item" title="Tagihan" aria-label="Tagihan">
-                    <span class="sidebar-icon">🧾</span>
-                    <span class="sidebar-text">Tagihan</span>
-                </button>
-
-                <button type="button" onclick="switchTab('approval')" id="navApproval"
-                        class="sidebar-item hidden" title="Approval Status Order" aria-label="Approval Status Order">
-                    <span class="sidebar-icon">✅</span>
-                    <span class="sidebar-text">Approval</span>
-                </button>
+                <div id="submenuPemesanan" class="sidebar-submenu" role="menu" aria-label="Submenu Pemesanan dan Riwayat">
+                    <button type="button" role="menuitem" onclick="switchTab('input')" id="navInput"
+                            class="sidebar-item sidebar-submenu-item" title="Input Order" aria-label="Input Order">
+                        <span class="sidebar-icon">🛒</span>
+                        <span class="sidebar-text">Input Order</span>
+                    </button>
+                    <button type="button" role="menuitem" onclick="switchTab('riwayat')" id="navRiwayat"
+                            class="sidebar-item sidebar-submenu-item" title="Riwayat Order" aria-label="Riwayat Order">
+                        <span class="sidebar-icon">📊</span>
+                        <span class="sidebar-text">Riwayat Order</span>
+                    </button>
+                    <button type="button" role="menuitem" onclick="switchTab('tagihan')" id="navTagihan"
+                            class="sidebar-item sidebar-submenu-item" title="Tagihan" aria-label="Tagihan">
+                        <span class="sidebar-icon">🧾</span>
+                        <span class="sidebar-text">Tagihan</span>
+                    </button>
+                    <button type="button" role="menuitem" onclick="switchTab('pesananoutlet')" id="navPesananOutlet"
+                            class="sidebar-item sidebar-submenu-item" title="Pesanan Outlet" aria-label="Pesanan Outlet">
+                        <span class="sidebar-icon">📦</span>
+                        <span class="sidebar-text">Pesanan Outlet</span>
+                    </button>
+                    <button type="button" role="menuitem" onclick="switchTab('approval')" id="navApproval"
+                            class="sidebar-item sidebar-submenu-item hidden" title="Approval Status Order" aria-label="Approval Status Order">
+                        <span class="sidebar-icon">✅</span>
+                        <span class="sidebar-text">Approval</span>
+                    </button>
+                </div>
 
                 <button type="button" onclick="togglePencapaianSubmenu()" id="navPencapaianGroup"
                         class="sidebar-item sidebar-group-menu" title="Pencapaian" aria-label="Pencapaian" aria-expanded="false" aria-controls="submenuPencapaian"
@@ -3386,66 +3407,65 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                     <svg class="sidebar-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </button>
 
-                <div id="submenuPencapaian" class="sidebar-submenu" role="menu" aria-label="Submenu Pencapaian">
+<div id="submenuPencapaian" class="sidebar-submenu" role="menu" aria-label="Submenu Pencapaian">
                     <button type="button" role="menuitem" onclick="switchTab('monitoring')" id="navMonitoring"
                             class="sidebar-item sidebar-submenu-item" title="Monitoring Outlet" aria-label="Monitoring Outlet">
                         <span class="sidebar-icon">📈</span>
-                        <span class="sidebar-text">Monitoring</span>
+                        <span class="sidebar-text">Outlet</span>
                     </button>
                     <button type="button" role="menuitem" onclick="switchTab('pencapaian')" id="navPencapaian"
-                            class="sidebar-item sidebar-submenu-item sidebar-pencapaian-menu" title="Pencapaian Sales" aria-label="Pencapaian Sales"
-                            style="display:flex !important; visibility:visible !important;">
+                            class="sidebar-item sidebar-submenu-item sidebar-pencapaian-menu" title="Pencapaian Sales" aria-label="Pencapaian Sales">
                         <span class="sidebar-icon">🏆</span>
-                        <span class="sidebar-text">Pencapaian Sales</span>
+                        <span class="sidebar-text">Sales</span>
+                    </button>
+                    <button type="button" role="menuitem" onclick="switchTab('outletkontrak')" id="navOutletKontrak"
+                            class="sidebar-item sidebar-submenu-item" title="Outlet Kontrak" aria-label="Outlet Kontrak">
+                        <span class="sidebar-icon">📋</span>
+                        <span class="sidebar-text">Outlet Kontrak</span>
+                    </button>
+                    <button type="button" role="menuitem" onclick="switchTab('outletbws')" id="navOutletBWS"
+                            class="sidebar-item sidebar-submenu-item hidden" title="Kelola Outlet BWS" aria-label="Kelola Outlet BWS">
+                        <span class="sidebar-icon">🏪</span>
+                        <span class="sidebar-text">Outlet BWS</span>
+                    </button>
+                    <button type="button" role="menuitem" onclick="switchTab('pricelist')" id="navPricelist"
+                            class="sidebar-item sidebar-submenu-item" title="Pricelist" aria-label="Pricelist">
+                        <span class="sidebar-icon">💰</span>
+                        <span class="sidebar-text">Pricelist</span>
                     </button>
                 </div>
 
-                <button type="button" onclick="switchTab('outletkontrak')" id="navOutletKontrak"
-                        class="sidebar-item" title="Outlet Kontrak" aria-label="Outlet Kontrak">
-                    <span class="sidebar-icon">📋</span>
-                    <span class="sidebar-text">Kontrak</span>
-                </button>
-
-                <button type="button" onclick="switchTab('outletbws')" id="navOutletBWS"
-                        class="sidebar-item hidden" title="Kelola Outlet BWS" aria-label="Kelola Outlet BWS">
-                    <span class="sidebar-icon">🏪</span>
-                    <span class="sidebar-text">Outlet BWS</span>
-                </button>
-
-                <button type="button" onclick="switchTab('pricelist')" id="navPricelist"
-                        class="sidebar-item" title="Pricelist" aria-label="Pricelist">
-                    <span class="sidebar-icon">💰</span>
-                    <span class="sidebar-text">Pricelist</span>
-                </button>
-                <button type="button" onclick="switchTab('harganett')" id="navHargaNett"
-                        class="sidebar-item" title="Harga Nett" aria-label="Harga Nett">
-                    <span class="sidebar-icon">🏷️</span>
-                    <span class="sidebar-text">Harga Nett</span>
-                </button>
-
                 <button type="button" onclick="switchTab('tambahcustomer')" id="navTambahCustomer"
-                        class="sidebar-item" title="Tambah Customer" aria-label="Tambah Customer">
+                        class="sidebar-item" title="Customer" aria-label="Customer">
                     <span class="sidebar-icon">👤</span>
-                    <span class="sidebar-text">Tambah Customer</span>
-                </button>
-                <button type="button" onclick="switchTab('pesananoutlet')" id="navPesananOutlet"
-                        class="sidebar-item" title="Pesanan Outlet" aria-label="Pesanan Outlet">
-                    <span class="sidebar-icon">📦</span>
-                    <span class="sidebar-text">Pesanan Outlet</span>
+                    <span class="sidebar-text">Customer</span>
                 </button>
 
-                <button type="button" onclick="switchTab('produkbyoutlet')" id="navProdukOutlet"
-                        class="sidebar-item" title="Produk by Outlet" aria-label="Produk by Outlet">
-                    <span class="sidebar-icon">🧴</span>
-                    <span class="sidebar-text">Produk by Outlet</span>
+                <button type="button" onclick="toggleSidebarGroup('submenuLainnya', this.id)" id="navLainnyaGroup"
+                        class="sidebar-item sidebar-group-menu" title="Lainnya" aria-label="Lainnya" aria-expanded="false" aria-controls="submenuLainnya"
+                        style="display:flex !important; visibility:visible !important;">
+                    <span class="sidebar-icon">🧩</span>
+                    <span class="sidebar-text">Lainnya</span>
+                    <svg class="sidebar-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </button>
 
-
-                <button type="button" onclick="switchTab('pengumumanadmin')" id="navPengumumanAdmin"
-                        class="sidebar-item hidden" title="Buat Pengumuman" aria-label="Buat Pengumuman">
-                    <span class="sidebar-icon">📣</span>
-                    <span class="sidebar-text">Buat Pengumuman</span>
-                </button>
+                <div id="submenuLainnya" class="sidebar-submenu" role="menu" aria-label="Submenu Lainnya">
+                    <button type="button" role="menuitem" onclick="switchTab('harganett')" id="navHargaNett"
+                            class="sidebar-item sidebar-submenu-item" title="Harga Nett" aria-label="Harga Nett">
+                        <span class="sidebar-icon">🏷️</span>
+                        <span class="sidebar-text">Harga Nett</span>
+                    </button>
+                    <button type="button" role="menuitem" onclick="switchTab('produkbyoutlet')" id="navProdukOutlet"
+                            class="sidebar-item sidebar-submenu-item" title="Produk by Outlet" aria-label="Produk by Outlet">
+                        <span class="sidebar-icon">🧴</span>
+                        <span class="sidebar-text">Produk by Outlet</span>
+                    </button>
+                    <button type="button" role="menuitem" onclick="switchTab('pengumumanadmin')" id="navPengumumanAdmin"
+                            class="sidebar-item sidebar-submenu-item hidden" title="Buat Pengumuman" aria-label="Buat Pengumuman">
+                        <span class="sidebar-icon">📣</span>
+                        <span class="sidebar-text">Buat Pengumuman</span>
+                    </button>
+                </div>
 
                 <div class="sidebar-spacer"></div>
 
@@ -6118,6 +6138,85 @@ startAutoRefresh();
             container.innerHTML = html;
         }
 
+        // ===== Task 61: Pencapaian Kontrak pada Detail Outlet (hanya channel BWS) =====
+        let monitoringKontrakFetchedFor = '';
+        function monitoringKontrakRows(data) {
+            const src = Array.isArray(globalOutletKontrakData) ? globalOutletKontrakData : [];
+            const outletKey = String(data.outlet || '').trim().toLowerCase();
+            const custKey = String(data.custCode || '').trim().toLowerCase();
+            return src.filter(function(x) {
+                const oOk = String(x.outlet || '').trim().toLowerCase() === outletKey;
+                const cOk = custKey ? String(x.custCode || '').trim().toLowerCase() === custKey : true;
+                return oOk && cOk;
+            });
+        }
+        function monitoringKontrakHtml(data) {
+            const rows = monitoringKontrakRows(data).filter(function(x) {
+                return String(x.channel || '').trim().toUpperCase() === 'BWS';
+            });
+            if (!rows.length) return '';
+            const blocks = rows.map(function(item) {
+                const pct = Number(item.percentage) || 0;
+                const gap = Number(item.gap) || 0;
+                const pctBar = pct >= 100 ? 'bg-emerald-600' : (pct >= 80 ? 'bg-amber-500' : 'bg-red-500');
+                let trip = '';
+                if (item.pointByCategory && item.pointByCategory.length > 0) {
+                    const trows = item.pointByCategory.map(function(row, idx) {
+                        const divText = row.divisor === 9.6 ? '/ 9,6' : (row.divisor === 12 ? '/ 12' : '-');
+                        return '<tr class="' + (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40') + ' border-b border-slate-100">' +
+                            '<td class="p-2 font-medium text-slate-700">' + escapeHtml(row.kategori) + '</td>' +
+                            '<td class="p-2 text-right text-slate-600">' + formatNumberID(row.volume, 1) + '</td>' +
+                            '<td class="p-2 text-right text-slate-600">' + formatNumberID(row.karton, 2) + ' <span class="text-[8px] text-slate-400">' + divText + '</span></td>' +
+                            '<td class="p-2 text-right font-bold text-indigo-700">' + formatNumberID(row.point, 2) + '</td></tr>';
+                    }).join('');
+                    trip = '<div class="mt-2 border border-slate-200 rounded-xl overflow-hidden">' +
+                        '<div class="px-3 py-2 bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-700">Point Trip Tahun Berjalan</div>' +
+                        '<div class="overflow-x-auto"><table class="w-full text-[10px]"><thead><tr class="bg-white border-b border-slate-200 text-slate-500">' +
+                        '<th class="p-2 text-left font-bold">Kategori</th><th class="p-2 text-right font-bold">Volume</th><th class="p-2 text-right font-bold">Karton</th><th class="p-2 text-right font-bold">Point</th>' +
+                        '</tr></thead><tbody>' + trows + '</tbody></table></div></div>';
+                }
+                return '<div class="mt-2 rounded-xl border border-slate-200 overflow-hidden">' +
+                    '<div class="px-3 py-2 bg-gradient-to-r from-slate-900 to-emerald-900 text-white">' +
+                    '<div class="text-[9px] uppercase tracking-wider text-emerald-300 font-bold">Periode Kontrak</div>' +
+                    '<div class="text-[11px] font-bold mt-0.5">' + escapeHtml(String(item.start || '-')) + ' s/d ' + escapeHtml(String(item.end || '-')) + '</div>' +
+                    '</div>' +
+                    '<div class="p-2.5">' +
+                    '<div class="grid grid-cols-4 gap-2">' +
+                    '<div class="rounded-lg border border-slate-200 p-2 bg-white"><div class="text-[8px] text-slate-400">Target</div><div class="text-[11px] font-bold text-slate-800">' + formatNumberID(item.target, 1) + '</div></div>' +
+                    '<div class="rounded-lg border border-emerald-200 p-2 bg-emerald-50"><div class="text-[8px] text-emerald-600">Actual</div><div class="text-[11px] font-bold text-emerald-800">' + formatNumberID(item.actual, 1) + '</div></div>' +
+                    '<div class="rounded-lg border border-slate-200 p-2 bg-white"><div class="text-[8px] text-slate-400">Gap</div><div class="text-[11px] font-bold ' + (gap <= 0 ? 'text-emerald-700' : 'text-red-600') + '">' + formatNumberID(gap, 1) + '</div></div>' +
+                    '<div class="rounded-lg border border-indigo-200 p-2 bg-indigo-50"><div class="text-[8px] text-indigo-600">Point</div><div class="text-[11px] font-bold text-indigo-800">' + formatNumberID(item.totalPoint, 2) + '</div></div>' +
+                    '</div>' +
+                    '<div class="mt-2"><div class="flex justify-between items-center mb-1"><span class="text-[9px] font-bold text-slate-500">Pencapaian Volume Kontrak</span><span class="text-[9px] font-bold text-slate-700">' + formatPercentID(pct) + '</span></div>' +
+                    '<div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full ' + pctBar + '" style="width:' + Math.min(Math.max(pct, 0), 100) + '%"></div></div></div>' +
+                    trip +
+                    '</div></div>';
+            }).join('');
+            return '<div class="mt-3 rounded-xl border border-slate-200 bg-white p-3" id="monitoringDetailKontrakWrap">' +
+                '<div class="text-[10px] font-extrabold text-slate-700">Pencapaian Kontrak</div>' + blocks + '</div>';
+        }
+        function monitoringKontrakEnsure(data) {
+            if (monitoringKontrakRows(data).length) return;
+            const userKey = String(currentUsernameInput || '').trim();
+            if (monitoringKontrakFetchedFor === userKey) return;
+            monitoringKontrakFetchedFor = userKey;
+            try {
+                google.script.run
+                    .withSuccessHandler(function(res) {
+                        if (!res || !res.success) return;
+                        globalOutletKontrakData = res.data || [];
+                        const modalBody = document.getElementById('modalBody');
+                        if (!modalBody || modalBody.textContent.indexOf('Pencapaian Bulanan') === -1) return;
+                        const hist = document.getElementById('monitoringDetailHistoryChart');
+                        if (!hist || document.getElementById('monitoringDetailKontrakWrap')) return;
+                        const html = monitoringKontrakHtml(data);
+                        if (html) hist.insertAdjacentHTML('beforebegin', html);
+                    })
+                    .withFailureHandler(function() {})
+                    .getOutletKontrakData_BWS(currentUser || 'Admin', currentUsernameInput || 'admin');
+            } catch (eAny) {}
+        }
+
         function tampilkanDetailMonitoring(encodedData) {
             setDetailModalNoFooter();
             let data = JSON.parse(decodeURIComponent(encodedData));
@@ -6161,29 +6260,12 @@ startAutoRefresh();
             '</tr>';
 
             document.getElementById('modalBody').innerHTML = `
-                <div class="modal-detail-summary">
-                    <div class="modal-stat-card">
-                        <div class="modal-stat-label">Target</div>
-                        <div class="modal-stat-value">${initialTarget.toFixed(1)} dus</div>
-                    </div>
-                    <div class="modal-stat-card">
-                        <div class="modal-stat-label">Actual</div>
-                        <div class="modal-stat-value is-main">${initialActual.toFixed(1)} dus</div>
-                    </div>
-                    <div class="modal-stat-card">
-                        <div class="modal-stat-label">Gap</div>
-                        <div class="modal-stat-value">${initialGap.toFixed(1)} dus</div>
-                    </div>
-                    <div class="modal-stat-card">
-                        <div class="modal-stat-label">Ach.</div>
-                        <div class="modal-stat-value">${initialTarget > 0 ? initialAch.toFixed(1) + '%' : '-'}</div>
-                    </div>
-                </div>
                 <div class="mt-3 rounded-xl border border-slate-200 bg-white p-3">
                     <div class="text-[10px] font-extrabold text-slate-700">Pencapaian Bulanan — ${data.quarter || '-'}</div>
                     <div class="overflow-x-auto mt-2"><table class="w-full text-[10px]"><thead><tr class="text-slate-400"><th class="p-1.5 text-left font-bold">Bulan</th><th class="p-1.5 text-right font-bold">Target</th><th class="p-1.5 text-right font-bold">Actual</th><th class="p-1.5 text-right font-bold">Gap</th><th class="p-1.5 text-right font-bold">Ach%</th></tr></thead><tbody>${pencapaianRows}</tbody></table></div>
                     <div class="text-[8.5px] text-slate-400 mt-1.5">Target bulanan = target kuartal dibagi rata 3 bulan (dus).</div>
                 </div>
+                ${monitoringKontrakHtml(data)}
                 <div id="monitoringDetailHistoryChart" class="mt-3 rounded-xl border border-slate-200 bg-white p-3">
                     <div class="text-[10px] font-extrabold text-slate-700">History Pengambilan</div>
                     <div class="text-[9px] text-slate-400 mt-1">Memuat...</div>
@@ -6198,6 +6280,7 @@ startAutoRefresh();
 
             // Tampilkan chart History Pengambilan saja; tooltip chart tidak diubah.
             loadMonitoringHistoryChart(data);
+            monitoringKontrakEnsure(data);
         }
 
 
@@ -10195,9 +10278,11 @@ startAutoRefresh();
         }
 
         // Task 52: submenu Pencapaian — buka/tutup grup menu (Monitoring + Pencapaian Sales).
-        function setPencapaianSubmenu(open) {
-            const wrap = document.getElementById('submenuPencapaian');
-            const group = document.getElementById('navPencapaianGroup');
+        // Task 61: mekanisme submenu generik untuk semua grup menu sidebar.
+        function setSidebarGroupOpen(groupId, open) {
+            const group = document.getElementById(groupId);
+            const wrapId = group ? String(group.getAttribute('aria-controls') || '') : '';
+            const wrap = wrapId ? document.getElementById(wrapId) : null;
             if (wrap) wrap.classList.toggle('sidebar-submenu-open', !!open);
             if (group) {
                 group.classList.toggle('sidebar-group-open', !!open);
@@ -10205,10 +10290,21 @@ startAutoRefresh();
             }
         }
 
+        function toggleSidebarGroup(wrapId, groupId) {
+            const wrap = document.getElementById(wrapId);
+            setSidebarGroupOpen(groupId, !(wrap && wrap.classList.contains('sidebar-submenu-open')));
+        }
+
+        // Task 52 (dipertahankan): grup Pencapaian — pintasan ke fungsi generik.
+        function setPencapaianSubmenu(open) { setSidebarGroupOpen('navPencapaianGroup', open); }
+
         function togglePencapaianSubmenu() {
             const wrap = document.getElementById('submenuPencapaian');
-            setPencapaianSubmenu(!(wrap && wrap.classList.contains('sidebar-submenu-open')));
+            setSidebarGroupOpen('navPencapaianGroup', !(wrap && wrap.classList.contains('sidebar-submenu-open')));
         }
+
+        // Task 61: item nav yang berada di dalam submenu (kelas submenu wajib dipertahankan).
+        const SIDEBAR_SUBMENU_NAVS = {input:true,riwayat:true,tagihan:true,pesananoutlet:true,approval:true,pencapaian:true,monitoring:true,outletkontrak:true,outletbws:true,harganett:true,produkbyoutlet:true,pengumumanadmin:true};
 
         function switchTab(tab) {
             const isAdminLogin = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
@@ -10233,13 +10329,13 @@ startAutoRefresh();
             Object.keys(navMap).forEach(function(key){
                 const el=document.getElementById(navMap[key]);
                 if(!el) return;
-                // Menu khusus Admin tidak boleh muncul untuk user non-admin.
+                // Menu khusus Admin tidak boleh muncul untuk user non-admin (kelas submenu dipertahankan).
                 if((key==='outletbws' || key==='pengumumanadmin') && !isAdminLogin){
-                    el.className='sidebar-item hidden';
+                    el.classList.add('hidden'); el.classList.remove('sidebar-item-active');
                 }else if(key==='approval' && !canApprovalMenu){
-                    el.className='sidebar-item hidden';
-                }else if(key==='pencapaian' || key==='monitoring'){
-                    // Task 52: item submenu Pencapaian — kelas submenu dipertahankan, cukup toggle aktif.
+                    el.classList.add('hidden'); el.classList.remove('sidebar-item-active');
+                }else if(SIDEBAR_SUBMENU_NAVS[key]){
+                    // Task 61: item submenu (semua grup) — kelas submenu dipertahankan, cukup toggle aktif.
                     el.classList.toggle('sidebar-item-active', key===tab);
                 }else{
                     el.className=key===tab?'sidebar-item sidebar-item-active':'sidebar-item';
@@ -10253,12 +10349,18 @@ startAutoRefresh();
                     if(adminNav){ adminNav.classList.add('hidden'); adminNav.classList.remove('sidebar-item-active'); }
                 });
             }
-            // Task 52: induk submenu Pencapaian ikut aktif & submenu terbuka saat Monitoring/Pencapaian Sales dipilih.
-            const grpNav52 = document.getElementById('navPencapaianGroup');
-            if (grpNav52) {
-                grpNav52.classList.toggle('sidebar-item-active', tab==='pencapaian' || tab==='monitoring');
-            }
-            if(tab==='pencapaian' || tab==='monitoring') setPencapaianSubmenu(true);
+            // Task 61: grup induk ikut aktif & submenu terbuka otomatis sesuai tab yang dipilih.
+            const SIDEBAR_GROUP_MAP = {
+                navPemesananGroup: ['input','riwayat','tagihan','pesananoutlet','approval'],
+                navPencapaianGroup: ['pencapaian','monitoring','outletkontrak','outletbws'],
+                navLainnyaGroup: ['harganett','produkbyoutlet','pengumumanadmin']
+            };
+            Object.keys(SIDEBAR_GROUP_MAP).forEach(function(gid){
+                const gEl = document.getElementById(gid);
+                const isActive = SIDEBAR_GROUP_MAP[gid].indexOf(tab) !== -1;
+                if (gEl) gEl.classList.toggle('sidebar-item-active', isActive);
+                if (isActive) setSidebarGroupOpen(gid, true);
+            });
             if(window.matchMedia&&window.matchMedia('(max-width:1023px)').matches){setSidebarState(true);}
 if(tab==='home'){loadHomeRebuild();startHomeRebuildAuto();}
 if(tab==='riwayat')loadRiwayat(false, true);
@@ -12919,7 +13021,10 @@ function doneBulkStatusApproval() {
         '.tg-badge-lunas{display:inline-flex;align-items:center;padding:3px 8px;border-radius:8px;font-weight:800;font-size:9px;background:#059669;color:#fff;border:1px solid #047857;box-shadow:0 2px 0 #047857;}' +
         '.tg-badge-cash{display:inline-flex;align-items:center;padding:3px 6px;border-radius:8px;font-weight:800;font-size:8px;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;}' +
         '.tagihan-row-selected td{background:#ecfdf5 !important;}' +
-        '.inv-head{background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;border-radius:12px 12px 0 0;}' +
+        '.inv-head{background:linear-gradient(135deg,#00a651,#047a3f);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;border-radius:12px 12px 0 0;border-bottom:3px solid #02612f;}' +
+        '.inv-eyebrow{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.8);margin-bottom:3px;}' +
+        '.inv-company{font-size:15px;font-weight:800;letter-spacing:-.2px;}' +
+        '.inv-subtitle{font-size:8.5px;color:rgba(255,255,255,.85);margin-top:2px;}' +
         '.inv-title{font-size:16px;font-weight:900;letter-spacing:.1em;}' +
         '.inv-sub{font-size:9px;color:#94a3b8;font-weight:600;margin-top:2px;}' +
         '.inv-chip{display:inline-block;font-size:9px;font-weight:800;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);padding:3px 8px;border-radius:999px;white-space:nowrap;}' +
@@ -12931,6 +13036,8 @@ function doneBulkStatusApproval() {
         '.inv-table{width:100%;border-collapse:collapse;font-size:10px;}' +
         '.inv-table th{background:#f1f5f9;color:#475569;font-size:8px;text-transform:uppercase;letter-spacing:.06em;padding:6px 8px;border-bottom:1px solid #e2e8f0;text-align:left;}' +
         '.inv-table td{padding:6px 8px;border-bottom:1px solid #f1f5f9;color:#334155;}' +
+        '.inv-body .overflow-x-auto table.inv-table th{text-align:center;}' +
+        '.inv-body .overflow-x-auto table.inv-table td{text-align:center;}' +
         '.inv-totrow td{background:#f8fafc;font-weight:900;color:#0f172a;border-top:2px solid #e2e8f0;}' +
         '.inv-stamp{display:inline-block;padding:5px 14px;border:2.5px solid;border-radius:8px;font-weight:900;font-size:13px;letter-spacing:.12em;transform:rotate(-6deg);margin-top:8px;}' +
         '.inv-stamp-lunas{color:#059669;border-color:#059669;background:rgba(5,150,105,.06);}' +
@@ -13704,9 +13811,9 @@ function tagihanTerapkanStatusLokal(changes) {
     try { renderTagihanList(tagihanFilteredData || []); } catch (eLocal) {}
 }
 
-// Ubah status SATU tagihan lewat tombol — disimpan SINKRON lewat
-// updateStatusTagihanSync sehingga status benar-benar tersimpan di server
-// sebelum popup konfirmasi ditampilkan.
+// Ubah status SATU tagihan lewat tombol — OPTIMISTIK (Task 61): tampilan
+// langsung berpindah, simpan ke server tetap lewat updateStatusTagihanSync;
+// bila gagal, status lokal dikembalikan dan pesan error ditampilkan.
 function ubahStatusTagihanSatuan(idInput, statusBaru) {
     const id = String(idInput || '').trim();
     const target = String(statusBaru || '').trim().toUpperCase();
@@ -13722,23 +13829,24 @@ function ubahStatusTagihanSatuan(idInput, statusBaru) {
         showModal('Status Sudah Sama', 'Status tagihan ini sudah ' + (cur || '-') + '.');
         return;
     }
+    // Task 61: optimistik seperti Harga Nett — tombol langsung berpindah tanpa
+    // menunggu proses simpan (tanpa loading); proses berjalan tetap sama di
+    // belakang layar, dan bila gagal status dikembalikan ke semula.
+    tagihanTerapkanStatusLokal([{ id: id, status: target }]);
     tagihanStatusInFlight = true;
-    showLoading(true);
     google.script.run
         .withSuccessHandler(function(res) {
             tagihanStatusInFlight = false;
-            showLoading(false);
             if (!res || res.success === false) {
+                tagihanTerapkanStatusLokal([{ id: id, status: cur }]);
                 showModal('Gagal Simpan Tagihan', (res && res.message) ? res.message : 'Perubahan status tagihan tidak tersimpan. Silakan coba lagi.');
                 return;
             }
-            tagihanTerapkanStatusLokal([{ id: id, status: target }]);
-            showModal('Tagihan Tersimpan', (res && res.message) ? res.message : ('Status tagihan ' + id + ' kini ' + target + '.'));
             try { loadTagihan(true, true); } catch (eReload) {}
         })
         .withFailureHandler(function(err) {
             tagihanStatusInFlight = false;
-            showLoading(false);
+            tagihanTerapkanStatusLokal([{ id: id, status: cur }]);
             showModal('Gagal Simpan Tagihan', (err && err.message ? err.message : 'Terjadi kesalahan saat menyimpan status tagihan.'));
         })
         .updateStatusTagihanSync([{ id: id, status: target }], currentUsernameInput, currentUser);
@@ -13823,7 +13931,7 @@ function bukaInvoiceTagihan(idInput) {
     document.getElementById('modalBody').innerHTML =
         '<div id="invoicePrintArea">' +
         '<div class="inv-head">' +
-            '<div><div class="inv-title">INVOICE</div></div>' +
+            '<div><div class="inv-eyebrow">INVOICE</div><div class="inv-company">PT. Sukses Adi Surya</div><div class="inv-subtitle">Jl. Muncul II, Komplek Pergudangan Gedangan</div></div>' +
             '<div style="text-align:right;"><div class="inv-chip">' + escapeHtml(targetId) + '</div>' +
             '<div class="inv-stamp ' + (st === 'LUNAS' ? 'inv-stamp-lunas' : 'inv-stamp-belum') + '">' + escapeHtml(st) + '</div></div>' +
         '</div>' +
@@ -13832,8 +13940,7 @@ function bukaInvoiceTagihan(idInput) {
                 '<div class="inv-cell"><div class="inv-label">Outlet</div><div class="inv-val">' + escapeHtml(item.outlet || '-') + '</div></div>' +
                 '<div class="inv-cell"><div class="inv-label">DSR / Sales</div><div class="inv-val">' + escapeHtml(item.dsr || '-') + '</div></div>' +
                 '<div class="inv-cell"><div class="inv-label">Tanggal Order</div><div class="inv-val">' + escapeHtml(tagihanFormatTanggalID(item.tanggal)) + '</div></div>' +
-                '<div class="inv-cell"><div class="inv-label">Tanggal Invoice</div><div class="inv-val">' + escapeHtml(tagihanFormatTanggalID(tagihanTanggalHariIniStr())) + '</div></div>' +
-                '<div class="inv-cell"><div class="inv-label">Pembayaran</div><div class="inv-val">' + escapeHtml(item.isCash ? 'CASH' : (item.payment || 'CREDIT')) + '</div></div>' +
+                                '<div class="inv-cell"><div class="inv-label">Pembayaran</div><div class="inv-val">' + escapeHtml(item.isCash ? 'CASH' : (item.payment || 'CREDIT')) + '</div></div>' +
                 '<div class="inv-cell"><div class="inv-label">Usia Nota</div><div class="inv-val' + (merah ? ' inv-val-merah' : '') + '">' + usia + ' hari</div></div>' +
                 lunasInfo +
             '</div>' +
