@@ -8,7 +8,7 @@
   <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
   
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Castrol</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -3219,6 +3219,9 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
   /* Pencapaian — tabel bulanan pas di kartu (padding ramping di mobile) */
   #tabPencapaian table[class*="min-w-"] { min-width: 0 !important; }
   #tabPencapaian table[class*="min-w-"] th, #tabPencapaian table[class*="min-w-"] td { white-space: normal; padding-left: 6px !important; padding-right: 6px !important; }
+  /* Outlet (Monitoring) — bar judul+filter melipat agar tidak terpotong di tepi kartu */
+  #tabMonitoring > div:first-child { flex-wrap: wrap; row-gap: 8px; }
+  #tabMonitoring > div:first-child > div { flex-wrap: wrap; row-gap: 6px; }
   /* Tabel banyak kolom tetap bisa digeser, dengan scrollbar yang terlihat */
   .overflow-x-auto, .cst-table-scroll { scrollbar-width: thin; scrollbar-color: #9db4a6 #eef2ef; }
   .overflow-x-auto::-webkit-scrollbar { height: 9px; }
@@ -3227,12 +3230,11 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
 }
 </style>
 <style id="castrol-mobile-input-zoom-fix">
-/* Task 60: cegah iOS Safari auto-zoom saat input difokus (font-size < 16px memicu
-   zoom otomatis sehingga tampilan mobile terlihat terpotong). Semua field form di
-   layar mobile memakai 16px (standar iOS); desktop tidak berubah. */
-@media (max-width: 767px) {
-  input, select, textarea { font-size: 16px !important; }
-}
+/* Task 60-c: paksaan font-size 16px utk input/select/textarea di mobile DIHAPUS
+   (keluhan user: "ukuran font pada semua filter jadi membesar") — semua filter
+   & field kembali ke ukuran font sesuai desain. Anti auto-zoom iOS kini lewat
+   viewport maximum-scale=1.0 di <head> (auto-zoom saat fokus terblokir;
+   pinch zoom iOS >= 10 tetap berfungsi). */
 /* Task 60: pengaman panel dropdown Produk by Outlet — tidak pernah melebihi lebar
    viewport; daftar opsi tanpa scroll horizontal. */
 #produkOutletDropdownPanel { max-width: calc(100vw - 24px); }
