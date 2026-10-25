@@ -3474,15 +3474,11 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
 
                 <div class="sidebar-spacer"></div>
 
-                <div class="sidebar-bottom">
+                <div class="sidebar-bottom" style="display:none">
                     <span id="userBadge" class="hidden" aria-hidden="true" style="display:none"></span>
-                    <button type="button" onclick="openEditAccount()" id="headerAccountBtn"
-                            class="sidebar-item sidebar-account-item" title="Account" aria-label="Account">
-                        <span class="sidebar-icon">⚙️</span>
-                        <span class="sidebar-text">Account</span>
-                    </button>
-                    <!-- Task 64: Logout digabung ke dalam ACCOUNT (tombol "Keluar (Logout)"
-                         di modal Account) — item sidebar tinggal satu: Account. -->
+                    <!-- Task 65: item "Account" dihilangkan dari menu sidebar — modal ACCOUNT
+                         kini dibuka lewat klik sapaan header (headerGreetBtn). userBadge
+                         dipertahankan karena masih dibaca JS (mirror sapaan header). -->
                 </div>
 
             </div>
@@ -10480,8 +10476,8 @@ if(tab==='tagihan')loadTagihan(false, true);
                     </div>
                     <!-- Task 64: Logout digabung di sini — satu tempat untuk kelola akun + keluar aplikasi. -->
                     <div class="pt-3 border-t border-slate-200">
-                        <button type="button" onclick="logoutFromAccount()" class="w-full flex items-center justify-center gap-2 rounded-xl bg-red-50 border border-red-200 text-red-700 font-extrabold text-xs py-2.5 hover:bg-red-100" title="Keluar dari aplikasi">
-                            <span aria-hidden="true">↪️</span> Keluar (Logout)
+                        <button type="button" onclick="logoutFromAccount()" class="w-full flex items-center justify-center rounded-xl bg-red-50 border border-red-200 text-red-700 font-extrabold text-xs py-2.5 hover:bg-red-100" title="Keluar dari aplikasi">
+                            Keluar (Logout)
                         </button>
                     </div>
                 </div>`;
