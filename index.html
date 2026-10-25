@@ -576,9 +576,8 @@
     .riwayat-card{padding:12px;border-radius:14px;}
     .riwayat-card-top{gap:8px;}
     .riwayat-card-outlet{font-size:12px;}
-    .riwayat-card-footer{align-items:flex-end;flex-direction:column;}
-    .riwayat-card-footer>div{width:100%;}
-    .riwayat-action{flex:1;}
+    /* Task 62: tombol aksi berukuran sama dengan desktop & tetap di kanan bawah
+       kartu (footer tidak lagi menjadi kolom, tombol tidak lagi diregangkan). */
 }
 
 /* ===== RIWAYAT TABLE ===== */
@@ -3428,7 +3427,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                     <button type="button" role="menuitem" onclick="switchTab('outletbws')" id="navOutletBWS"
                             class="sidebar-item sidebar-submenu-item hidden" title="Kelola Outlet BWS" aria-label="Kelola Outlet BWS">
                         <span class="sidebar-icon">🏪</span>
-                        <span class="sidebar-text">Outlet BWS</span>
+                        <span class="sidebar-text">Edit Outlet BWS</span>
                     </button>
                     <button type="button" role="menuitem" onclick="switchTab('pricelist')" id="navPricelist"
                             class="sidebar-item sidebar-submenu-item" title="Pricelist" aria-label="Pricelist">
@@ -3939,7 +3938,6 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                                 <div id="produkOutletOptions" class="max-h-64 overflow-y-auto po-outlet-options"></div>
                             </div>
                         </div>
-                        <p class="text-[10px] text-slate-400 mt-1.5">Isi dropdown mengikuti kolom "Produk by" di sheet PRODUK — semua produk (termasuk yang tidak aktif/OFF) dikelompokkan berdasarkan nilainya; produk dengan kolom kosong memakai nama produknya. Gunakan kolom pencarian untuk mencari.</p>
                     </div>
 
                     <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
@@ -6143,13 +6141,14 @@ startAutoRefresh();
         // ===== Task 61: Pencapaian Kontrak pada Detail Outlet (hanya channel BWS) =====
         let monitoringKontrakFetchedFor = '';
         function monitoringKontrakRows(data) {
+            // Task 62: cocokkan berdasarkan CUST.CODE saja (bukan nama outlet) —
+            // jika outlet tidak ada di Outlet Kontrak, detail tampil seperti
+            // biasa (seksi Pencapaian Kontrak tidak dirender).
             const src = Array.isArray(globalOutletKontrakData) ? globalOutletKontrakData : [];
-            const outletKey = String(data.outlet || '').trim().toLowerCase();
             const custKey = String(data.custCode || '').trim().toLowerCase();
+            if (!custKey) return [];
             return src.filter(function(x) {
-                const oOk = String(x.outlet || '').trim().toLowerCase() === outletKey;
-                const cOk = custKey ? String(x.custCode || '').trim().toLowerCase() === custKey : true;
-                return oOk && cOk;
+                return String(x.custCode || '').trim().toLowerCase() === custKey;
             });
         }
         function monitoringKontrakHtml(data) {
@@ -10308,7 +10307,13 @@ startAutoRefresh();
         // Task 61: item nav yang berada di dalam submenu (kelas submenu wajib dipertahankan).
         const SIDEBAR_SUBMENU_NAVS = {input:true,riwayat:true,tagihan:true,pesananoutlet:true,approval:true,pencapaian:true,monitoring:true,outletkontrak:true,outletbws:true,harganett:true,produkbyoutlet:true,pengumumanadmin:true};
 
+        // Task 62: dukungan tombol kembali browser / nav mobile — tiap perpindahan
+        // tab dicatat ke history; tombol kembali membuka tab sebelumnya (bukan
+        // keluar dari aplikasi). try/catch utk iframe sandbox Apps Script.
+        var __castrolTabFromPop = false;
+
         function switchTab(tab) {
+            const __castrolFromPop = __castrolTabFromPop; __castrolTabFromPop = false;
             const isAdminLogin = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
             if (tab === 'pengumumanadmin' && !isAdminLogin) { applyRoleVisibility(); return; }
             // Task 43: Approval hanya untuk admin / akun tanpa nama sales.
@@ -10379,7 +10384,19 @@ if(tab==='tagihan')loadTagihan(false, true);
             // Task 53: halaman Produk by Outlet.
             if(tab==='produkbyoutlet')loadProdukByOutlet(false);
             if(tab==='pengumumanadmin')loadPengumumanAdmin();
+            // Task 62: catat tab ke history agar tombol kembali browser membuka tab sebelumnya.
+            try { if (!__castrolFromPop && window.history && typeof history.pushState === 'function') { history.pushState({ castrolTab: tab }, '', location.href); } } catch (eCastrolHist) {}
         }
+
+        // Task 62: tombol kembali (browser / nav mobile) -> kembali ke tab sebelumnya.
+        try {
+            window.addEventListener('popstate', function(ev) {
+                const st = (ev && ev.state && ev.state.castrolTab) ? String(ev.state.castrolTab) : 'home';
+                __castrolTabFromPop = true;
+                switchTab(st);
+            });
+        } catch (eCastrolPop) {}
+        try { if (window.history && typeof history.replaceState === 'function') { history.replaceState({ castrolTab: 'home' }, '', location.href); } } catch (eCastrolRep) {}
 
         function setSidebarState(collapsed) {
             const app = document.getElementById('app');
@@ -12665,6 +12682,12 @@ function renderRiwayatCards(data) {
 
 </script>
 
+<style id="castrol-approval-status-btn">
+/* Task 62: tombol APPROVE/DECLINE halaman Approval — gaya dasar .tg-btn dari
+   CSS Tagihan; APPROVE aktif = hijau, DECLINE aktif = merah. */
+.tg-btn-approve.is-active{background:#059669;border-color:#047857;color:#fff;box-shadow:0 2px 0 #047857,0 3px 4px rgba(4,120,87,.25);}
+.tg-btn-decline.is-active{background:#dc2626;border-color:#b91c1c;color:#fff;box-shadow:0 2px 0 #b91c1c,0 3px 4px rgba(185,28,28,.25);}
+</style>
 <script id="approval-page-v1">
 /* Task 43: MENU APPROVAL - khusus admin / akun tanpa nama sales.
    Skema sama dengan halaman Riwayat (cards + tabel + filter + pagination),
@@ -12820,11 +12843,9 @@ function renderApprovalList(data) {
 }
 
 function approvalBulkControlsHtml() {
-    return '<div class="flex flex-wrap items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl mb-3">' +
-        '<button type="button" onclick="resetPilihanStatusApproval()" class="px-3 py-1.5 rounded-md bg-white hover:bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200">RESET</button>' +
-        '<button type="button" onclick="doneBulkStatusApproval()" class="px-4 py-1.5 rounded-md bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-extrabold shadow-sm">DONE</button>' +
-        '<span id="bulkStatusInfo" class="text-[10px] text-slate-500 font-semibold ml-auto">Pilih status pada masing-masing order lalu klik DONE.</span>' +
-        '</div>';
+    // Task 62: bar RESET/DONE dihapus — APPROVE/DECLINE kini tombol per order
+    // yang langsung diproses secara optimistik (sama seperti halaman Tagihan).
+    return '';
 }
 
 function approvalPaginationHtml(totalShown, startIndex) {
@@ -12839,8 +12860,71 @@ function approvalPaginationHtml(totalShown, startIndex) {
         '</div></div>';
 }
 
-function approvalDetailBtnHtml(idEsc) {
-    return '<button type="button" onclick="lihatDetail(\'' + idEsc + '\',\'approval\'); return false;" class="riwayat-action riwayat-action-edit" title="Detail order" aria-label="Detail order"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>';
+// Task 62: tombol APPROVE/DECLINE per order — gaya sama dengan tombol status
+// halaman Tagihan (.tg-btn). APPROVE aktif = hijau, DECLINE aktif = merah.
+function approvalStatusButtonsHtml(item, statusText) {
+    const st = String(statusText || item.status || 'PENDING').toUpperCase();
+    const id = escapeHtml(item.id || '');
+    return '<div class="inline-flex items-center gap-1" onclick="event.stopPropagation()">' +
+        '<button type="button" onclick="ubahStatusApprovalSatuan(\'' + id + '\',\'APPROVE\')" class="tg-btn tg-btn-approve' + (st === 'APPROVE' ? ' is-active' : '') + '" title="Setujui order">Approve</button>' +
+        '<button type="button" onclick="ubahStatusApprovalSatuan(\'' + id + '\',\'DECLINE\')" class="tg-btn tg-btn-decline' + (st === 'DECLINE' ? ' is-active' : '') + '" title="Tolak order">Decline</button>' +
+        '</div>';
+}
+
+// Task 62: terapkan perubahan status ke data lokal lalu render ulang (optimistik).
+function approvalTerapkanStatusLokal(changes) {
+    (changes || []).forEach(function(ch) {
+        const id = String((ch && ch.id) || '').trim();
+        const st = String((ch && ch.status) || '').trim().toUpperCase();
+        if (!id || (st !== 'APPROVE' && st !== 'DECLINE')) return;
+        const it = (globalApprovalData || []).find(function(x){ return String(x.id || '').trim() === id; });
+        if (!it) return;
+        it.status = st;
+    });
+    try { renderApprovalList(approvalFilteredData || []); } catch (eLocalApproval) {}
+}
+
+// Task 62: ubah status SATU order lewat tombol — OPTIMISTIK seperti Tagihan:
+// tampilan langsung berpindah tanpa menunggu proses simpan (tanpa loading);
+// proses berjalan tetap sama di belakang layar (updateOrderStatusBatchSync),
+// dan bila gagal status lokal dikembalikan ke semula.
+function ubahStatusApprovalSatuan(idInput, statusBaru) {
+    if (!canUseApprovalMenu()) {
+        showModal('Akses Ditolak', 'Hanya Admin atau akun tanpa nama sales yang dapat mengubah status.');
+        return;
+    }
+    const id = String(idInput || '').trim();
+    const target = String(statusBaru || '').trim().toUpperCase();
+    if (!id || (target !== 'APPROVE' && target !== 'DECLINE')) return;
+    if (approvalStatusInFlight) return;
+    const item = (globalApprovalData || []).find(function(x){ return String(x.id || '').trim() === id; });
+    const cur = String(item && item.status || 'PENDING').toUpperCase();
+    if (cur === target) {
+        showModal('Status Sudah Sama', 'Status order ini sudah ' + cur + '.');
+        return;
+    }
+    approvalTerapkanStatusLokal([{ id: id, status: target }]);
+    approvalStatusInFlight = true;
+    google.script.run
+        .withSuccessHandler(function(res) {
+            approvalStatusInFlight = false;
+            if (!res || res.success === false) {
+                approvalTerapkanStatusLokal([{ id: id, status: cur }]);
+                showModal('Gagal Approval', (res && res.message) ? res.message : 'Perubahan status tidak tersimpan. Silakan coba lagi.');
+                return;
+            }
+            delete selectedRiwayatStatus[id];
+            try { window._homeDsrCache = {}; } catch (eHomeCache) {}
+            try { loadRiwayat(true, true); } catch (eReloadRiwayat) {}
+            try { loadHomeRebuild(true); } catch (eReloadHome) {}
+            try { loadApproval(true, true); } catch (eReloadApproval) {}
+        })
+        .withFailureHandler(function(err) {
+            approvalStatusInFlight = false;
+            approvalTerapkanStatusLokal([{ id: id, status: cur }]);
+            showModal('Gagal Approval', (err && err.message ? err.message : 'Terjadi kesalahan saat mengubah status.'));
+        })
+        .updateOrderStatusBatchSync([{ id: id, status: target }], currentUsernameInput, currentUser);
 }
 
 function renderApprovalCards(data) {
@@ -12857,11 +12941,8 @@ function renderApprovalCards(data) {
         const statusDot = status === 'APPROVE' ? 'bg-emerald-500' : status === 'DECLINE' ? 'bg-red-500' : 'bg-amber-500';
         const products = Array.isArray(item.products) ? item.products.filter(function(p){ return String(p || '').trim() !== ''; }) : [];
         const productText = products.length ? products.map(function(p){ return escapeHtml(p); }).join('<br>') : '-';
-        const statusCell = '<select onclick="event.stopPropagation()" class="bulk-status-select w-full border border-slate-300 rounded-lg px-2.5 py-2 text-[10px] font-bold bg-white" data-order-id="' + escapeHtml(item.id) + '" data-current-status="' + escapeHtml(status) + '">' +
-            '<option value="">' + escapeHtml(status) + ' / TIDAK DIUBAH</option>' +
-            '<option value="APPROVE" ' + (selectedRiwayatStatus[String(item.id)] === 'APPROVE' ? 'selected' : '') + '>APPROVE</option>' +
-            '<option value="DECLINE" ' + (selectedRiwayatStatus[String(item.id)] === 'DECLINE' ? 'selected' : '') + '>DECLINE</option>' +
-            '</select>';
+        // Task 62: tombol APPROVE/DECLINE (gaya Tagihan) menggantikan dropdown.
+        const statusCell = approvalStatusButtonsHtml(item, status);
         const number = startIndex + index + 1;
         const valueText = 'Rp ' + Number(item.value || 0).toLocaleString('id-ID');
         const volumeText = escapeHtml(item.volume || '0') + ' L';
@@ -12881,9 +12962,9 @@ function renderApprovalCards(data) {
             '<div class="riwayat-card-stat"><span class="riwayat-card-label">VOLUME</span><strong>' + volumeText + '</strong></div>' +
             '<div class="riwayat-card-stat"><span class="riwayat-card-label">NILAI</span><strong>' + valueText + '</strong></div>' +
             '</div>' +
-            '<div class="riwayat-card-footer" onclick="event.stopPropagation()">' +
+            // Task 62: tombol detail dihapus — card tidak memiliki akses detail.
+            '<div class="riwayat-card-footer">' +
             '<span class="text-[9px] text-slate-400 font-medium">ID: ' + escapeHtml(item.id || '-') + '</span>' +
-            '<div class="flex items-center gap-1.5">' + approvalDetailBtnHtml(escapeHtml(item.id)) + '</div>' +
             '</div>' +
             '</article>';
     });
@@ -12897,20 +12978,17 @@ function renderApprovalTable(data) {
     if (approvalPage > totalPages) approvalPage = totalPages;
     const startIndex = (approvalPage - 1) * RIWAYAT_PAGE_SIZE;
     const rows = data.slice(startIndex, startIndex + RIWAYAT_PAGE_SIZE);
+    // Task 62: tombol APPROVE/DECLINE (gaya Tagihan) menggantikan dropdown.
     const statusSelect = function(item) {
-        const status = String(item.status || 'PENDING').toUpperCase();
-        return '<select onclick="event.stopPropagation()" class="bulk-status-select w-full border border-slate-300 rounded-lg px-2 py-1.5 text-[9px] font-bold bg-white" data-order-id="' + escapeHtml(item.id) + '" data-current-status="' + escapeHtml(status) + '">' +
-            '<option value="">' + escapeHtml(status) + ' / TIDAK DIUBAH</option>' +
-            '<option value="APPROVE">APPROVE</option>' +
-            '<option value="DECLINE">DECLINE</option>' +
-            '</select>';
+        return approvalStatusButtonsHtml(item, String(item.status || 'PENDING').toUpperCase());
     };
     const body = rows.map(function(item, index) {
         const products = Array.isArray(item.products) ? item.products.filter(function(p){ return String(p || '').trim() !== ''; }) : [];
         const productText = products.length ? products.map(escapeHtml).join('<br>') : '-';
         const id = escapeHtml(item.id || '');
         const number = startIndex + index + 1;
-        return '<tr class="border-b border-slate-100 hover:bg-emerald-50/50">' +
+        // Task 62: klik baris tabel membuka detail (tanpa tombol detail terpisah).
+        return '<tr onclick="lihatDetail(\'' + id + '\',\'approval\')" class="border-b border-slate-100 hover:bg-emerald-50/50 cursor-pointer" title="Klik untuk melihat detail order">' +
             '<td class="px-3 py-2.5 font-bold text-slate-500">#' + number + '</td>' +
             '<td class="px-3 py-2.5 whitespace-nowrap">' + escapeHtml(item.tanggal || '-') + '</td>' +
             '<td class="px-3 py-2.5 font-bold text-slate-700">' + escapeHtml(item.outlet || '-') + '<div class="text-[9px] text-slate-400 font-normal">DSR: ' + escapeHtml(item.dsr || '-') + '</div></td>' +
@@ -12918,11 +12996,10 @@ function renderApprovalTable(data) {
             '<td class="px-3 py-2.5 text-right font-semibold">' + escapeHtml(item.volume || '0') + ' L</td>' +
             '<td class="px-3 py-2.5 text-right font-semibold">Rp ' + Number(item.value || 0).toLocaleString('id-ID') + '</td>' +
             '<td class="px-3 py-2.5">' + statusSelect(item) + '</td>' +
-            '<td class="px-3 py-2.5 whitespace-nowrap"><div class="flex gap-1">' + approvalDetailBtnHtml(id) + '</div></td>' +
             '</tr>';
     }).join('');
     container.innerHTML = approvalBulkControlsHtml() +
-        '<div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left text-[10px] min-w-[980px]"><thead><tr class="bg-slate-50 border-b border-slate-200 text-[9px] uppercase tracking-wide text-slate-500"><th class="px-3 py-2">No</th><th class="px-3 py-2">Tanggal</th><th class="px-3 py-2">Outlet</th><th class="px-3 py-2">Produk</th><th class="px-3 py-2 text-right">Volume</th><th class="px-3 py-2 text-right">Nilai</th><th class="px-3 py-2">Status</th><th class="px-3 py-2">Aksi</th></tr></thead><tbody>' + body + '</tbody></table></div></div>' +
+        '<div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left text-[10px] min-w-[980px]"><thead><tr class="bg-slate-50 border-b border-slate-200 text-[9px] uppercase tracking-wide text-slate-500"><th class="px-3 py-2">No</th><th class="px-3 py-2">Tanggal</th><th class="px-3 py-2">Outlet</th><th class="px-3 py-2">Produk</th><th class="px-3 py-2 text-right">Volume</th><th class="px-3 py-2 text-right">Nilai</th><th class="px-3 py-2">Status</th></tr></thead><tbody>' + body + '</tbody></table></div></div>' +
         approvalPaginationHtml(data.length, startIndex);
 }
 
@@ -13501,8 +13578,7 @@ function renderProdukOutlet() {
         '<tr class="border-t-2 border-emerald-200 bg-emerald-50/60 font-extrabold text-emerald-800">' +
             '<td colspan="2" class="px-3 py-2.5 uppercase tracking-wide">Total</td>' +
             '<td class="px-3 py-2.5 text-right whitespace-nowrap">' + escapeHtml(totalLabel || '0') + '</td>' +
-        '</tr></tbody></table>' +
-        '<div class="px-3 py-2 text-[10px] text-slate-400 bg-slate-50 border-t border-slate-100">Klik baris outlet untuk melihat rincian tanggal &amp; volume order.</div>';
+        '</tr></tbody></table>';
     const tb = wrap.querySelector('tbody');
     if (tb) tb.addEventListener('click', function(ev) {
         const tr = ev.target && ev.target.closest ? ev.target.closest('tr[data-po-outlet]') : null;
