@@ -4651,6 +4651,21 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             }
         }
 
+        // Task 66: klik di luar kartu modal (backdrop) atau tombol Escape
+        // menutup modal lewat jalur cancel (sama dengan tombol X / Batal),
+        // sehingga modalCallback(false) tetap dijalankan.
+        (function () {
+            const overlay = document.getElementById('customModal');
+            if (!overlay || overlay.dataset.castrolModalOutsideBound === '1') return;
+            overlay.dataset.castrolModalOutsideBound = '1';
+            overlay.addEventListener('mousedown', function (e) {
+                if (e.target === overlay && overlay.style.display === 'flex') closeModal(false);
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e && e.key === 'Escape' && overlay.style.display === 'flex') closeModal(false);
+            });
+        })();
+
         let currentUser = "";
         let currentUsernameInput = "";
         let produkDataList = [];
@@ -9964,6 +9979,17 @@ startAutoRefresh();
         }
         function resetHomeRebuildZoom(){homeLightboxScale=1;homeLightboxX=0;homeLightboxY=0;homeLightboxDragging=false;homeLightboxPinchStart=0;homeLightboxPinchScale=1;applyHomeRebuildZoom();}
         function closeHomeRebuildImage(){const o=document.getElementById('homeRebuildLightbox');if(o)o.classList.remove('open');document.body.style.overflow='';resetHomeRebuildZoom();startHomeRebuildAuto();}
+        // Task 66: tombol Escape menutup lightbox gambar Beranda (klik di luar
+        // sudah ditangani setupHomeRebuildLightbox).
+        if (!window.__homeRebuildLightboxEscBound) {
+            window.__homeRebuildLightboxEscBound = true;
+            document.addEventListener('keydown', function (e) {
+                if (e && e.key === 'Escape') {
+                    const lb = document.getElementById('homeRebuildLightbox');
+                    if (lb && lb.classList.contains('open')) closeHomeRebuildImage();
+                }
+            });
+        }
         function setupHomeRebuildLightbox(o){
             const img=document.getElementById('homeRebuildLightboxImg');
             if(!img)return;
