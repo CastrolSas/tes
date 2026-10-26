@@ -136,7 +136,9 @@
 </script>
 <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* ===== Task 67: OutLET PORTAL — design tokens identik dengan sales portal ===== */
+        /* ===== Task 70: tema/layout/UI identik dengan portal Sales =====
+           Header putih + saputangan Castrol, sidebar gelap gradien,
+           kartu radius 20, judul seksi dengan bar hijau, modal & login sales. */
         :root{
             --castrol-green:#007a3d;
             --castrol-green-2:#00a651;
@@ -148,6 +150,8 @@
             --castrol-line:#dfe8e2;
             --castrol-soft:#f3f8f4;
             --castrol-card:#ffffff;
+            --ui-green:#008a45;
+            --ui-bg:#f3f6f4;
         }
         *{ -webkit-tap-highlight-color:transparent; }
         html,body{ margin:0; padding:0; }
@@ -155,11 +159,8 @@
             font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
             -webkit-font-smoothing:antialiased;
             overflow-x:hidden;
-            color:var(--castrol-ink);
-            background:
-                radial-gradient(circle at 0% 0%, rgba(0,166,81,.08), transparent 28%),
-                radial-gradient(circle at 100% 0%, rgba(227,24,55,.05), transparent 25%),
-                linear-gradient(180deg,#f6faf7 0%,#f3f7f5 55%,#eef4f0 100%) !important;
+            color:#10241b;
+            background:#f3f6f4 !important;
             min-height:100vh; min-height:100dvh;
         }
         .hidden{ display:none !important; }
@@ -178,39 +179,40 @@
         }
         @keyframes opspin{ to{ transform:rotate(360deg); } }
 
-        /* ===== Modal ===== */
+        /* ===== Modal — gaya #customModal portal Sales ===== */
         .op-modal-overlay{
             display:none; position:fixed; inset:0; z-index:9999;
-            padding:14px; align-items:center; justify-content:center;
-            background:rgba(7,28,20,.55); backdrop-filter:blur(6px);
+            padding:12px; align-items:center; justify-content:center;
+            background:rgba(2,28,16,.62); backdrop-filter:blur(10px);
         }
         .op-modal-card{
-            width:min(520px,100%); max-height:min(86vh,760px);
-            background:#fff; border-radius:20px; overflow:hidden;
-            box-shadow:0 26px 70px rgba(5,31,22,.30);
+            width:440px; max-width:calc(100vw - 20px); max-height:min(88vh,800px);
+            background:#fff; border-radius:21px; overflow:hidden;
+            box-shadow:0 28px 90px rgba(2,32,18,.25);
             display:flex; flex-direction:column;
-            border:1px solid rgba(255,255,255,.7);
+            border:1px solid rgba(216,229,220,.95);
         }
         .op-modal-header{
-            padding:14px 18px; border-bottom:1px solid var(--castrol-line);
-            background:linear-gradient(135deg,#f4fbf8,#fff);
+            padding:14px 16px; border-bottom:1px solid #e2ebe5;
+            background:linear-gradient(135deg,#ffffff,#f5faf7);
             font-weight:800; font-size:14px; color:#123527;
         }
-        .op-modal-body{ padding:16px 18px; overflow-y:auto; font-size:13px; color:#24352c; }
+        .op-modal-body{ padding:16px 18px; overflow-y:auto; -webkit-overflow-scrolling:touch; font-size:13px; color:#24352c; }
         .op-modal-footer{
-            padding:12px 18px; border-top:1px solid var(--castrol-line); background:#f8fbfa;
+            padding:12px 16px; border-top:1px solid #e2ebe5; background:#fbfdfc;
             display:flex; justify-content:flex-end; gap:8px;
         }
         .op-btn{
             border:0; cursor:pointer; border-radius:11px; font-weight:800; font-size:12px;
-            padding:9px 16px; transition:filter .15s ease, transform .08s ease;
+            padding:9px 16px; transition:filter .15s ease, transform .08s ease, background .15s ease;
         }
         .op-btn:active{ transform:scale(.98); }
-        .op-btn-ok{ background:linear-gradient(180deg,#00a651,#047f42); color:#fff; box-shadow:0 6px 14px rgba(0,120,60,.28); }
-        .op-btn-cancel{ background:#fff; color:#475569; border:1px solid #dbe5df; }
+        .op-btn-ok{ background:linear-gradient(180deg,#00b85c,#009b4d) !important; color:#fff; border:1px solid #008a45; box-shadow:0 6px 14px rgba(0,140,74,.20); }
+        .op-btn-cancel{ background:#fff; color:#475569; border:1px solid #e5eaee; }
+        .op-btn-cancel:hover{ background:#f3f6f4; }
         .op-btn-danger{ background:#dc2626; color:#fff; }
 
-        /* ===== Login page ===== */
+        /* ===== Login layar penuh hijau — identik portal Sales ===== */
         #loginPage{
             position:fixed; inset:0; z-index:60; overflow-y:auto;
             background-color:#0b2e1d;
@@ -223,17 +225,17 @@
             box-sizing:border-box;
         }
         .castrol-auth-brand{
-            display:flex; align-items:center; gap:10px;
-            padding:26px 0 10px; width:100%; max-width:420px;
+            width:100%; max-width:430px;
+            display:flex; align-items:center; justify-content:center; gap:10px;
+            padding-top:34px;
         }
         .castrol-auth-roundel{
-            width:44px; height:44px; border-radius:50%; background:#fff;
-            display:flex; align-items:center; justify-content:center;
-            font-weight:900; font-style:italic; font-size:22px; color:#00a651;
-            box-shadow:0 6px 16px rgba(0,0,0,.25);
+            width:44px; height:44px; object-fit:contain;
+            background:#fff; border-radius:9999px; padding:5px; box-sizing:content-box;
+            box-shadow:0 6px 18px rgba(0,0,0,.28);
         }
-        .castrol-auth-wordmark{ color:#fff; font-weight:900; font-style:italic; font-size:26px; letter-spacing:.5px; }
-        .castrol-auth-body{ flex:1; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px 0 30px; }
+        .castrol-auth-wordmark{ color:#fff; font-weight:800; font-style:italic; font-size:26px; letter-spacing:.4px; line-height:1; text-shadow:0 2px 10px rgba(0,0,0,.25); }
+        .castrol-auth-body{ flex:1 1 auto; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 0; }
         .castrol-auth-card{
             width:100%; max-width:400px; background:#fff; border-radius:18px;
             box-shadow:0 18px 44px rgba(4,24,15,.35); padding:26px 22px; box-sizing:border-box;
@@ -243,8 +245,7 @@
             color:#047f42; background:#e7f7ee; border:1px solid #c5ebd5;
             padding:4px 10px; border-radius:999px; margin-bottom:12px;
         }
-        .castrol-auth-title{ font-size:18px; font-weight:900; color:#0f2c1d; margin:0 0 4px; }
-        .castrol-auth-sub{ font-size:11.5px; color:#64766c; margin:0 0 16px; line-height:1.5; }
+        .castrol-auth-title{ font-size:18px; font-weight:900; color:#10241b; margin:0 0 14px; }
         .castrol-auth-label{ display:block; font-size:11px; font-weight:700; color:#3f5a4c; margin-bottom:5px; letter-spacing:.3px; }
         .castrol-auth-input{
             width:100%; box-sizing:border-box;
@@ -252,7 +253,7 @@
             padding:11px 13px; font-size:14px; color:#10241b; background:#fff;
             outline:none; transition:border-color .15s ease, box-shadow .15s ease; height:42px;
         }
-        .castrol-auth-input::placeholder{ color:#9ab0a4; text-transform:uppercase; }
+        .castrol-auth-input::placeholder{ color:#9ab0a4; }
         .castrol-auth-input:focus{ border-color:#00a651; box-shadow:0 0 0 3px rgba(0,166,81,.14); }
         .castrol-auth-submit{
             width:100%; border:0; cursor:pointer;
@@ -263,199 +264,297 @@
             transition:filter .15s ease, transform .08s ease;
         }
         .castrol-auth-submit:hover{ filter:brightness(1.06); }
-        .castrol-auth-submit:active{ transform:scale(.99); }
-        .castrol-auth-submit:disabled{ opacity:.7; cursor:wait; }
+        .castrol-auth-submit:active{ transform:translateY(1px); }
+        .castrol-auth-submit:disabled{ opacity:.7; cursor:progress; }
         .castrol-auth-error{
             display:none; margin-top:12px; font-size:11.5px; font-weight:700;
             color:#b91c1c; background:#fef2f2; border:1px solid #fecaca;
             border-radius:10px; padding:9px 12px;
         }
         .castrol-auth-error.on{ display:block; }
-        .castrol-auth-footer{ color:rgba(255,255,255,.55); font-size:10px; padding-top:14px; text-align:center; }
+        .castrol-auth-footer{ width:100%; max-width:520px; text-align:center; padding-bottom:6px; }
+        .castrol-auth-tagline{
+            margin:0; color:#ffffff;
+            font-weight:800; font-style:italic;
+            font-size:17px; line-height:1.35;
+            text-shadow:0 2px 10px rgba(0,0,0,.30);
+        }
+        .castrol-auth-sub{ margin:7px 0 0; color:rgba(255,255,255,.62); font-size:12px; font-weight:600; }
+        .castrol-auth-copy{ margin:12px 0 0; color:rgba(255,255,255,.38); font-size:10.5px; }
+        @media (min-width:768px){
+            .castrol-auth-brand{ padding-top:44px; }
+            .castrol-auth-card{ padding:30px 28px; }
+            .castrol-auth-tagline{ font-size:21px; }
+        }
 
         /* ===== App shell ===== */
         #app{ min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; }
+
+        /* ===== Header PUTIH + saputangan Castrol ===== */
         #mainHeader{
-            position:sticky; top:0; z-index:60; min-height:62px;
-            background:linear-gradient(135deg,#062f1c 0%,#005d30 52%,#007a3d 100%) !important;
-            border-bottom:1px solid rgba(183,212,51,.22);
-            box-shadow:0 12px 34px rgba(2,50,28,.20);
+            position:sticky; top:0; z-index:60; height:62px; min-height:62px; box-sizing:border-box;
+            background:#ffffff !important;
+            border-bottom:1px solid #e5eaee !important;
+            box-shadow:0 2px 12px rgba(16,36,27,.06) !important;
             display:flex; justify-content:space-between; align-items:center;
-            padding:8px 14px; color:#fff;
+            padding:11px 20px; color:#123527;
         }
+        #mainHeader:before{ content:none !important; }
         #mainHeader:after{
-            content:""; position:absolute; left:0; right:0; bottom:0; height:3px;
-            background:linear-gradient(90deg,var(--castrol-red) 0 20%,var(--castrol-lime) 20% 33%,#fff 33% 35%,var(--castrol-green-2) 35% 100%);
-            opacity:.95; pointer-events:none;
+            content:"" !important;
+            position:absolute; top:0; left:auto; right:0;
+            width:138px; height:100%;
+            background:linear-gradient(115deg,#00a651 0 30%,#0d8a46 30% 55%,#e60012 55% 78%,#123527 78% 100%);
+            clip-path:polygon(36% 0,100% 0,100% 100%,10% 100%);
+            opacity:.94 !important;
+            pointer-events:none;
+            z-index:0;
         }
-        .castrol-greet{ display:flex; flex-direction:column; min-width:0; padding:4px 6px; margin:-4px 0; border-radius:10px; }
-        .castrol-greet-hi{ font-size:9px; font-weight:700; color:rgba(255,255,255,.75); letter-spacing:.4px; }
-        h1.castrol-greet-name{ font-size:14px; font-weight:900; margin:1px 0 0; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:52vw; }
-        .castrol-greet-role{ font-size:8.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#b7d433; }
+        #mainHeader > *{ position:relative; z-index:1; }
+        .castrol-greet{ display:flex; flex-direction:column; justify-content:center; line-height:1.18; min-width:0; }
+        .castrol-greet-hi{ font-size:9px; font-weight:600; color:#6b7f74; letter-spacing:.02em; white-space:nowrap; }
+        h1.castrol-greet-name{
+            font-size:14px !important; font-weight:900 !important; font-style:normal !important;
+            color:#123527 !important; letter-spacing:0 !important; text-shadow:none !important;
+            max-width:190px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+            margin:0;
+        }
+        .castrol-greet-role{ font-size:8.5px; font-weight:800; color:#008a45; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; }
+        .cst-header-online{
+            position:absolute; right:112px; top:50%; transform:translateY(-50%);
+            display:inline-flex; align-items:center; gap:6px;
+            background:#e8f5ee; color:#008a45; border:1px solid #c9e8d6;
+            font-size:10.5px; font-weight:800; border-radius:999px; padding:5px 11px; white-space:nowrap;
+        }
+        .cst-header-online i{ width:7px; height:7px; border-radius:50%; background:#00c853; box-shadow:0 0 0 3px rgba(0,200,83,.18); animation:cstOnlinePulse 2s ease-in-out infinite; }
+        @keyframes cstOnlinePulse{ 0%,100%{ box-shadow:0 0 0 3px rgba(0,200,83,.18); } 50%{ box-shadow:0 0 0 6px rgba(0,200,83,.08); } }
+        #sidebarToggle{
+            width:40px; height:40px; border-radius:13px;
+            border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.075);
+            color:#123527; cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            transition:background .15s ease, border-color .15s ease, color .15s ease;
+        }
+        #sidebarToggle:hover{ background:#eaf7f0 !important; border-color:#bfe6d2 !important; color:#008a45 !important; }
         .header-btn{
-            width:36px; height:36px; border-radius:10px; border:1px solid rgba(255,255,255,.22);
-            background:rgba(255,255,255,.10); color:#fff; cursor:pointer;
-            display:flex; align-items:center; justify-content:center; font-size:15px;
-            transition:background .15s ease;
+            width:34px; height:34px; border-radius:10px;
+            border:1px solid #e5eaee; background:#f3f6f4; color:#123527; cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            transition:background .15s ease, border-color .15s ease, color .15s ease;
         }
-        .header-btn:hover{ background:rgba(255,255,255,.20); }
+        .header-btn:hover{ background:#eaf7f0; border-color:#bfe6d2; color:#008a45; }
         .header-btn.spinning svg{ animation:opspin 1s linear infinite; }
 
-        /* ===== Sidebar ===== */
+        /* ===== Sidebar gelap Castrol (item teks-saja, ikon disembunyikan) ===== */
         #leftNav{
-            position:fixed; left:0; top:62px; bottom:0; width:228px; z-index:55;
-            background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(246,251,247,.98));
-            border-right:1px solid #dce8df; box-shadow:10px 0 28px rgba(10,52,29,.08);
-            display:flex; flex-direction:column; padding:14px 12px; box-sizing:border-box;
+            position:fixed; left:0; top:62px; bottom:0; width:184px; z-index:900;
+            background:linear-gradient(180deg,#10402a 0%,#0c3120 55%,#082417 100%) !important;
+            border-right:1px solid rgba(255,255,255,.08) !important;
+            box-shadow:6px 0 22px rgba(4,24,15,.35) !important;
+            display:flex; flex-direction:column; padding:12px 8px; box-sizing:border-box;
             transition:transform .22s ease; overflow-y:auto;
         }
         .sidebar-inner{ display:flex; flex-direction:column; gap:6px; flex:1; min-height:0; }
-        .castrol-sidebar-logo{ display:flex; align-items:center; gap:9px; padding:2px 6px 12px; border-bottom:1px solid #e3ede6; margin-bottom:8px; }
-        .castrol-sidebar-logo .roundel{
-            width:38px; height:38px; border-radius:50%; background:#fff; border:1px solid #e2ece5;
-            display:flex; align-items:center; justify-content:center; font-weight:900; font-style:italic; color:#00a651; font-size:19px;
-            box-shadow:0 4px 10px rgba(17,56,32,.08);
+        .castrol-sidebar-logo{
+            display:flex !important; align-items:center !important; justify-content:flex-start !important;
+            gap:9px !important; min-height:40px !important;
+            padding:6px 13px 8px !important;
+            border-bottom:1px solid rgba(255,255,255,.10); margin-bottom:8px;
         }
-        .castrol-sidebar-logo .wordmark{ font-weight:900; font-style:italic; font-size:19px; color:#0d3a24; }
+        .castrol-logo-img{ width:38px; height:38px; object-fit:contain; background:#fff; border-radius:9999px; padding:4px; box-sizing:content-box; box-shadow:0 4px 12px rgba(0,0,0,.28); flex:none; display:block; }
+        .castrol-logo-word{ color:#ffffff !important; font-size:21px; font-weight:900; font-style:italic; letter-spacing:-.3px; line-height:1; white-space:nowrap; text-shadow:0 1px 6px rgba(0,0,0,.3); }
         .sidebar-item{
             display:flex; align-items:center; gap:10px; width:100%; text-align:left;
-            min-height:46px; padding:8px 12px; border-radius:14px; border:1px solid transparent;
-            background:transparent; cursor:pointer; color:#66766d;
-            font-size:11px; font-weight:750; letter-spacing:.2px;
+            min-height:42px; height:42px; padding:0 10px 0 14px;
+            border-radius:10px; border:1px solid transparent; background:transparent;
+            cursor:pointer; color:rgba(255,255,255,.78) !important;
+            font-size:10.5px; font-weight:750; letter-spacing:.2px;
             transition:color .15s ease, background .15s ease, border-color .15s ease, transform .15s ease;
         }
-        .sidebar-item:hover{ color:var(--castrol-green); background:#eef8f1; border-color:#cfe5d5; transform:translateY(-1px); }
+        .sidebar-item:hover{ color:#ffffff !important; background:rgba(255,255,255,.09) !important; border-color:rgba(255,255,255,.16) !important; transform:translateX(2px); }
         .sidebar-item-active{
-            color:#005c2e !important;
-            background:linear-gradient(180deg,#eaf8ef,#dcf2e3) !important;
-            border-color:#bfe0c9 !important;
-            box-shadow:inset 4px 0 0 var(--castrol-green-2), 0 8px 18px rgba(0,122,61,.08) !important;
+            color:#ffffff !important;
+            background:linear-gradient(180deg,rgba(0,166,81,.42) 0%,rgba(0,166,81,.20) 100%) !important;
+            border-color:rgba(0,166,81,.55) !important;
+            box-shadow:inset 3px 0 0 #00a651, 0 6px 16px rgba(0,0,0,.22) !important;
         }
-        .sidebar-icon{
-            width:30px; height:30px; flex:0 0 30px; border-radius:9px; background:#fff;
-            border:1px solid #e8f0ea; box-shadow:0 4px 12px rgba(17,56,32,.07);
-            display:flex; align-items:center; justify-content:center; font-size:15px;
+        .sidebar-icon{ display:none !important; }
+        .sidebar-text{
+            display:block; width:100%; text-align:left;
+            font-size:11px; font-weight:700; letter-spacing:.01em;
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
         }
         .sidebar-spacer{ flex:1; }
         .sidebar-bottom{
-            border-top:1px solid #e3ede6; padding-top:10px; margin-top:10px;
+            border-top:1px solid rgba(255,255,255,.14); padding-top:10px; margin-top:10px;
             display:flex; flex-direction:column; gap:6px;
+            display:none !important; /* sama dengan sales: bagian bawah sidebar disembunyikan */
         }
         #outletBadge{
-            font-size:9px; font-weight:900; letter-spacing:1.2px; color:#047f42;
-            background:#e7f7ee; border:1px solid #c5ebd5; border-radius:999px;
+            font-size:9px; font-weight:900; letter-spacing:1.2px; color:#a7f3d0;
+            background:rgba(0,166,81,.20); border:1px solid rgba(0,166,81,.45); border-radius:999px;
             padding:6px 10px; text-align:center;
         }
         #sidebarOverlay{
-            position:fixed; inset:0; z-index:54; background:rgba(5,25,15,.42);
+            position:fixed; inset:0; z-index:890; background:rgba(5,25,15,.42);
             display:none;
         }
         #sidebarOverlay.on{ display:block; }
-        #appContent{ flex:1; padding:14px; transition:margin-left .22s ease; }
-        @media (min-width:1024px){
-            #appContent{ margin-left:228px; }
+        #appContent{ flex:1; padding:24px 28px; transition:margin-left .25s ease; }
+        @media (min-width:1101px){
+            #appContent{ margin-left:184px; }
             #app.sidebar-closed #leftNav{ transform:translateX(-100%); }
             #app.sidebar-closed #appContent{ margin-left:0; }
         }
-        @media (max-width:1023.9px){
-            #leftNav{ transform:translateX(-105%); box-shadow:14px 0 34px rgba(5,31,22,.22); }
+        @media (min-width:768px) and (max-width:1100px){
+            #leftNav{ width:200px; }
+            #appContent{ margin-left:200px; padding:20px; }
+            #app.sidebar-closed #leftNav{ transform:translateX(-100%); }
+            #app.sidebar-closed #appContent{ margin-left:0; }
+        }
+        @media (max-width:767px){
+            #leftNav{
+                transform:translateX(-105%); width:220px; top:58px; padding:11px 10px;
+                border-radius:0 18px 18px 0;
+                box-shadow:16px 0 40px rgba(4,35,20,.16), 6px 0 22px rgba(4,24,15,.35);
+            }
             #app.drawer-open #leftNav{ transform:translateX(0); }
-            #appContent{ margin-left:0 !important; }
-            h1.castrol-greet-name{ max-width:44vw; }
+            #appContent{ margin-left:0 !important; padding:10px; }
+            .sidebar-item{ min-height:44px; height:44px; padding:0 12px; }
         }
 
         /* ===== Konten umum ===== */
         .tab-content{ animation:fadein .18s ease; }
         @keyframes fadein{ from{ opacity:0; transform:translateY(4px);} to{ opacity:1; transform:none;} }
         .op-card{
-            background:var(--castrol-card); border:1px solid var(--castrol-line);
-            border-radius:16px; box-shadow:0 10px 26px rgba(12,49,28,.06);
+            background:var(--castrol-card); border:1px solid #e4ebe7;
+            border-radius:20px; box-shadow:0 10px 34px rgba(15,23,42,.055);
         }
         .op-input{
-            width:100%; box-sizing:border-box; border:1px solid #dbe5df; border-radius:11px;
-            padding:9px 12px; font-size:12.5px; color:#10241b; background:#fff; outline:none;
+            width:100%; box-sizing:border-box; min-height:42px;
+            border:1px solid #d5e0d9; border-radius:11px;
+            padding:9px 12px; font-size:12.5px; color:#17251d; background:#fff; outline:none;
+            box-shadow:0 1px 2px rgba(18,50,31,.025);
             transition:border-color .15s ease, box-shadow .15s ease;
         }
-        .op-input:focus{ border-color:#00a651; box-shadow:0 0 0 3px rgba(0,166,81,.13); }
-        .op-label{ display:block; font-size:10px; font-weight:800; color:#3f5a4c; margin-bottom:5px; letter-spacing:.3px; }
+        .op-input:focus{ border-color:#00a651 !important; box-shadow:0 0 0 3px rgba(0,166,81,.13) !important; }
+        .op-label{ display:block; font-size:11px; font-weight:700; color:#3f5a4c; margin-bottom:5px; letter-spacing:.3px; }
+        .op-section-title{
+            position:relative; padding-left:12px;
+            font-size:18px; font-weight:900; letter-spacing:-.01em;
+            color:#10241b !important; margin:0 0 2px;
+        }
+        .op-section-title:before{
+            content:""; position:absolute; left:0; top:3px; bottom:3px;
+            width:4px; border-radius:4px;
+            background:linear-gradient(180deg,#00b85c,#008a45);
+        }
+        .op-section-sub{ font-size:12px; color:#5b6f64; margin:0 0 8px; }
         .op-btn-primary{
             border:0; cursor:pointer; color:#fff; font-weight:800; font-size:12.5px;
-            background:linear-gradient(180deg,#00a651,#047f42); border-radius:12px;
-            padding:11px 16px; box-shadow:0 8px 18px rgba(0,120,60,.30);
+            background:linear-gradient(180deg,#00b85c,#009b4d); border-radius:10px;
+            padding:11px 16px; box-shadow:0 6px 14px rgba(0,140,74,.20);
             transition:filter .15s ease, transform .08s ease;
         }
-        .op-btn-primary:hover{ filter:brightness(1.06); }
+        .op-btn-primary:hover{ filter:brightness(1.05); }
         .op-btn-primary:active{ transform:scale(.99); }
         .op-btn-primary:disabled{ opacity:.65; cursor:wait; }
         .op-btn-ghost{
-            border:1px solid #dbe5df; cursor:pointer; color:#475569; font-weight:800; font-size:12px;
-            background:#fff; border-radius:11px; padding:9px 14px; transition:background .15s ease;
+            border:1px solid #e5eaee; cursor:pointer; color:#475569; font-weight:800; font-size:12px;
+            background:#fff; border-radius:10px; padding:9px 14px;
+            transition:background .15s ease, border-color .15s ease, color .15s ease;
         }
-        .op-btn-ghost:hover{ background:#f2f8f4; }
+        .op-btn-ghost:hover{ background:#f3faf6; border-color:#8fd6b0; color:#008a45; }
+        #btnKirimOrder{
+            min-height:48px; border-radius:16px;
+            background:linear-gradient(135deg,#ed252b,#c9141c) !important;
+            box-shadow:0 8px 22px rgba(16,36,27,.05) !important;
+        }
+        #btnKirimOrder:hover{ transform:translateY(-1px); }
         .payment-btn{ cursor:pointer; font-weight:800; }
-        .payment-btn.on{ background:#0f2c1d !important; color:#fff !important; border-color:#0f2c1d !important; }
+        .payment-btn.on{ background:linear-gradient(180deg,#00b85c,#009b4d) !important; color:#fff !important; border-color:#008a45 !important; }
         .status-pill{
             display:inline-flex; align-items:center; gap:4px;
             font-size:9px; font-weight:900; letter-spacing:.6px; text-transform:uppercase;
             padding:4px 9px; border-radius:999px; border:1px solid transparent; white-space:nowrap;
         }
         .status-PENDING{ color:#92400e; background:#fef3c7; border-color:#fde68a; }
-        .status-APPROVE{ color:#065f46; background:#d1fae5; border-color:#a7f3d0; }
+        .status-APPROVE{ color:#008a45; background:#eaf7f0; border-color:#bfe6d2; }
         .status-DECLINE{ color:#b91c1c; background:#fee2e2; border-color:#fecaca; }
         .status-PROSES{ color:#334155; background:#f1f5f9; border-color:#e2e8f0; }
 
         /* Dropdown pencarian produk / pola Task 54 */
         .op-dd-panel{
             position:absolute; z-index:40; left:0; right:0; margin-top:6px;
-            background:#fff; border:1px solid #dbe5df; border-radius:14px;
-            box-shadow:0 18px 40px rgba(5,31,22,.16); overflow:hidden;
+            background:#fff; border:1px solid #e5eaee; border-radius:14px;
+            box-shadow:0 14px 34px rgba(16,36,27,.14); overflow:hidden;
         }
         .op-dd-options{ max-height:240px; overflow-y:auto; }
         .op-dd-options::-webkit-scrollbar{ width:8px; }
-        .op-dd-options::-webkit-scrollbar-thumb{ background:#dbe7e0; border-radius:8px; }
+        .op-dd-options::-webkit-scrollbar-thumb{ background:#c7e3d4; border-radius:8px; }
         .op-dd-option{
             display:block; width:100%; text-align:left; border:0; background:#fff; cursor:pointer;
             padding:9px 12px; border-bottom:1px solid #f1f5f3;
             font-size:12px; color:#1f2937; transition:background .12s ease;
         }
-        .op-dd-option:hover{ background:#eff8f2; }
+        .op-dd-option:hover{ background:#eaf7f0; }
         .op-dd-option:last-child{ border-bottom:0; }
 
         /* ===== Pencapaian: TANPA tabel/card — baris langsung ===== */
         .qtr-row{ padding:14px 2px; border-bottom:1px solid #e6efe9; }
         .qtr-row:last-child{ border-bottom:0; }
         .qtr-top{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
-        .qtr-name{ font-size:14px; font-weight:900; color:#0f2c1d; }
-        .qtr-pct{ font-size:22px; font-weight:900; color:#047f42; font-variant-numeric:tabular-nums; }
+        .qtr-name{ font-size:14px; font-weight:900; color:#10241b; }
+        .qtr-pct{ font-size:22px; font-weight:900; color:#008a45; font-variant-numeric:tabular-nums; }
         .qtr-pct.muted{ color:#94a3b8; }
-        .qtr-sub{ font-size:10.5px; color:#64766c; margin-top:3px; }
+        .qtr-sub{ font-size:10.5px; color:#5b6f64; margin-top:3px; }
         .op-progress{
             height:10px; border-radius:999px; background:#e8f1eb; overflow:hidden; margin-top:8px;
             border:1px solid #dcebe2;
         }
         .op-progress > i{
             display:block; height:100%; border-radius:999px;
-            background:linear-gradient(90deg,#00a651,#047f42);
+            background:linear-gradient(90deg,#00b85c,#008a45);
             transition:width .5s ease; min-width:0;
         }
         .op-progress > i.over{ background:linear-gradient(90deg,#b7d433,#00a651); }
         .current-pill{
             display:inline-block; margin-left:6px; font-size:8.5px; font-weight:900; letter-spacing:.8px;
-            color:#047f42; background:#e7f7ee; border:1px solid #c5ebd5; border-radius:999px; padding:2px 8px;
+            color:#008a45; background:#eaf7f0; border:1px solid #bfe6d2; border-radius:999px; padding:2px 8px;
             vertical-align:middle;
         }
         .point-row{ display:flex; justify-content:space-between; gap:10px; padding:9px 2px; border-bottom:1px dashed #e0eae3; font-size:12px; }
         .point-row:last-child{ border-bottom:0; }
-        .point-val{ font-weight:900; color:#0f2c1d; font-variant-numeric:tabular-nums; }
-        .op-section-title{ font-size:12px; font-weight:900; letter-spacing:1.2px; text-transform:uppercase; color:#047f42; margin:0 0 2px; }
-        .op-section-sub{ font-size:10.5px; color:#64766c; margin:0 0 8px; }
+        .point-val{ font-weight:900; color:#10241b; font-variant-numeric:tabular-nums; }
 
         /* Kartu riwayat */
         .riw-card{ border-left:4px solid #cbd5e1; }
         .riw-card.st-PENDING{ border-left-color:#f59e0b; }
-        .riw-card.st-APPROVE{ border-left-color:#059669; }
+        .riw-card.st-APPROVE{ border-left-color:#00a651; }
         .riw-card.st-DECLINE{ border-left-color:#dc2626; }
         .riw-card.st-PROSES{ border-left-color:#64748b; }
+
+        /* Scrollbar gaya sales */
+        #app ::-webkit-scrollbar, #appContent ::-webkit-scrollbar{ width:9px; height:9px; }
+        #app ::-webkit-scrollbar-track, #appContent ::-webkit-scrollbar-track{ background:transparent; }
+        #app ::-webkit-scrollbar-thumb, #appContent ::-webkit-scrollbar-thumb{ background:#c7e3d4; border-radius:999px; border:2px solid #f3f6f4; }
+        #app ::-webkit-scrollbar-thumb:hover, #appContent ::-webkit-scrollbar-thumb:hover{ background:#00a651; }
+
+        /* ===== Media header ===== */
+        @media (max-width:767px){
+            #mainHeader{ height:58px; min-height:58px; padding:8px 10px; }
+            #sidebarToggle{ width:36px; height:36px; }
+            h1.castrol-greet-name{ max-width:150px; }
+            .castrol-greet-hi{ font-size:8px; }
+            .castrol-greet-role{ font-size:8px; }
+            .cst-header-online{ display:none; }
+        }
+        @media (max-width:480px){
+            h1.castrol-greet-name{ max-width:105px; }
+        }
+        @media (max-width:768px){
+            #mainHeader:after{ width:86px !important; clip-path:polygon(30% 0,100% 0,100% 100%,6% 100%) !important; }
+        }
     </style>
 </head>
 <body>
@@ -478,15 +577,13 @@
     <!-- LOGIN — CUST.CODE -->
     <div id="loginPage">
         <header class="castrol-auth-brand">
-            <div class="castrol-auth-roundel">C</div>
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjbF9zjGOOADFZIb2DyNfdj-3wi3z5cqLroA&s" alt="Logo Castrol" class="castrol-auth-roundel">
             <span class="castrol-auth-wordmark">Castrol</span>
         </header>
         <div class="castrol-auth-body">
             <div class="castrol-auth-card">
                 <span class="castrol-auth-portal-tag">OUTLET PORTAL</span>
                 <h1 class="castrol-auth-title">Masuk dengan CUST.CODE</h1>
-                <p class="castrol-auth-sub">Portal khusus Outlet — input order, riwayat order, dan pencapaian.
-                    Gunakan CUST.CODE outlet Anda untuk masuk.</p>
                 <form onsubmit="handleLogin(event)" autocomplete="off">
                     <label class="castrol-auth-label" for="loginCustCode">CUST.CODE</label>
                     <input type="text" id="loginCustCode" class="castrol-auth-input" placeholder="CUST.CODE"
@@ -495,7 +592,11 @@
                     <button type="submit" id="loginSubmitBtn" class="castrol-auth-submit">Masuk</button>
                 </form>
             </div>
-            <div class="castrol-auth-footer">© PT Sukses Adi Surya — Castrol Outlet Portal</div>
+            <footer class="castrol-auth-footer">
+                <p class="castrol-auth-tagline">IT'S MORE THAN JUST OIL.<br>IT'S LIQUID ENGINEERING.</p>
+                <p class="castrol-auth-sub">PT Sukses Adi Surya &mdash; Distributor Resmi Castrol</p>
+                <p class="castrol-auth-copy">&copy; 2026 PT Sukses Adi Surya</p>
+            </footer>
         </div>
     </div>
 
@@ -512,6 +613,7 @@
                     <span id="greetRole" class="castrol-greet-role">OUTLET</span>
                 </div>
             </div>
+            <span class="cst-header-online" aria-hidden="true"><i></i>Online</span>
             <div style="display:flex; align-items:center; gap:8px;">
                 <button type="button" id="btnRefresh" class="header-btn" aria-label="Muat ulang data" title="Muat ulang data">
                     <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
@@ -524,21 +626,18 @@
 
         <nav id="leftNav" aria-label="Navigasi outlet">
             <div class="sidebar-inner">
-                <div class="castrol-sidebar-logo">
-                    <div class="roundel">C</div>
-                    <div class="wordmark">Castrol</div>
-                </div>
+                <div class="castrol-sidebar-logo" role="img" aria-label="Castrol"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjbF9zjGOOADFZIb2DyNfdj-3wi3z5cqLroA&s" alt="" aria-hidden="true" class="castrol-logo-img"><span class="castrol-logo-word">Castrol</span></div>
                 <button type="button" onclick="switchTab('input')" id="navInput" class="sidebar-item" title="Input Order">
-                    <span class="sidebar-icon">📝</span>
-                    <span>Input Order</span>
+                    <span class="sidebar-icon">🛒</span>
+                    <span class="sidebar-text">Input Order</span>
                 </button>
                 <button type="button" onclick="switchTab('riwayat')" id="navRiwayat" class="sidebar-item" title="Riwayat Order">
-                    <span class="sidebar-icon">📋</span>
-                    <span>Riwayat Order</span>
+                    <span class="sidebar-icon">📊</span>
+                    <span class="sidebar-text">Riwayat Order</span>
                 </button>
                 <button type="button" onclick="switchTab('pencapaian')" id="navPencapaian" class="sidebar-item" title="Pencapaian">
-                    <span class="sidebar-icon">📊</span>
-                    <span>Pencapaian</span>
+                    <span class="sidebar-icon">🎯</span>
+                    <span class="sidebar-text">Pencapaian</span>
                 </button>
                 <div class="sidebar-spacer"></div>
                 <div class="sidebar-bottom">
@@ -549,7 +648,7 @@
         <div id="sidebarOverlay"></div>
 
         <div id="appContent">
-            <div id="mainPage" class="hidden space-y-4" style="max-width:1180px; margin:0 auto;">
+            <div id="mainPage" class="hidden space-y-4" style="max-width:1240px; margin:0 auto;">
 
                 <!-- ================= INPUT ORDER ================= -->
                 <section id="tabInput" class="tab-content space-y-4">
