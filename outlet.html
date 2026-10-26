@@ -1,0 +1,1283 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Castrol Outlet</title>
+    <script id="castrol-github-bridge">
+/* Task 69: GitHub Pages bridge — mekanisme sama dengan portal sales (Index.html).
+   Bila file ini dibuka dari GitHub Pages (host bukan script.google.com),
+   google.script.run diganti bridge POST -> Apps Script (allowlist Code.gs sudah
+   mencakup outletPortal*). Bila dibuka dari Apps Script, native API tetap dipakai. */
+(function () {
+    var host = String(window.location.hostname || '').toLowerCase();
+    var isAppsScriptHost = host === 'script.google.com' || host === 'script.googleusercontent.com';
+    if (isAppsScriptHost) return;
+
+    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5dkNkseL2AXyP4T3vRATCQEnRC3Ft5ho29iUObmj-Y3H-vRunigrQheYt3jzoBq-p/exec';
+    var BRIDGE_URL = CASTROL_APPS_SCRIPT_URL + (CASTROL_APPS_SCRIPT_URL.indexOf('?') >= 0 ? '&' : '?') + 'bridge=1';
+    var seq = 0;
+    var pending = Object.create(null);
+
+    function cleanup(p) {
+        if (!p) return;
+        if (p.frame && p.frame.parentNode) p.frame.parentNode.removeChild(p.frame);
+        if (p.form && p.form.parentNode) p.form.parentNode.removeChild(p.form);
+    }
+
+    function hiddenInput(name, value) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value == null ? '' : String(value);
+        return input;
+    }
+
+    window.addEventListener('message', function (event) {
+        var msg = event.data || {};
+        if (!msg || typeof msg !== 'object') return;
+        if (msg.type !== 'castrol-gas-response' || !msg.id) return;
+        var p = pending[msg.id];
+        if (!p) return;
+        delete pending[msg.id];
+        cleanup(p);
+
+        if (msg.ok) {
+            if (p.success) p.success(msg.data, p.userObject);
+        } else {
+            if (p.failure) p.failure(new Error(
+                msg.error && msg.error.message ? msg.error.message : 'Permintaan tidak dapat diproses.'
+            ), p.userObject);
+        }
+    });
+
+    function call(method, args, success, failure, userObject) {
+        var id = 'gas_' + Date.now() + '_' + (++seq);
+        var frame = document.createElement('iframe');
+        var frameName = 'castrolReq_' + Date.now() + '_' + seq;
+        frame.name = frameName;
+        frame.setAttribute('aria-hidden', 'true');
+        frame.style.cssText = 'position:fixed;width:1px;height:1px;left:-10000px;top:-10000px;border:0;opacity:0;pointer-events:none;';
+        document.body.appendChild(frame);
+
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = BRIDGE_URL;
+        form.target = frameName;
+        form.style.display = 'none';
+        form.appendChild(hiddenInput('bridge', '1'));
+        form.appendChild(hiddenInput('id', id));
+        form.appendChild(hiddenInput('method', method));
+        form.appendChild(hiddenInput('args', JSON.stringify(Array.isArray(args) ? args : [])));
+        document.body.appendChild(form);
+
+        var p = pending[id] = {
+            frame: frame,
+            form: form,
+            success: typeof success === 'function' ? success : null,
+            failure: typeof failure === 'function' ? failure : null,
+            userObject: userObject
+        };
+
+        try {
+            form.submit();
+        } catch (err) {
+            delete pending[id];
+            cleanup(p);
+            if (p.failure) p.failure(err, p.userObject);
+        }
+    }
+
+    function runner(state) {
+        state = state || { success: null, failure: null, userObject: null };
+        return new Proxy({}, {
+            get: function (_target, prop) {
+                if (prop === 'withSuccessHandler') {
+                    return function (fn) {
+                        return runner({
+                            success: typeof fn === 'function' ? fn : null,
+                            failure: state.failure,
+                            userObject: state.userObject
+                        });
+                    };
+                }
+                if (prop === 'withFailureHandler') {
+                    return function (fn) {
+                        return runner({
+                            success: state.success,
+                            failure: typeof fn === 'function' ? fn : null,
+                            userObject: state.userObject
+                        });
+                    };
+                }
+                if (prop === 'withUserObject') {
+                    return function (obj) {
+                        return runner({
+                            success: state.success,
+                            failure: state.failure,
+                            userObject: obj
+                        });
+                    };
+                }
+                if (prop === 'then' || prop === 'catch' || prop === 'toString' || prop === Symbol.toPrimitive) return undefined;
+                return function () {
+                    var args = Array.prototype.slice.call(arguments);
+                    call(String(prop), args, state.success, state.failure, state.userObject);
+                };
+            }
+        });
+    }
+
+    window.google = window.google || {};
+    window.google.script = window.google.script || {};
+    window.google.script.run = runner({ success: null, failure: null, userObject: null });
+})();
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* ===== Task 67: OutLET PORTAL — design tokens identik dengan sales portal ===== */
+        :root{
+            --castrol-green:#007a3d;
+            --castrol-green-2:#00a651;
+            --castrol-dark:#052b1a;
+            --castrol-red:#e31837;
+            --castrol-lime:#b7d433;
+            --castrol-ink:#12221a;
+            --castrol-muted:#6b7a71;
+            --castrol-line:#dfe8e2;
+            --castrol-soft:#f3f8f4;
+            --castrol-card:#ffffff;
+        }
+        *{ -webkit-tap-highlight-color:transparent; }
+        html,body{ margin:0; padding:0; }
+        body{
+            font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+            -webkit-font-smoothing:antialiased;
+            overflow-x:hidden;
+            color:var(--castrol-ink);
+            background:
+                radial-gradient(circle at 0% 0%, rgba(0,166,81,.08), transparent 28%),
+                radial-gradient(circle at 100% 0%, rgba(227,24,55,.05), transparent 25%),
+                linear-gradient(180deg,#f6faf7 0%,#f3f7f5 55%,#eef4f0 100%) !important;
+            min-height:100vh; min-height:100dvh;
+        }
+        .hidden{ display:none !important; }
+
+        /* ===== Loading overlay ===== */
+        #loadingOverlay{
+            position:fixed; inset:0; z-index:100000; display:none;
+            align-items:center; justify-content:center;
+            background:rgba(4,26,15,.35); backdrop-filter:blur(2px);
+        }
+        #loadingOverlay.on{ display:flex; }
+        .op-spinner{
+            width:46px; height:46px; border-radius:50%;
+            border:4px solid rgba(255,255,255,.35); border-top-color:#fff;
+            animation:opspin .8s linear infinite;
+        }
+        @keyframes opspin{ to{ transform:rotate(360deg); } }
+
+        /* ===== Modal ===== */
+        .op-modal-overlay{
+            display:none; position:fixed; inset:0; z-index:9999;
+            padding:14px; align-items:center; justify-content:center;
+            background:rgba(7,28,20,.55); backdrop-filter:blur(6px);
+        }
+        .op-modal-card{
+            width:min(520px,100%); max-height:min(86vh,760px);
+            background:#fff; border-radius:20px; overflow:hidden;
+            box-shadow:0 26px 70px rgba(5,31,22,.30);
+            display:flex; flex-direction:column;
+            border:1px solid rgba(255,255,255,.7);
+        }
+        .op-modal-header{
+            padding:14px 18px; border-bottom:1px solid var(--castrol-line);
+            background:linear-gradient(135deg,#f4fbf8,#fff);
+            font-weight:800; font-size:14px; color:#123527;
+        }
+        .op-modal-body{ padding:16px 18px; overflow-y:auto; font-size:13px; color:#24352c; }
+        .op-modal-footer{
+            padding:12px 18px; border-top:1px solid var(--castrol-line); background:#f8fbfa;
+            display:flex; justify-content:flex-end; gap:8px;
+        }
+        .op-btn{
+            border:0; cursor:pointer; border-radius:11px; font-weight:800; font-size:12px;
+            padding:9px 16px; transition:filter .15s ease, transform .08s ease;
+        }
+        .op-btn:active{ transform:scale(.98); }
+        .op-btn-ok{ background:linear-gradient(180deg,#00a651,#047f42); color:#fff; box-shadow:0 6px 14px rgba(0,120,60,.28); }
+        .op-btn-cancel{ background:#fff; color:#475569; border:1px solid #dbe5df; }
+        .op-btn-danger{ background:#dc2626; color:#fff; }
+
+        /* ===== Login page ===== */
+        #loginPage{
+            position:fixed; inset:0; z-index:60; overflow-y:auto;
+            background-color:#0b2e1d;
+            background-image:
+                radial-gradient(circle at 18% 14%, rgba(0,166,81,.20) 0%, rgba(0,166,81,0) 44%),
+                radial-gradient(circle at 82% 80%, rgba(0,166,81,.17) 0%, rgba(0,166,81,0) 48%),
+                linear-gradient(160deg,#123f28 0%,#0c3120 52%,#071f14 100%) !important;
+            display:flex; flex-direction:column; align-items:center;
+            padding:0 20px max(18px, env(safe-area-inset-bottom));
+            box-sizing:border-box;
+        }
+        .castrol-auth-brand{
+            display:flex; align-items:center; gap:10px;
+            padding:26px 0 10px; width:100%; max-width:420px;
+        }
+        .castrol-auth-roundel{
+            width:44px; height:44px; border-radius:50%; background:#fff;
+            display:flex; align-items:center; justify-content:center;
+            font-weight:900; font-style:italic; font-size:22px; color:#00a651;
+            box-shadow:0 6px 16px rgba(0,0,0,.25);
+        }
+        .castrol-auth-wordmark{ color:#fff; font-weight:900; font-style:italic; font-size:26px; letter-spacing:.5px; }
+        .castrol-auth-body{ flex:1; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px 0 30px; }
+        .castrol-auth-card{
+            width:100%; max-width:400px; background:#fff; border-radius:18px;
+            box-shadow:0 18px 44px rgba(4,24,15,.35); padding:26px 22px; box-sizing:border-box;
+        }
+        .castrol-auth-portal-tag{
+            display:inline-block; font-size:9px; font-weight:900; letter-spacing:2px;
+            color:#047f42; background:#e7f7ee; border:1px solid #c5ebd5;
+            padding:4px 10px; border-radius:999px; margin-bottom:12px;
+        }
+        .castrol-auth-title{ font-size:18px; font-weight:900; color:#0f2c1d; margin:0 0 4px; }
+        .castrol-auth-sub{ font-size:11.5px; color:#64766c; margin:0 0 16px; line-height:1.5; }
+        .castrol-auth-label{ display:block; font-size:11px; font-weight:700; color:#3f5a4c; margin-bottom:5px; letter-spacing:.3px; }
+        .castrol-auth-input{
+            width:100%; box-sizing:border-box;
+            border:1px solid #dbe5df; border-radius:11px;
+            padding:11px 13px; font-size:14px; color:#10241b; background:#fff;
+            outline:none; transition:border-color .15s ease, box-shadow .15s ease; height:42px;
+        }
+        .castrol-auth-input::placeholder{ color:#9ab0a4; text-transform:uppercase; }
+        .castrol-auth-input:focus{ border-color:#00a651; box-shadow:0 0 0 3px rgba(0,166,81,.14); }
+        .castrol-auth-submit{
+            width:100%; border:0; cursor:pointer;
+            background:linear-gradient(180deg,#00a651,#047f42);
+            color:#fff; font-weight:800; font-size:15px;
+            padding:12px 14px; border-radius:12px; margin-top:14px;
+            box-shadow:0 8px 18px rgba(0,120,60,.30);
+            transition:filter .15s ease, transform .08s ease;
+        }
+        .castrol-auth-submit:hover{ filter:brightness(1.06); }
+        .castrol-auth-submit:active{ transform:scale(.99); }
+        .castrol-auth-submit:disabled{ opacity:.7; cursor:wait; }
+        .castrol-auth-error{
+            display:none; margin-top:12px; font-size:11.5px; font-weight:700;
+            color:#b91c1c; background:#fef2f2; border:1px solid #fecaca;
+            border-radius:10px; padding:9px 12px;
+        }
+        .castrol-auth-error.on{ display:block; }
+        .castrol-auth-footer{ color:rgba(255,255,255,.55); font-size:10px; padding-top:14px; text-align:center; }
+
+        /* ===== App shell ===== */
+        #app{ min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; }
+        #mainHeader{
+            position:sticky; top:0; z-index:60; min-height:62px;
+            background:linear-gradient(135deg,#062f1c 0%,#005d30 52%,#007a3d 100%) !important;
+            border-bottom:1px solid rgba(183,212,51,.22);
+            box-shadow:0 12px 34px rgba(2,50,28,.20);
+            display:flex; justify-content:space-between; align-items:center;
+            padding:8px 14px; color:#fff;
+        }
+        #mainHeader:after{
+            content:""; position:absolute; left:0; right:0; bottom:0; height:3px;
+            background:linear-gradient(90deg,var(--castrol-red) 0 20%,var(--castrol-lime) 20% 33%,#fff 33% 35%,var(--castrol-green-2) 35% 100%);
+            opacity:.95; pointer-events:none;
+        }
+        .castrol-greet{ display:flex; flex-direction:column; min-width:0; padding:4px 6px; margin:-4px 0; border-radius:10px; }
+        .castrol-greet-hi{ font-size:9px; font-weight:700; color:rgba(255,255,255,.75); letter-spacing:.4px; }
+        h1.castrol-greet-name{ font-size:14px; font-weight:900; margin:1px 0 0; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:52vw; }
+        .castrol-greet-role{ font-size:8.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#b7d433; }
+        .header-btn{
+            width:36px; height:36px; border-radius:10px; border:1px solid rgba(255,255,255,.22);
+            background:rgba(255,255,255,.10); color:#fff; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; font-size:15px;
+            transition:background .15s ease;
+        }
+        .header-btn:hover{ background:rgba(255,255,255,.20); }
+        .header-btn.spinning svg{ animation:opspin 1s linear infinite; }
+
+        /* ===== Sidebar ===== */
+        #leftNav{
+            position:fixed; left:0; top:62px; bottom:0; width:228px; z-index:55;
+            background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(246,251,247,.98));
+            border-right:1px solid #dce8df; box-shadow:10px 0 28px rgba(10,52,29,.08);
+            display:flex; flex-direction:column; padding:14px 12px; box-sizing:border-box;
+            transition:transform .22s ease; overflow-y:auto;
+        }
+        .sidebar-inner{ display:flex; flex-direction:column; gap:6px; flex:1; min-height:0; }
+        .castrol-sidebar-logo{ display:flex; align-items:center; gap:9px; padding:2px 6px 12px; border-bottom:1px solid #e3ede6; margin-bottom:8px; }
+        .castrol-sidebar-logo .roundel{
+            width:38px; height:38px; border-radius:50%; background:#fff; border:1px solid #e2ece5;
+            display:flex; align-items:center; justify-content:center; font-weight:900; font-style:italic; color:#00a651; font-size:19px;
+            box-shadow:0 4px 10px rgba(17,56,32,.08);
+        }
+        .castrol-sidebar-logo .wordmark{ font-weight:900; font-style:italic; font-size:19px; color:#0d3a24; }
+        .sidebar-item{
+            display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+            min-height:46px; padding:8px 12px; border-radius:14px; border:1px solid transparent;
+            background:transparent; cursor:pointer; color:#66766d;
+            font-size:11px; font-weight:750; letter-spacing:.2px;
+            transition:color .15s ease, background .15s ease, border-color .15s ease, transform .15s ease;
+        }
+        .sidebar-item:hover{ color:var(--castrol-green); background:#eef8f1; border-color:#cfe5d5; transform:translateY(-1px); }
+        .sidebar-item-active{
+            color:#005c2e !important;
+            background:linear-gradient(180deg,#eaf8ef,#dcf2e3) !important;
+            border-color:#bfe0c9 !important;
+            box-shadow:inset 4px 0 0 var(--castrol-green-2), 0 8px 18px rgba(0,122,61,.08) !important;
+        }
+        .sidebar-icon{
+            width:30px; height:30px; flex:0 0 30px; border-radius:9px; background:#fff;
+            border:1px solid #e8f0ea; box-shadow:0 4px 12px rgba(17,56,32,.07);
+            display:flex; align-items:center; justify-content:center; font-size:15px;
+        }
+        .sidebar-spacer{ flex:1; }
+        .sidebar-bottom{
+            border-top:1px solid #e3ede6; padding-top:10px; margin-top:10px;
+            display:flex; flex-direction:column; gap:6px;
+        }
+        #outletBadge{
+            font-size:9px; font-weight:900; letter-spacing:1.2px; color:#047f42;
+            background:#e7f7ee; border:1px solid #c5ebd5; border-radius:999px;
+            padding:6px 10px; text-align:center;
+        }
+        #sidebarOverlay{
+            position:fixed; inset:0; z-index:54; background:rgba(5,25,15,.42);
+            display:none;
+        }
+        #sidebarOverlay.on{ display:block; }
+        #appContent{ flex:1; padding:14px; transition:margin-left .22s ease; }
+        @media (min-width:1024px){
+            #appContent{ margin-left:228px; }
+            #app.sidebar-closed #leftNav{ transform:translateX(-100%); }
+            #app.sidebar-closed #appContent{ margin-left:0; }
+        }
+        @media (max-width:1023.9px){
+            #leftNav{ transform:translateX(-105%); box-shadow:14px 0 34px rgba(5,31,22,.22); }
+            #app.drawer-open #leftNav{ transform:translateX(0); }
+            #appContent{ margin-left:0 !important; }
+            h1.castrol-greet-name{ max-width:44vw; }
+        }
+
+        /* ===== Konten umum ===== */
+        .tab-content{ animation:fadein .18s ease; }
+        @keyframes fadein{ from{ opacity:0; transform:translateY(4px);} to{ opacity:1; transform:none;} }
+        .op-card{
+            background:var(--castrol-card); border:1px solid var(--castrol-line);
+            border-radius:16px; box-shadow:0 10px 26px rgba(12,49,28,.06);
+        }
+        .op-input{
+            width:100%; box-sizing:border-box; border:1px solid #dbe5df; border-radius:11px;
+            padding:9px 12px; font-size:12.5px; color:#10241b; background:#fff; outline:none;
+            transition:border-color .15s ease, box-shadow .15s ease;
+        }
+        .op-input:focus{ border-color:#00a651; box-shadow:0 0 0 3px rgba(0,166,81,.13); }
+        .op-label{ display:block; font-size:10px; font-weight:800; color:#3f5a4c; margin-bottom:5px; letter-spacing:.3px; }
+        .op-btn-primary{
+            border:0; cursor:pointer; color:#fff; font-weight:800; font-size:12.5px;
+            background:linear-gradient(180deg,#00a651,#047f42); border-radius:12px;
+            padding:11px 16px; box-shadow:0 8px 18px rgba(0,120,60,.30);
+            transition:filter .15s ease, transform .08s ease;
+        }
+        .op-btn-primary:hover{ filter:brightness(1.06); }
+        .op-btn-primary:active{ transform:scale(.99); }
+        .op-btn-primary:disabled{ opacity:.65; cursor:wait; }
+        .op-btn-ghost{
+            border:1px solid #dbe5df; cursor:pointer; color:#475569; font-weight:800; font-size:12px;
+            background:#fff; border-radius:11px; padding:9px 14px; transition:background .15s ease;
+        }
+        .op-btn-ghost:hover{ background:#f2f8f4; }
+        .payment-btn{ cursor:pointer; font-weight:800; }
+        .payment-btn.on{ background:#0f2c1d !important; color:#fff !important; border-color:#0f2c1d !important; }
+        .status-pill{
+            display:inline-flex; align-items:center; gap:4px;
+            font-size:9px; font-weight:900; letter-spacing:.6px; text-transform:uppercase;
+            padding:4px 9px; border-radius:999px; border:1px solid transparent; white-space:nowrap;
+        }
+        .status-PENDING{ color:#92400e; background:#fef3c7; border-color:#fde68a; }
+        .status-APPROVE{ color:#065f46; background:#d1fae5; border-color:#a7f3d0; }
+        .status-DECLINE{ color:#b91c1c; background:#fee2e2; border-color:#fecaca; }
+        .status-PROSES{ color:#334155; background:#f1f5f9; border-color:#e2e8f0; }
+
+        /* Dropdown pencarian produk / pola Task 54 */
+        .op-dd-panel{
+            position:absolute; z-index:40; left:0; right:0; margin-top:6px;
+            background:#fff; border:1px solid #dbe5df; border-radius:14px;
+            box-shadow:0 18px 40px rgba(5,31,22,.16); overflow:hidden;
+        }
+        .op-dd-options{ max-height:240px; overflow-y:auto; }
+        .op-dd-options::-webkit-scrollbar{ width:8px; }
+        .op-dd-options::-webkit-scrollbar-thumb{ background:#dbe7e0; border-radius:8px; }
+        .op-dd-option{
+            display:block; width:100%; text-align:left; border:0; background:#fff; cursor:pointer;
+            padding:9px 12px; border-bottom:1px solid #f1f5f3;
+            font-size:12px; color:#1f2937; transition:background .12s ease;
+        }
+        .op-dd-option:hover{ background:#eff8f2; }
+        .op-dd-option:last-child{ border-bottom:0; }
+
+        /* ===== Pencapaian: TANPA tabel/card — baris langsung ===== */
+        .qtr-row{ padding:14px 2px; border-bottom:1px solid #e6efe9; }
+        .qtr-row:last-child{ border-bottom:0; }
+        .qtr-top{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+        .qtr-name{ font-size:14px; font-weight:900; color:#0f2c1d; }
+        .qtr-pct{ font-size:22px; font-weight:900; color:#047f42; font-variant-numeric:tabular-nums; }
+        .qtr-pct.muted{ color:#94a3b8; }
+        .qtr-sub{ font-size:10.5px; color:#64766c; margin-top:3px; }
+        .op-progress{
+            height:10px; border-radius:999px; background:#e8f1eb; overflow:hidden; margin-top:8px;
+            border:1px solid #dcebe2;
+        }
+        .op-progress > i{
+            display:block; height:100%; border-radius:999px;
+            background:linear-gradient(90deg,#00a651,#047f42);
+            transition:width .5s ease; min-width:0;
+        }
+        .op-progress > i.over{ background:linear-gradient(90deg,#b7d433,#00a651); }
+        .current-pill{
+            display:inline-block; margin-left:6px; font-size:8.5px; font-weight:900; letter-spacing:.8px;
+            color:#047f42; background:#e7f7ee; border:1px solid #c5ebd5; border-radius:999px; padding:2px 8px;
+            vertical-align:middle;
+        }
+        .point-row{ display:flex; justify-content:space-between; gap:10px; padding:9px 2px; border-bottom:1px dashed #e0eae3; font-size:12px; }
+        .point-row:last-child{ border-bottom:0; }
+        .point-val{ font-weight:900; color:#0f2c1d; font-variant-numeric:tabular-nums; }
+        .op-section-title{ font-size:12px; font-weight:900; letter-spacing:1.2px; text-transform:uppercase; color:#047f42; margin:0 0 2px; }
+        .op-section-sub{ font-size:10.5px; color:#64766c; margin:0 0 8px; }
+
+        /* Kartu riwayat */
+        .riw-card{ border-left:4px solid #cbd5e1; }
+        .riw-card.st-PENDING{ border-left-color:#f59e0b; }
+        .riw-card.st-APPROVE{ border-left-color:#059669; }
+        .riw-card.st-DECLINE{ border-left-color:#dc2626; }
+        .riw-card.st-PROSES{ border-left-color:#64748b; }
+    </style>
+</head>
+<body>
+
+    <!-- Loading -->
+    <div id="loadingOverlay" aria-hidden="true"><div class="op-spinner"></div></div>
+
+    <!-- Modal -->
+    <div id="customModal" class="op-modal-overlay" role="dialog" aria-modal="true">
+        <div class="op-modal-card">
+            <div class="op-modal-header" id="modalTitle">Informasi</div>
+            <div class="op-modal-body" id="modalBody"></div>
+            <div class="op-modal-footer">
+                <button type="button" id="modalCancelBtn" class="op-btn op-btn-cancel">Batal</button>
+                <button type="button" id="modalOkBtn" class="op-btn op-btn-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIN — CUST.CODE -->
+    <div id="loginPage">
+        <header class="castrol-auth-brand">
+            <div class="castrol-auth-roundel">C</div>
+            <span class="castrol-auth-wordmark">Castrol</span>
+        </header>
+        <div class="castrol-auth-body">
+            <div class="castrol-auth-card">
+                <span class="castrol-auth-portal-tag">OUTLET PORTAL</span>
+                <h1 class="castrol-auth-title">Masuk dengan CUST.CODE</h1>
+                <p class="castrol-auth-sub">Portal khusus Outlet — input order, riwayat order, dan pencapaian.
+                    Gunakan CUST.CODE outlet Anda untuk masuk.</p>
+                <form onsubmit="handleLogin(event)" autocomplete="off">
+                    <label class="castrol-auth-label" for="loginCustCode">CUST.CODE</label>
+                    <input type="text" id="loginCustCode" class="castrol-auth-input" placeholder="CUST.CODE"
+                           autocomplete="off" autocapitalize="characters" spellcheck="false" required>
+                    <div id="loginError" class="castrol-auth-error"></div>
+                    <button type="submit" id="loginSubmitBtn" class="castrol-auth-submit">Masuk</button>
+                </form>
+            </div>
+            <div class="castrol-auth-footer">© PT Sukses Adi Surya — Castrol Outlet Portal</div>
+        </div>
+    </div>
+
+    <!-- APP -->
+    <div id="app" class="hidden">
+        <header id="mainHeader">
+            <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                <button type="button" id="sidebarToggle" class="header-btn" aria-label="Buka menu" aria-expanded="false" title="Menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                </button>
+                <div class="castrol-greet" id="greetBox">
+                    <span class="castrol-greet-hi">Selamat Datang,</span>
+                    <h1 id="greetName" class="castrol-greet-name">Outlet</h1>
+                    <span id="greetRole" class="castrol-greet-role">OUTLET</span>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <button type="button" id="btnRefresh" class="header-btn" aria-label="Muat ulang data" title="Muat ulang data">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+                </button>
+                <button type="button" id="btnLogout" class="header-btn" aria-label="Keluar" title="Keluar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <nav id="leftNav" aria-label="Navigasi outlet">
+            <div class="sidebar-inner">
+                <div class="castrol-sidebar-logo">
+                    <div class="roundel">C</div>
+                    <div class="wordmark">Castrol</div>
+                </div>
+                <button type="button" onclick="switchTab('input')" id="navInput" class="sidebar-item" title="Input Order">
+                    <span class="sidebar-icon">📝</span>
+                    <span>Input Order</span>
+                </button>
+                <button type="button" onclick="switchTab('riwayat')" id="navRiwayat" class="sidebar-item" title="Riwayat Order">
+                    <span class="sidebar-icon">📋</span>
+                    <span>Riwayat Order</span>
+                </button>
+                <button type="button" onclick="switchTab('pencapaian')" id="navPencapaian" class="sidebar-item" title="Pencapaian">
+                    <span class="sidebar-icon">📊</span>
+                    <span>Pencapaian</span>
+                </button>
+                <div class="sidebar-spacer"></div>
+                <div class="sidebar-bottom">
+                    <div id="outletBadge">—</div>
+                </div>
+            </div>
+        </nav>
+        <div id="sidebarOverlay"></div>
+
+        <div id="appContent">
+            <div id="mainPage" class="hidden space-y-4" style="max-width:1180px; margin:0 auto;">
+
+                <!-- ================= INPUT ORDER ================= -->
+                <section id="tabInput" class="tab-content space-y-4">
+                    <!-- Task 68: kartu info order disembunyikan (permintaan user) — outlet langsung pilih produk; input tetap ada utk JS: tanggal=hari ini, payment=CASH, disc=0%, cashback kosong, note="-" -->
+                    <div class="op-card" style="padding:16px; display:none;">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <div>
+                                <p class="op-section-title">Input Order</p>
+                                <p class="op-section-sub">Order langsung tercatat atas nama outlet Anda — tinggal pilih produk.</p>
+                            </div>
+                            <span id="inputBwsPill" class="status-pill status-APPROVE hidden">BWS</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+                            <div>
+                                <label class="op-label">Outlet</label>
+                                <input type="text" id="opOutletName" class="op-input" readonly disabled style="background:#f4f8f5; color:#51625a; font-weight:800;">
+                            </div>
+                            <div>
+                                <label class="op-label">CUST.CODE</label>
+                                <input type="text" id="opOutletCode" class="op-input" readonly disabled style="background:#f4f8f5; color:#51625a; font-weight:800;">
+                            </div>
+                            <div>
+                                <label class="op-label">Channel</label>
+                                <input type="text" id="opOutletChannel" class="op-input" readonly disabled style="background:#f4f8f5; color:#51625a;">
+                            </div>
+                            <div>
+                                <label class="op-label">Sales / DSR</label>
+                                <input type="text" id="opOutletSales" class="op-input" readonly disabled style="background:#f4f8f5; color:#51625a;">
+                            </div>
+                            <div>
+                                <label class="op-label">Tanggal <span style="color:#dc2626;">*</span></label>
+                                <input type="date" id="opTanggal" class="op-input">
+                            </div>
+                            <div>
+                                <label class="op-label">Payment</label>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                                    <button type="button" id="opPayCash" class="payment-btn rounded-xl border-2 px-3 py-2.5 text-xs bg-slate-900 text-white border-slate-900" onclick="setPayment('CASH')">CASH</button>
+                                    <button type="button" id="opPayCredit" class="payment-btn rounded-xl border-2 px-3 py-2.5 text-xs bg-white text-slate-600 border-slate-200" onclick="setPayment('CREDIT')">CREDIT</button>
+                                </div>
+                                <input type="hidden" id="opPayment" value="CASH">
+                            </div>
+                            <div>
+                                <label class="op-label">Disc (%)</label>
+                                <input type="text" id="opDisc" value="0%" class="op-input" inputmode="decimal">
+                            </div>
+                            <div>
+                                <label class="op-label">Cashback</label>
+                                <select id="opCashback" class="op-input"><option value="">-- Pilih Cashback --</option></select>
+                            </div>
+                            <div style="grid-column:1/-1;">
+                                <label class="op-label">Note Order</label>
+                                <input type="text" id="opNote" value="-" class="op-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="op-card" style="padding:16px;">
+                        <p class="op-section-title">Tambah Produk</p>
+                        <p class="op-section-sub">Cari produk lalu tentukan jumlah — Pcs atau Dus.</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 mt-2 items-end">
+                            <div class="sm:col-span-6" id="opProdukDdRoot" style="position:relative;">
+                                <label class="op-label">Produk</label>
+                                <button type="button" id="opProdukBtn" aria-expanded="false" aria-haspopup="true" aria-controls="opProdukPanel"
+                                        onclick="toggleProdukDd()" class="w-full flex items-center justify-between gap-2 py-2.5 px-3 bg-white border border-slate-200 rounded-xl text-xs" style="min-height:42px;">
+                                    <span id="opProdukLabel" class="truncate text-slate-400">- Pilih produk -</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="m6 9 6 6 6-6"/></svg>
+                                </button>
+                                <div id="opProdukPanel" class="op-dd-panel hidden">
+                                    <div style="padding:8px; border-bottom:1px solid #f1f5f3;">
+                                        <input type="text" id="opProdukSearch" placeholder="Cari produk..." oninput="renderProdukOptions()"
+                                               class="op-input" style="background:#f8faf9;">
+                                    </div>
+                                    <div id="opProdukOptions" class="op-dd-options"></div>
+                                </div>
+                            </div>
+                            <div class="sm:col-span-3">
+                                <label class="op-label">Qty</label>
+                                <input type="number" id="opQty" min="1" step="1" value="1" class="op-input" inputmode="numeric">
+                            </div>
+                            <div class="sm:col-span-3">
+                                <label class="op-label">Satuan</label>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                                    <button type="button" id="opSatPcs" class="payment-btn rounded-xl border-2 px-2 py-2.5 text-xs bg-slate-900 text-white border-slate-900" onclick="setSatuan('Pcs')">Pcs</button>
+                                    <button type="button" id="opSatDus" class="payment-btn rounded-xl border-2 px-2 py-2.5 text-xs bg-white text-slate-600 border-slate-200" onclick="setSatuan('Dus')">Dus</button>
+                                </div>
+                                <input type="hidden" id="opSatuan" value="Pcs">
+                            </div>
+                            <div class="sm:col-span-12">
+                                <button type="button" onclick="tambahKeKeranjang()" class="op-btn-primary w-full sm:w-auto">+ Tambah ke Keranjang</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="op-card" style="padding:16px;">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="op-section-title" style="margin:0;">Keranjang Order</p>
+                            <span id="cartCount" class="text-[10px] font-extrabold text-slate-500">0 item</span>
+                        </div>
+                        <div id="cartList" class="mt-3 space-y-2"></div>
+                        <div class="mt-3 pt-3 border-t border-slate-200 flex flex-wrap items-center justify-end gap-x-6 gap-y-1 text-xs">
+                            <div class="text-slate-500">Total Volume: <b id="grandVol" class="text-emerald-700">0</b> L</div>
+                            <div class="text-slate-500">Total Nilai: <b id="grandVal" class="text-emerald-700">Rp 0</b></div>
+                        </div>
+                        <div class="mt-4">
+                            <button type="button" id="btnKirimOrder" onclick="kirimOrder()" class="op-btn-primary w-full">Kirim Order</button>
+                            <p class="text-[10px] text-slate-400 mt-2 text-center">Order masuk ke daftar Pesanan Outlet sales Anda untuk diproses.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= RIWAYAT ORDER ================= -->
+                <section id="tabRiwayat" class="tab-content hidden space-y-4">
+                    <div class="op-card" style="padding:16px;">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <div>
+                                <p class="op-section-title">Riwayat Order</p>
+                                <p class="op-section-sub">Semua order outlet Anda beserta status prosesnya.</p>
+                            </div>
+                            <button type="button" onclick="loadRiwayat(true)" class="op-btn-ghost">⟳ Muat Ulang</button>
+                        </div>
+                        <input type="text" id="riwayatSearch" class="op-input mt-3" placeholder="Cari ID order / produk..." oninput="renderRiwayat()">
+                    </div>
+                    <div id="riwayatList" class="space-y-3"></div>
+                </section>
+
+                <!-- ================= PENCAPAIAN (tanpa tabel/card) ================= -->
+                <section id="tabPencapaian" class="tab-content hidden space-y-4">
+                    <div class="op-card" style="padding:16px;">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <div>
+                                <p class="op-section-title">Pencapaian <span id="pencYear">—</span></p>
+                                <p class="op-section-sub" id="pencSub">Pencapaian volume per quartal.</p>
+                            </div>
+                            <button type="button" onclick="loadPencapaian(true)" class="op-btn-ghost">⟳ Muat Ulang</button>
+                        </div>
+                        <div id="pencQuarters" style="margin-top:6px;"></div>
+                    </div>
+
+                    <div id="pencBwsWrap" class="hidden space-y-4">
+                        <div style="padding:16px 16px 10px;">
+                            <p class="op-section-title">Pencapaian Kontrak BWS</p>
+                            <p class="op-section-sub">Realisasi volume kontrak outlet Anda periode berjalan.</p>
+                            <div id="pencKontrak"></div>
+                        </div>
+                        <div style="padding:0 16px 16px;">
+                            <p class="op-section-title">Point Trip <span id="pencPointYear"></span></p>
+                            <p class="op-section-sub">Akumulasi point trip tahun berjalan per kategori produk.</p>
+                            <div style="display:flex; align-items:baseline; gap:8px; padding:6px 0 10px;">
+                                <span style="font-size:30px; font-weight:900; color:#0f2c1d; font-variant-numeric:tabular-nums;" id="pencTotalPoint">0</span>
+                                <span style="font-size:11px; font-weight:800; color:#64766c; letter-spacing:.6px;">TOTAL POINT</span>
+                            </div>
+                            <div id="pencPoints"></div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+
+<script>
+    // =====================================================================
+    // Task 67: OUTLET PORTAL — frontend (native google.script.run).
+    // Semua data terikat pada CUST.CODE yang berhasil login.
+    // =====================================================================
+
+    var profile = null;          // {outlet, custCode, channel, sales, dayVisit, isBWS}
+    var produkList = [];
+    var shoppingCart = [];
+    var riwayatRows = [];
+    var riwayatLoading = false;
+    var pencapaianLoading = false;
+    var submitInFlight = false;
+    var AUTH_KEY = 'castrolOutletAuth';
+
+    // ---------- Util ----------
+    function $(id) { return document.getElementById(id); }
+    function esc(v) {
+        return String(v == null ? '' : v)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function showLoading(on) { $('loadingOverlay').classList.toggle('on', !!on); }
+    function fmtRp(n) {
+        var num = Number(n) || 0;
+        return 'Rp ' + Math.round(num).toLocaleString('id-ID');
+    }
+    function todayIso() {
+        var d = new Date();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        return d.getFullYear() + '-' + m + '-' + day;
+    }
+    function produkPackFromName(nama) {
+        var m = String(nama || '').match(/(\d+)\s*x/i);
+        if (m) return parseInt(m[1], 10) || 1;
+        if (/activ\s*matic\s*10w-30\s*0[.,]8\s*ctm/i.test(String(nama || ''))) return 12;
+        return 1;
+    }
+
+    // ---------- Server bridge (google.script.run -> Promise) ----------
+    function gsRun(method, args) {
+        return new Promise(function (resolve) {
+            try {
+                var runner = google.script.run
+                    .withSuccessHandler(function (res) { resolve(res); })
+                    .withFailureHandler(function (err) {
+                        resolve({ success: false, message: (err && err.message) ? err.message : 'Terjadi kesalahan koneksi.' });
+                    });
+                runner[method].apply(runner, Array.isArray(args) ? args : []);
+            } catch (e) {
+                resolve({ success: false, message: (e && e.message) ? e.message : String(e) });
+            }
+        });
+    }
+
+    // ---------- Modal (dengan tutup via backdrop & Escape — konsisten Task 66) ----------
+    var modalCallback = null;
+    function showModal(title, html, opts) {
+        opts = opts || {};
+        $('modalTitle').textContent = title;
+        $('modalBody').innerHTML = html || '';
+        $('modalOkBtn').textContent = opts.okText || 'OK';
+        $('modalOkBtn').className = 'op-btn ' + (opts.danger ? 'op-btn-danger' : 'op-btn-ok');
+        $('modalCancelBtn').style.display = opts.showCancel ? 'inline-block' : 'none';
+        $('customModal').style.display = 'flex';
+    }
+    function closeModal(isOk) {
+        $('customModal').style.display = 'none';
+        var cb = modalCallback;
+        modalCallback = null;
+        if (typeof cb === 'function') cb(!!isOk);
+    }
+    (function () {
+        var overlay = $('customModal');
+        $('modalOkBtn').addEventListener('click', function () { closeModal(true); });
+        $('modalCancelBtn').addEventListener('click', function () { closeModal(false); });
+        overlay.addEventListener('mousedown', function (e) {
+            if (e.target === overlay && overlay.style.display === 'flex') closeModal(false);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e && e.key === 'Escape' && overlay.style.display === 'flex') closeModal(false);
+        });
+    })();
+
+    function confirmModal(title, message, onYes, danger) {
+        // message berupa HTML tepercaya yang dibangun aplikasi (bukan input mentah).
+        showModal(title, '<p style="margin:0;">' + message + '</p>', { showCancel: true, okText: 'Ya, Kirim', danger: !!danger });
+        modalCallback = function (isOk) { if (isOk) onYes(); };
+    }
+
+    // ---------- Login ----------
+    function setLoginError(msg) {
+        var el = $('loginError');
+        if (!msg) { el.classList.remove('on'); el.textContent = ''; return; }
+        el.textContent = msg;
+        el.classList.add('on');
+    }
+
+    function handleLogin(e) {
+        e.preventDefault();
+        var code = String($('loginCustCode').value || '').trim();
+        if (!code) { setLoginError('Masukkan CUST.CODE terlebih dahulu.'); return; }
+        doLogin(code, false);
+    }
+
+    function doLogin(code, silent) {
+        var btn = $('loginSubmitBtn');
+        if (!silent && btn) { btn.disabled = true; btn.textContent = 'Memproses...'; }
+        setLoginError('');
+        if (!silent) showLoading(true);
+        gsRun('outletPortalLogin', [code]).then(function (res) {
+            showLoading(false);
+            if (btn) { btn.disabled = false; btn.textContent = 'Masuk'; }
+            if (res && res.success && res.outlet) {
+                enterApp(res.outlet);
+            } else {
+                try { localStorage.removeItem(AUTH_KEY); } catch (eStore) {}
+                if (!silent) setLoginError((res && res.message) || 'CUST.CODE tidak dikenal.');
+            }
+        });
+    }
+
+    function enterApp(prof) {
+        profile = prof;
+        try { localStorage.setItem(AUTH_KEY, JSON.stringify({ custCode: prof.custCode })); } catch (eStore) {}
+        $('loginPage').classList.add('hidden');
+        $('app').classList.remove('hidden');
+        $('mainPage').classList.remove('hidden');
+        $('greetName').textContent = prof.outlet || '-';
+        $('greetRole').textContent = prof.custCode || 'OUTLET';
+        $('outletBadge').textContent = (prof.custCode || '-') + (prof.channel ? ' • ' + prof.channel : '');
+        $('opOutletName').value = prof.outlet || '';
+        $('opOutletCode').value = prof.custCode || '';
+        $('opOutletChannel').value = prof.channel || '-';
+        $('opOutletSales').value = prof.sales || '-';
+        $('inputBwsPill').classList.toggle('hidden', !prof.isBWS);
+        switchTab('input');
+        loadProduk(true);
+        loadRiwayat(true);
+    }
+
+    function logoutOutlet() {
+        showModal('Keluar', '<p style="margin:0;">Keluar dari portal outlet?</p>', { showCancel: true, okText: 'Keluar', danger: true });
+        modalCallback = function (isOk) {
+            if (!isOk) return;
+            try { localStorage.removeItem(AUTH_KEY); } catch (eStore) {}
+            profile = null; produkList = []; shoppingCart = []; riwayatRows = [];
+            $('app').classList.add('hidden');
+            $('loginPage').classList.remove('hidden');
+            $('loginCustCode').value = '';
+        };
+    }
+
+    // ---------- Sidebar / navigasi ----------
+    function switchTab(tab) {
+        var tabMap = { input: 'tabInput', riwayat: 'tabRiwayat', pencapaian: 'tabPencapaian' };
+        var navMap = { input: 'navInput', riwayat: 'navRiwayat', pencapaian: 'navPencapaian' };
+        Object.keys(tabMap).forEach(function (k) {
+            var el = $(tabMap[k]);
+            if (el) el.classList.toggle('hidden', k !== tab);
+            var nv = $(navMap[k]);
+            if (nv) nv.classList.toggle('sidebar-item-active', k === tab);
+        });
+        closeDrawer();
+        if (tab === 'riwayat') loadRiwayat(false);
+        if (tab === 'pencapaian') loadPencapaian(false);
+    }
+    function toggleDrawer() {
+        var app = $('app');
+        var open = app.classList.contains('drawer-open');
+        setDrawer(!open);
+    }
+    function setDrawer(open) {
+        var app = $('app');
+        var isMobile = window.matchMedia('(max-width:1023.9px)').matches;
+        if (isMobile) {
+            app.classList.toggle('drawer-open', open);
+            $('sidebarOverlay').classList.toggle('on', open);
+            app.classList.remove('sidebar-closed');
+        } else {
+            app.classList.toggle('sidebar-closed', !open);
+            app.classList.remove('drawer-open');
+            $('sidebarOverlay').classList.remove('on');
+        }
+        $('sidebarToggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    function closeDrawer() {
+        var app = $('app');
+        app.classList.remove('drawer-open');
+        $('sidebarOverlay').classList.remove('on');
+    }
+    $('sidebarToggle').addEventListener('click', toggleDrawer);
+    $('sidebarOverlay').addEventListener('click', closeDrawer);
+
+    // ---------- Dropdown produk (pola Task 54: klik luar + Escape) ----------
+    var selectedProduk = null;
+    function toggleProdukDd() {
+        var panel = $('opProdukPanel');
+        if (panel.classList.contains('hidden')) openProdukDd(); else closeProdukDd();
+    }
+    function openProdukDd() {
+        $('opProdukPanel').classList.remove('hidden');
+        $('opProdukBtn').setAttribute('aria-expanded', 'true');
+        $('opProdukSearch').value = '';
+        renderProdukOptions();
+        try { $('opProdukSearch').focus(); } catch (eFocus) {}
+    }
+    function closeProdukDd() {
+        $('opProdukPanel').classList.add('hidden');
+        $('opProdukBtn').setAttribute('aria-expanded', 'false');
+    }
+    function renderProdukOptions() {
+        var q = String($('opProdukSearch').value || '').trim().toLowerCase();
+        var wrap = $('opProdukOptions');
+        var list = produkList.filter(function (p) {
+            if (!q) return true;
+            return String(p.nama || '').toLowerCase().indexOf(q) >= 0 ||
+                   String(p.kode || '').toLowerCase().indexOf(q) >= 0;
+        });
+        if (!list.length) {
+            wrap.innerHTML = '<div style="padding:12px; font-size:11.5px; color:#94a3b8; text-align:center;">Produk tidak ditemukan.</div>';
+            return;
+        }
+        wrap.innerHTML = list.map(function (p) {
+            return '<button type="button" class="op-dd-option" data-kode="' + esc(p.kode) + '">' +
+                '<b>' + esc(p.nama) + '</b>' +
+                '<span style="display:block; color:#64766c; font-size:10.5px; margin-top:2px;">' +
+                esc(p.kode || '-') + ' • ' + (Number(p.liter) || 0) + 'L • ' + fmtRp(p.harga) + '</span></button>';
+        }).join('');
+        Array.prototype.forEach.call(wrap.querySelectorAll('.op-dd-option'), function (btn) {
+            btn.addEventListener('click', function () {
+                var kode = btn.getAttribute('data-kode');
+                selectedProduk = produkList.filter(function (p) { return String(p.kode) === String(kode); })[0] || null;
+                $('opProdukLabel').textContent = selectedProduk ? selectedProduk.nama : '- Pilih produk -';
+                $('opProdukLabel').classList.remove('text-slate-400');
+                closeProdukDd();
+            });
+        });
+    }
+    (function () {
+        document.addEventListener('click', function (ev) {
+            var panel = $('opProdukPanel');
+            if (!panel || panel.classList.contains('hidden')) return;
+            var root = $('opProdukDdRoot');
+            if (root && !root.contains(ev.target)) closeProdukDd();
+        });
+        document.addEventListener('keydown', function (ev) {
+            if (ev && ev.key === 'Escape') {
+                var panel = $('opProdukPanel');
+                if (panel && !panel.classList.contains('hidden')) closeProdukDd();
+            }
+        });
+    })();
+
+    function setPayment(v) {
+        $('opPayment').value = v;
+        $('opPayCash').classList.toggle('on', v === 'CASH');
+        $('opPayCredit').classList.toggle('on', v === 'CREDIT');
+        renderCart();
+    }
+    function setSatuan(v) {
+        $('opSatuan').value = v;
+        $('opSatPcs').classList.toggle('on', v === 'Pcs');
+        $('opSatDus').classList.toggle('on', v === 'Dus');
+    }
+
+    // ---------- Keranjang (rumus identik dengan portal sales) ----------
+    function cartPcs(item) {
+        var pack = Number(item.pack) || 1;
+        return String(item.satuan).toUpperCase() === 'DUS' ? (item.qty * pack) : item.qty;
+    }
+    function tambahKeKeranjang() {
+        if (!selectedProduk) { showModal('Peringatan', 'Pilih produk terlebih dahulu.'); return; }
+        var qty = parseInt($('opQty').value, 10) || 0;
+        if (qty <= 0) { showModal('Peringatan', 'Qty minimal 1.'); return; }
+        var satuan = $('opSatuan').value;
+        var existing = shoppingCart.filter(function (it) {
+            return it.kode === selectedProduk.kode && it.satuan === satuan;
+        })[0];
+        if (existing) {
+            existing.qty += qty;
+        } else {
+            shoppingCart.push({
+                kode: selectedProduk.kode, produk: selectedProduk.nama,
+                qty: qty, satuan: satuan, pack: produkPackFromName(selectedProduk.nama),
+                harga: Number(selectedProduk.harga) || 0, liter: Number(selectedProduk.liter) || 1
+            });
+        }
+        $('opQty').value = '1';
+        setSatuan('Pcs');
+        renderCart();
+    }
+    function hapusItemCart(index) {
+        shoppingCart.splice(index, 1);
+        renderCart();
+    }
+    function renderCart() {
+        var wrap = $('cartList');
+        $('cartCount').textContent = shoppingCart.length + ' item';
+        if (!shoppingCart.length) {
+            wrap.innerHTML = '<p class="text-xs text-slate-400 text-center py-3 border rounded bg-slate-50">Belum ada item.</p>';
+            $('grandVol').textContent = '0';
+            $('grandVal').textContent = 'Rp 0';
+            return;
+        }
+        var html = '';
+        var totalVol = 0, subtotal = 0;
+        shoppingCart.forEach(function (item, index) {
+            var pcs = cartPcs(item);
+            var subVol = pcs * item.liter;
+            var subVal = pcs * item.harga;
+            totalVol += subVol;
+            subtotal += subVal;
+            html += '<div class="flex justify-between items-center bg-white border-l-4 border-l-emerald-600 border rounded-lg p-2.5 text-xs shadow-sm">' +
+                '<div><b>' + esc(item.produk) + '</b><br>' +
+                '<span class="text-slate-500">Qty: ' + item.qty + ' ' + esc(item.satuan) + ' (' + pcs + ' Pcs) | ' + item.liter + 'L/pcs</span> | Vol: <b class="text-emerald-700">' + subVol.toFixed(1) + 'L</b> | ' + fmtRp(subVal) + '</div>' +
+                '<button type="button" onclick="hapusItemCart(' + index + ')" class="text-red-500 hover:text-red-700 font-bold p-1 rounded-md hover:bg-red-50 transition">✕</button>' +
+                '</div>';
+        });
+        var discStr = String($('opDisc').value || '').replace('%', '').trim();
+        var discPct = parseFloat(discStr.replace(',', '.')) || 0;
+        var totalVal = subtotal - (subtotal * (discPct / 100));
+        wrap.innerHTML = html;
+        $('grandVol').textContent = totalVol.toFixed(1);
+        $('grandVal').textContent = fmtRp(totalVal);
+    }
+
+    // ---------- Kirim order ----------
+    function kirimOrder() {
+        if (submitInFlight) return;
+        if (!profile) { showModal('Sesi Berakhir', 'Sesi login berakhir. Muat ulang halaman.'); return; }
+        if (!shoppingCart.length) { showModal('Keranjang Kosong', 'Tambahkan minimal satu produk.'); return; }
+        var tanggal = $('opTanggal').value || todayIso();
+        var ringkas = shoppingCart.map(function (it) { return '• ' + esc(it.produk) + ' — ' + it.qty + ' ' + esc(it.satuan); }).join('<br>');
+        confirmModal('Kirim Order?', '<b>' + esc(profile.outlet) + '</b><br>' + ringkas +
+            '<br><br>Total: <b>' + $('grandVal').textContent + '</b> (' + $('grandVol').textContent + ' L)', function () {
+            doKirimOrder(tanggal);
+        });
+    }
+    function doKirimOrder(tanggal) {
+        submitInFlight = true;
+        var btn = $('btnKirimOrder');
+        btn.disabled = true; btn.textContent = 'Mengirim...';
+        showLoading(true);
+        var payload = {
+            custCode: profile.custCode,
+            tanggal: tanggal,
+            payment: $('opPayment').value || 'CASH',
+            disc: String($('opDisc').value || '0%'),
+            note: String($('opNote').value || '-'),
+            cashback: String($('opCashback').value || ''),
+            items: shoppingCart.map(function (it) {
+                return { kode: it.kode, produk: it.produk, qty: it.qty, satuan: it.satuan };
+            }),
+            requestId: 'REQ-' + Date.now() + '-' + Math.random().toString(36).slice(2, 14)
+        };
+        gsRun('outletPortalSubmitOrder', [payload]).then(function (res) {
+            showLoading(false);
+            submitInFlight = false;
+            btn.disabled = false; btn.textContent = 'Kirim Order';
+            if (res && res.success) {
+                shoppingCart = [];
+                renderCart();
+                showModal('Order Terkirim', '<p style="margin:0;">' + esc(res.message || 'Order berhasil dikirim.') +
+                    '<br><br>ID Order: <b>' + esc(res.idInput || '-') + '</b></p>');
+                loadRiwayat(true);
+            } else {
+                showModal('Gagal', esc((res && res.message) || 'Order gagal dikirim.'));
+            }
+        });
+    }
+
+    // ---------- Produk & cashback ----------
+    function loadProduk(force) {
+        if (!profile) return Promise.resolve();
+        return gsRun('outletPortalProduk', [profile.custCode]).then(function (res) {
+            if (res && res.success && Array.isArray(res.data)) {
+                produkList = res.data;
+            }
+            if (!res || !res.success) {
+                // Coba jalur master yang sama dengan portal sales bila khusus outlet gagal.
+                return gsRun('getListProduk', []).then(function (r2) {
+                    if (r2 && Array.isArray(r2)) produkList = r2;
+                });
+            }
+        }).then(function () {
+            return gsRun('getListCashback', []).then(function (cb) {
+                var list = Array.isArray(cb) ? cb : (cb && cb.data) || [];
+                var sel = $('opCashback');
+                var current = sel.value;
+                sel.innerHTML = '<option value="">-- Pilih Cashback --</option>' + list.map(function (c) {
+                    var v = typeof c === 'string' ? c : (c && (c.nama || c.cashback)) || '';
+                    return '<option value="' + esc(v) + '">' + esc(v) + '</option>';
+                }).join('');
+                if (current) sel.value = current;
+            });
+        });
+    }
+
+    // ---------- Riwayat ----------
+    function loadRiwayat(force) {
+        if (!profile || riwayatLoading) return;
+        riwayatLoading = true;
+        if (force) showLoading(true);
+        gsRun('outletPortalRiwayat', [profile.custCode, !!force]).then(function (res) {
+            riwayatLoading = false;
+            showLoading(false);
+            if (res && res.success) {
+                riwayatRows = Array.isArray(res.rows) ? res.rows : [];
+                renderRiwayat();
+            } else if (!res || res.message) {
+                riwayatRows = [];
+                renderRiwayat();
+            }
+        });
+    }
+    function statusClass(st) {
+        var s = String(st || '').trim().toUpperCase();
+        if (s === 'APPROVE') return 'st-APPROVE';
+        if (s === 'DECLINE') return 'st-DECLINE';
+        if (s === 'PENDING') return 'st-PENDING';
+        return 'st-PROSES';
+    }
+    function renderRiwayat() {
+        var wrap = $('riwayatList');
+        var q = String($('riwayatSearch').value || '').trim().toLowerCase();
+        var list = riwayatRows.filter(function (r) {
+            if (!q) return true;
+            var hay = [r.id, r.tanggal, r.status, r.note]
+                .concat((r.items || []).map(function (it) { return it.produk; })).join(' ').toLowerCase();
+            return hay.indexOf(q) >= 0;
+        });
+        if (!list.length) {
+            wrap.innerHTML = '<div class="op-card" style="padding:26px; text-align:center; color:#94a3b8; font-size:12px;">' +
+                (riwayatRows.length ? 'Tidak ada order yang cocok dengan pencarian.' : 'Belum ada order. Mulai dari menu Input Order.') + '</div>';
+            return;
+        }
+        wrap.innerHTML = list.map(function (r) {
+            var itemsHtml = (r.items || []).map(function (it) {
+                return '<div style="font-size:11.5px; color:#475569;">• ' + esc(it.produk) +
+                    (it.qty ? ' — <b>' + it.qty + ' ' + esc(it.satuan || '') + '</b>' : '') + '</div>';
+            }).join('') || '<div style="font-size:11.5px; color:#94a3b8;">(detail tidak tersedia)</div>';
+            var st = String(r.status || '').toUpperCase();
+            var stText = st.indexOf('SEDANG DI PROSES') >= 0 ? 'SEDANG DI PROSES ADMIN' : (st || 'PENDING');
+            return '<div class="op-card riw-card ' + statusClass(r.status) + '" style="padding:14px;">' +
+                '<div class="flex items-start justify-between gap-2 flex-wrap">' +
+                '<div><b style="font-size:12.5px;">' + esc(r.id || '-') + '</b>' +
+                '<div style="font-size:10.5px; color:#64766c; margin-top:2px;">' + esc(r.tanggal || '-') + ' • ' + esc(r.payment || '-') + '</div></div>' +
+                '<span class="status-pill ' + statusClass(r.status) + '">' + esc(stText) + '</span></div>' +
+                '<div class="mt-2">' + itemsHtml + '</div>' +
+                '<div class="mt-2 pt-2 border-t border-slate-100 flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-slate-500">' +
+                '<span>Volume: <b class="text-emerald-700">' + esc(r.volume || '-') + '</b> L</span>' +
+                '<span>Nilai: <b class="text-emerald-700">' + (r.value ? fmtRp(String(r.value).replace(/[^0-9.-]/g, '')) : '-') + '</b></span>' +
+                (r.note && r.note !== '-' ? '<span>Note: ' + esc(r.note) + '</span>' : '') +
+                '</div></div>';
+        }).join('');
+    }
+
+    // ---------- Pencapaian (TANPA tabel/card — tampilan langsung) ----------
+    function loadPencapaian(force) {
+        if (!profile || pencapaianLoading) return;
+        pencapaianLoading = true;
+        if (force) showLoading(true);
+        gsRun('outletPortalPencapaian', [profile.custCode, !!force]).then(function (res) {
+            pencapaianLoading = false;
+            showLoading(false);
+            renderPencapaian(res && res.success ? res : null);
+        });
+    }
+    function barHtml(pct) {
+        var w = Math.max(0, Math.min(100, pct));
+        return '<div class="op-progress"><i class="' + (pct >= 100 ? 'over' : '') + '" style="width:' + w + '%"></i></div>';
+    }
+    function renderPencapaian(res) {
+        var wrap = $('pencQuarters');
+        if (!res || !Array.isArray(res.quarters)) {
+            wrap.innerHTML = '<p style="font-size:12px; color:#94a3b8; padding:18px 0;">Gagal memuat pencapaian. Coba muat ulang.</p>';
+            $('pencBwsWrap').classList.add('hidden');
+            return;
+        }
+        $('pencYear').textContent = res.year || '-';
+        $('pencSub').textContent = 'Pencapaian volume per quartal' +
+            (res.outlet && res.outlet.channel ? ' — channel ' + res.outlet.channel : '') + '.';
+        wrap.innerHTML = res.quarters.map(function (q) {
+            var hasTarget = Number(q.target) > 0;
+            var pct = hasTarget ? q.pct : null;
+            var pctHtml = pct === null
+                ? '<span class="qtr-pct muted">—</span>'
+                : '<span class="qtr-pct">' + pct + '%</span>';
+            return '<div class="qtr-row">' +
+                '<div class="qtr-top"><div><span class="qtr-name">' + esc(q.label) + '</span>' +
+                (q.isCurrent ? '<span class="current-pill">SEDANG BERJALAN</span>' : '') + '</div>' + pctHtml + '</div>' +
+                (hasTarget
+                    ? barHtml(pct) +
+                      '<div class="qtr-sub">' + q.actual + ' / ' + q.target + ' karton' +
+                      (q.actualLiter || q.targetLiter ? ' • ' + q.actualLiter + ' / ' + q.targetLiter + ' L' : '') + '</div>'
+                    : '<div class="qtr-sub">' + (q.actual > 0 ? ('Realisasi ' + q.actual + ' karton (' + q.actualLiter + ' L) — target belum diatur.') : 'Target belum diatur.') + '</div>') +
+                '</div>';
+        }).join('');
+
+        var bws = res.bws;
+        var bwsWrap = $('pencBwsWrap');
+        if (bws) {
+            bwsWrap.classList.remove('hidden');
+            var kontrakHtml = (bws.contracts || []).map(function (c) {
+                var pct = Number(c.percentage) || 0;
+                return '<div class="qtr-row">' +
+                    '<div class="qtr-top"><div><span class="qtr-name" style="font-size:12.5px;">' + esc(c.start || '-') + ' s/d ' + esc(c.end || '-') + '</span></div>' +
+                    '<span class="qtr-pct" style="font-size:18px;">' + pct + '%</span></div>' +
+                    barHtml(pct) +
+                    '<div class="qtr-sub">' + c.actual + ' / ' + c.target + ' • gap ' + c.gap + '</div>' +
+                    '</div>';
+            }).join('') || '<p style="font-size:12px; color:#94a3b8; padding:10px 0;">Belum ada kontrak BWS aktif.</p>';
+            $('pencKontrak').innerHTML = kontrakHtml;
+            $('pencPointYear').textContent = res.year || '';
+            $('pencTotalPoint').textContent = bws.totalPoint || 0;
+            $('pencPoints').innerHTML = (bws.pointByCategory || []).map(function (c) {
+                return '<div class="point-row"><div><b>' + esc(c.kategori) + '</b>' +
+                    '<span style="color:#64766c; font-size:10.5px;"> — ' + (Math.round((c.karton || 0) * 100) / 100) + ' karton</span></div>' +
+                    '<span class="point-val">+' + c.point + ' poin</span></div>';
+            }).join('') || '<p style="font-size:12px; color:#94a3b8;">Belum ada point trip tercatat tahun ini.</p>';
+        } else {
+            bwsWrap.classList.add('hidden');
+        }
+    }
+
+    // ---------- Refresh global ----------
+    $('btnRefresh').addEventListener('click', function () {
+        if (!profile) return;
+        var btn = $('btnRefresh');
+        btn.classList.add('spinning');
+        Promise.all([loadProduk(true), loadRiwayat(true), loadPencapaian(true)]).then(function () {
+            btn.classList.remove('spinning');
+        });
+    });
+    $('btnLogout').addEventListener('click', logoutOutlet);
+
+    // ---------- Auto login: ?code=... (link dari sales) atau sesi tersimpan ----------
+    function getCodeParam(cb) {
+        try {
+            if (window.google && google.script && google.script.url && google.script.url.getLocation) {
+                google.script.url.getLocation(function (loc) {
+                    cb(String((loc && loc.parameter && loc.parameter.code) || '').trim());
+                });
+                return;
+            }
+        } catch (eGs) {}
+        var m = String(window.location.search || '').match(/[?&]code=([^&]*)/);
+        cb(m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : '');
+    }
+
+    (function init() {
+        $('opTanggal').value = todayIso();
+        setPayment('CASH');
+        setSatuan('Pcs');
+        getCodeParam(function (code) {
+            if (code) {
+                doLogin(code, false);
+                return;
+            }
+            var saved = null;
+            try { saved = JSON.parse(localStorage.getItem(AUTH_KEY) || 'null'); } catch (eParse) { saved = null; }
+            if (saved && saved.custCode) {
+                doLogin(String(saved.custCode), true);
+            }
+        });
+    })();
+</script>
+</body>
+</html>
