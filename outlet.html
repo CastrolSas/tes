@@ -7,7 +7,7 @@
     (function () {
         'use strict';
 
-        const CASTROL_API_URL = 'https://script.google.com/macros/s/AKfycbwZHD6DhhUjweqk8CgIrj81hMQOZOp2glKfa0C8hkpOsMdxwT8X8EDSTkcTUiY6oOzZ/exec';
+        const CASTROL_API_URL = 'https://script.google.com/macros/s/AKfycbzs5A5L9R8NwR9hcMaPE_mE25qMoW4jR-0qfuaOkGLuh70P85hplOL4DkHcp_uylqoF/exec';
         window.CASTROL_API_URL = CASTROL_API_URL;
 
         let seq = 0;
@@ -72,7 +72,9 @@
                         window[callbackName] = succeed;
                         script.async = true;
                         script.onerror = function () {
-                            fail(new Error('Klik saja OK'));
+                            // Task 71: pesan jelas bila script JSONP gagal dimuat
+                            // (offline / URL salah), bukan teks ambigu.
+                            fail(new Error('Koneksi ke server Apps Script gagal. Periksa koneksi internet Anda, lalu muat ulang halaman.'));
                         };
 
                         let encodedArgs = '';
@@ -1625,7 +1627,8 @@ body {
                 <form onsubmit="handleLogin(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Kode Customer (Minta ke Sales anda)</label>
-                        <input type="text" id="loginUser" required class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-600 focus:outline-none">
+                        <input type="text" id="loginUser" required placeholder="Contoh: CC123" autocomplete="off" class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-600 focus:outline-none">
+                        <p class="mt-1.5 text-[10px] leading-4 text-slate-500">Isi dengan <span class="font-bold">CUST.CODE</span> sesuai kolom CUST.CODE pada sheet OUTLET (contoh format: CC123) &mdash; bukan nama outlet.</p>
                     </div>
                     <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 rounded-lg shadow transition">Masuk</button>
                 </form>
@@ -2186,6 +2189,19 @@ body {
             }).withFailureHandler(function(err){ console.warn('Gagal memuat cashback:', err); finish(); }).getListCashback();
         }
 
+        // Task 71: pesan "Login Gagal" yang lebih membantu. Kasus paling umum:
+        // pengguna memasukkan NAMA OUTLET (atau kode contoh), bukan CUST.CODE.
+        function buildLoginGagalMessage(rawMsg, enteredCode) {
+            let msg = String(rawMsg || '').trim() || 'Login gagal. Silakan coba lagi.';
+            const code = String(enteredCode || '').trim();
+            if (msg.indexOf('tidak ditemukan') >= 0) {
+                msg += ' Kode "' + code + '" tidak terdaftar. Yang harus diisi adalah CUST.CODE sesuai kolom CUST.CODE pada sheet OUTLET (contoh format: CC123) — bukan nama outlet. Bila lupa, minta CUST.CODE Anda ke sales/DSR.';
+            } else if (msg.indexOf('timeout') >= 0 || msg.indexOf('Koneksi ke server') >= 0 || msg.indexOf('Request API gagal') >= 0) {
+                msg += ' Periksa koneksi internet Anda, lalu coba lagi.';
+            }
+            return msg;
+        }
+
         function handleLogin(e) {
             e.preventDefault();
             currentUsernameInput = document.getElementById('loginUser').value.trim();
@@ -2225,8 +2241,14 @@ body {
                     if (!isAdminLogin) loadInputMasterData();
                     if (isAdminLogin) switchTab('riwayat');
                 } else {
-                    showModal("Login Gagal", res.message);
+                    // Task 71: tampilkan pesan yang menjelaskan cara login yang benar.
+                    showModal("Login Gagal", buildLoginGagalMessage(res && res.message ? res.message : '', currentUsernameInput));
                 }
+            }).withFailureHandler(function(err) {
+                // Task 71: tanpa ini, kegagalan jaringan membuat loading menggantung
+                // selamanya karena successHandler tidak pernah dipanggil.
+                showLoading(false);
+                showModal('Login Gagal', buildLoginGagalMessage(err && err.message ? err.message : '', currentUsernameInput));
             }).prosesLogin(currentUsernameInput);
         }
 
@@ -3236,12 +3258,12 @@ body {
                             }
                             try { window.history.replaceState({}, document.title, window.location.pathname); } catch (e) {}
                         } else {
-                            showModal('Login Gagal', res && res.message ? res.message : 'CUST.CODE tidak ditemukan.');
+                            showModal('Login Gagal', buildLoginGagalMessage(res && res.message ? res.message : '', urlCode));
                         }
                     })
                     .withFailureHandler(function(err) {
                         showLoading(false);
-                        showModal('Login Gagal', err && err.message ? err.message : 'Terjadi kesalahan saat login.');
+                        showModal('Login Gagal', buildLoginGagalMessage(err && err.message ? err.message : '', urlCode));
                     })
                     .prosesLogin(urlCode);
                 startAutoRefresh();
