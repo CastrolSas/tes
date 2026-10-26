@@ -13553,12 +13553,25 @@ function resetProdukOutletFilter() {
 // login dengan CUST.CODE-nya.
 let selectedGenOutlet = null;
 function genOutletBase() {
+    // Task 69: bila portal sales dibuka dari GitHub Pages (host bukan Apps Script),
+    // link outlet diarahkan ke file outlet.html pada GitHub Pages yang sama
+    // (pakai bridge). Bila dibuka dari Apps Script, tetap URL deploy (?page=outlet).
+    var host = String(window.location.hostname || '').toLowerCase();
+    var isAppsScriptHost = host === 'script.google.com' || host === 'script.googleusercontent.com';
+    if (!isAppsScriptHost) {
+        var origin = String(window.location.origin || '').replace(/\/+$/, '');
+        var dir = String(window.location.pathname || '/').replace(/[^/]*$/, '');
+        if (dir.charAt(0) !== '/') dir = '/' + dir;
+        return origin + dir + 'outlet.html';
+    }
     return String(window.__CASTROL_DEPLOY_URL__ || '').trim();
 }
 function buildGenLink(custCode) {
     var base = genOutletBase();
     if (!base) return '';
-    return base + (base.indexOf('?') >= 0 ? '&' : '?') + 'page=outlet&code=' + encodeURIComponent(String(custCode || '').trim());
+    var code = encodeURIComponent(String(custCode || '').trim());
+    if (/outlet\.html$/i.test(base)) return base + '?code=' + code; // GitHub Pages: file outlet.html
+    return base + (base.indexOf('?') >= 0 ? '&' : '?') + 'page=outlet&code=' + code; // Apps Script: doGet routing
 }
 function toggleGenOutletDd() {
     const panel = document.getElementById('genOutletPanel');
