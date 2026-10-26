@@ -525,6 +525,18 @@
         }
         .point-row{ display:flex; justify-content:space-between; gap:10px; padding:9px 2px; border-bottom:1px dashed #e0eae3; font-size:12px; }
         .point-row:last-child{ border-bottom:0; }
+        /* Task 73: tombol aksi Riwayat (edit / WhatsApp / hapus) — gaya sama portal sales */
+        .riw-actions{ display:flex; align-items:center; gap:6px; }
+        .riw-action{ display:inline-flex; align-items:center; justify-content:center; width:30px; min-height:30px; padding:0; border-radius:8px; font-size:9px; font-weight:800; transition:.15s ease; border:none; cursor:pointer; }
+        .riw-action svg{ width:15px; height:15px; display:block; }
+        .riw-action-edit,.riw-action-delete{ background:linear-gradient(160deg,#fafbfd 0%,#e4e8ec 38%,#c9cdd4 74%,#aeb5be 100%); color:#59636f; box-shadow:0 3px 6px rgba(15,23,42,.22),0 1px 2px rgba(15,23,42,.15),inset 0 1.5px 0 rgba(255,255,255,.85),inset 0 -2px 3px rgba(15,23,42,.16); }
+        .riw-action-edit:hover,.riw-action-delete:hover{ background:linear-gradient(160deg,#ffffff 0%,#edf0f3 38%,#d3d8dd 74%,#bcc2ca 100%); color:#49535e; }
+        .riw-action-edit:active,.riw-action-delete:active{ transform:translateY(1px); box-shadow:0 1px 2px rgba(15,23,42,.18),inset 0 2px 4px rgba(15,23,42,.22); }
+        .riw-action-wa{ background:linear-gradient(160deg,#23c463 0%,#00a651 46%,#008a45 100%); color:#fff; box-shadow:0 3px 6px rgba(0,138,69,.34),0 1px 2px rgba(0,109,55,.28),inset 0 1.5px 0 rgba(255,255,255,.5),inset 0 -2px 3px rgba(0,77,39,.36); }
+        .riw-action-wa:hover{ background:linear-gradient(160deg,#2fd06e 0%,#00b35a 46%,#00964e 100%); }
+        .riw-action-wa:active{ transform:translateY(1px); box-shadow:0 1px 2px rgba(0,109,55,.28),inset 0 2px 4px rgba(0,77,39,.32); }
+        .edit-error{ display:none; color:#dc2626; font-size:11px; font-weight:700; margin-top:8px; }
+        .edit-error.on{ display:block; }
         .point-val{ font-weight:900; color:#10241b; font-variant-numeric:tabular-nums; }
 
         /* Kartu riwayat */
@@ -685,7 +697,7 @@
                             <div>
                                 <label class="op-label">Payment</label>
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                                    <button type="button" id="opPayCash" class="payment-btn rounded-xl border-2 px-3 py-2.5 text-xs bg-slate-900 text-white border-slate-900" onclick="setPayment('CASH')">CASH</button>
+                                    <button type="button" id="opPayCash" class="payment-btn rounded-xl border-2 px-3 py-2.5 text-xs bg-white text-slate-600 border-slate-200 on" onclick="setPayment('CASH')">CASH</button>
                                     <button type="button" id="opPayCredit" class="payment-btn rounded-xl border-2 px-3 py-2.5 text-xs bg-white text-slate-600 border-slate-200" onclick="setPayment('CREDIT')">CREDIT</button>
                                 </div>
                                 <input type="hidden" id="opPayment" value="CASH">
@@ -731,7 +743,7 @@
                             <div class="sm:col-span-3">
                                 <label class="op-label">Satuan</label>
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                                    <button type="button" id="opSatPcs" class="payment-btn rounded-xl border-2 px-2 py-2.5 text-xs bg-slate-900 text-white border-slate-900" onclick="setSatuan('Pcs')">Pcs</button>
+                                    <button type="button" id="opSatPcs" class="payment-btn rounded-xl border-2 px-2 py-2.5 text-xs bg-white text-slate-600 border-slate-200 on" onclick="setSatuan('Pcs')">Pcs</button>
                                     <button type="button" id="opSatDus" class="payment-btn rounded-xl border-2 px-2 py-2.5 text-xs bg-white text-slate-600 border-slate-200" onclick="setSatuan('Dus')">Dus</button>
                                 </div>
                                 <input type="hidden" id="opSatuan" value="Pcs">
@@ -788,19 +800,11 @@
                     </div>
 
                     <div id="pencBwsWrap" class="hidden space-y-4">
-                        <div style="padding:16px 16px 10px;">
-                            <p class="op-section-title">Pencapaian Kontrak BWS</p>
-                            <p class="op-section-sub">Realisasi volume kontrak outlet Anda periode berjalan.</p>
-                            <div id="pencKontrak"></div>
-                        </div>
-                        <div style="padding:0 16px 16px;">
-                            <p class="op-section-title">Point Trip <span id="pencPointYear"></span></p>
-                            <p class="op-section-sub">Akumulasi point trip tahun berjalan per kategori produk.</p>
-                            <div style="display:flex; align-items:baseline; gap:8px; padding:6px 0 10px;">
-                                <span style="font-size:30px; font-weight:900; color:#0f2c1d; font-variant-numeric:tabular-nums;" id="pencTotalPoint">0</span>
-                                <span style="font-size:11px; font-weight:800; color:#64766c; letter-spacing:.6px;">TOTAL POINT</span>
-                            </div>
-                            <div id="pencPoints"></div>
+                        <!-- Task 73: tampilan sama dengan DETAIL OUTLET KONTRAK di portal sales -->
+                        <div class="op-card" style="padding:16px;">
+                            <p class="op-section-title">Outlet Kontrak</p>
+                            <p class="op-section-sub">Detail kontrak BWS outlet Anda beserta point trip tahun berjalan.</p>
+                            <div id="pencKontrak" class="mt-3 space-y-4"></div>
                         </div>
                     </div>
                 </section>
@@ -848,6 +852,37 @@
         if (/activ\s*matic\s*10w-30\s*0[.,]8\s*ctm/i.test(String(nama || ''))) return 12;
         return 1;
     }
+    // Task 73: format angka/persen gaya portal sales (id-ID).
+    function formatNumberID(v, digits) {
+        var n = Number(v) || 0;
+        var d = isNaN(Number(digits)) ? 1 : Number(digits);
+        return n.toLocaleString('id-ID', { minimumFractionDigits: d, maximumFractionDigits: d });
+    }
+    function formatPercentID(v) {
+        var n = Number(v) || 0;
+        return n.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+    }
+    // Task 73: ikon tombol aksi (SVG sama dengan portal sales).
+    var SVG_EDIT = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.12 2.12 0 0 0-3-3L5 17v3Z"/><path d="M13.5 6.5l3 3"/></svg>';
+    var SVG_WA = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>';
+    var SVG_TRASH = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5h6v2"/><path d="M6.5 7l1 13h9l1-13"/><path d="M10 11v6M14 11v6"/></svg>';
+    // Task 73: parse teks tanggal PO OUTLET ("12 October 2026" / "12 Oktober 2026" /
+    // "12/10/2026" / "2026-10-12") menjadi ISO utk input date form edit.
+    function parseTanggalDisplay(s) {
+        var sIn = String(s || '').trim();
+        if (!sIn) return todayIso();
+        var m = sIn.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if (m) return m[1] + '-' + String(Number(m[2])).padStart(2, '0') + '-' + String(Number(m[3])).padStart(2, '0');
+        m = sIn.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+        if (m) return m[3] + '-' + String(Number(m[2])).padStart(2, '0') + '-' + String(Number(m[1])).padStart(2, '0');
+        var MN = { januari: 0, februari: 1, maret: 2, april: 3, mei: 4, juni: 5, juli: 6, agustus: 7, september: 8, oktober: 9, november: 10, desember: 11,
+            january: 0, february: 1, march: 2, may: 4, june: 5, july: 6, august: 7, october: 9, december: 11 };
+        m = sIn.match(/^(\d{1,2})\s+([A-Za-z]+)\.?\s+(\d{4})$/);
+        if (m && MN[m[2].toLowerCase()] !== undefined) {
+            return m[3] + '-' + String(MN[m[2].toLowerCase()] + 1).padStart(2, '0') + '-' + String(Number(m[1])).padStart(2, '0');
+        }
+        return todayIso();
+    }
 
     // ---------- Server bridge (google.script.run -> Promise) ----------
     function gsRun(method, args) {
@@ -873,8 +908,14 @@
         $('modalBody').innerHTML = html || '';
         $('modalOkBtn').textContent = opts.okText || 'OK';
         $('modalOkBtn').className = 'op-btn ' + (opts.danger ? 'op-btn-danger' : 'op-btn-ok');
+        $('modalOkBtn').style.display = 'inline-block'; // Task 73: pulihkan footer bila sebelumnya disembunyikan form edit
         $('modalCancelBtn').style.display = opts.showCancel ? 'inline-block' : 'none';
         $('customModal').style.display = 'flex';
+    }
+    // Task 73: sembunyikan tombol footer standar (form edit memakai tombol sendiri di dalam body).
+    function hideModalFooter() {
+        $('modalOkBtn').style.display = 'none';
+        $('modalCancelBtn').style.display = 'none';
     }
     function closeModal(isOk) {
         $('customModal').style.display = 'none';
@@ -1254,6 +1295,13 @@
             }).join('') || '<div style="font-size:11.5px; color:#94a3b8;">(detail tidak tersedia)</div>';
             var st = String(r.status || '').toUpperCase();
             var stText = st.indexOf('SEDANG DI PROSES') >= 0 ? 'SEDANG DI PROSES ADMIN' : (st || 'PENDING');
+            var isPending = st === 'PENDING';
+            var safeId = esc(r.id || '');
+            var actions = '<div class="riw-actions">' +
+                (isPending ? '<button type="button" class="riw-action riw-action-edit" title="Edit order" aria-label="Edit order" onclick=\'openEditOrder("' + safeId + '")\'>' + SVG_EDIT + '</button>' : '') +
+                '<button type="button" class="riw-action riw-action-wa" title="Kirim WhatsApp" aria-label="Kirim WhatsApp" onclick=\'kirimWaOrder("' + safeId + '")\'>' + SVG_WA + '</button>' +
+                (isPending ? '<button type="button" class="riw-action riw-action-delete" title="Hapus order" aria-label="Hapus order" onclick=\'hapusOrder("' + safeId + '")\'>' + SVG_TRASH + '</button>' : '') +
+                '</div>';
             return '<div class="op-card riw-card ' + statusClass(r.status) + '" style="padding:14px;">' +
                 '<div class="flex items-start justify-between gap-2 flex-wrap">' +
                 '<div><b style="font-size:12.5px;">' + esc(r.id || '-') + '</b>' +
@@ -1264,8 +1312,209 @@
                 '<span>Volume: <b class="text-emerald-700">' + esc(r.volume || '-') + '</b> L</span>' +
                 '<span>Nilai: <b class="text-emerald-700">' + (r.value ? fmtRp(String(r.value).replace(/[^0-9.-]/g, '')) : '-') + '</b></span>' +
                 (r.note && r.note !== '-' ? '<span>Note: ' + esc(r.note) + '</span>' : '') +
+                '</div>' +
+                '<div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">' +
+                '<span class="text-[9.5px] text-slate-400">' +
+                (isPending ? 'Order masih PENDING — dapat diedit atau dihapus sebelum diproses sales/admin.' : 'Order sudah diproses sales/admin — hubungi sales Anda bila ada perubahan.') +
+                '</span>' + actions + '</div>' +
+                '</div>';
+        }).join('');
+    }
+
+    // ---------- Task 73: aksi Riwayat — EDIT / WHATSAPP / HAPUS ----------
+    var editOrderId = '';
+    var editOrderItems = [];
+    var editInFlight = false;
+
+    function kirimWaOrder(id) {
+        if (!profile) { showModal('Sesi Berakhir', 'Sesi login berakhir. Muat ulang halaman.'); return; }
+        showLoading(true);
+        gsRun('outletPortalWhatsAppUrl', [id, profile.custCode]).then(function (res) {
+            showLoading(false);
+            if (res && res.success && res.whatsappUrl) {
+                window.open(res.whatsappUrl, '_blank');
+            } else {
+                showModal('Informasi', esc((res && res.message) || 'Gagal membuat link WhatsApp untuk order ' + id + '.'));
+            }
+        });
+    }
+
+    function hapusOrder(id) {
+        if (!profile) { showModal('Sesi Berakhir', 'Sesi login berakhir. Muat ulang halaman.'); return; }
+        showModal('Hapus Order', '<p style="margin:0;">Hapus order <b>' + esc(id) + '</b>?\nOrder akan dihilangkan dari daftar Pesanan Outlet sales Anda. Tindakan ini tidak dapat dibatalkan.</p>',
+            { showCancel: true, okText: 'Ya, Hapus', danger: true });
+        modalCallback = function (isOk) {
+            if (!isOk) return;
+            showLoading(true);
+            gsRun('outletPortalDeleteOrder', [id, profile.custCode]).then(function (res) {
+                showLoading(false);
+                if (res && res.success) {
+                    showModal('Berhasil', esc(res.message || 'Order berhasil dihapus.'));
+                    loadRiwayat(true);
+                } else {
+                    showModal('Gagal', esc((res && res.message) || 'Order gagal dihapus.'));
+                }
+            });
+        };
+    }
+
+    function getEditProductOptions(selected, selectedKode) {
+        var html = '<option value="">-- Pilih Produk --</option>';
+        var selName = String(selected || '').trim();
+        var selKode = String(selectedKode || '').trim();
+        var found = false;
+        (produkList || []).forEach(function (p) {
+            var n = String(p.nama || '').trim();
+            if (!n) return;
+            var kode = String(p.kode || '').trim();
+            var isSel = (selName && n === selName) || (selKode && kode === selKode);
+            if (isSel) found = true;
+            html += '<option value="' + esc(n) + '" ' + (isSel ? 'selected' : '') + '>' + esc(n) +
+                ' (' + Number(p.liter || 0) + 'L | Rp ' + Number(p.harga || 0).toLocaleString('id-ID') + ')</option>';
+        });
+        if (selName && !found) {
+            html = '<option value="' + esc(selName) + '" selected>' + esc(selName) + ' (Produk saat ini)</option>' + html;
+        }
+        return html;
+    }
+
+    function renderEditProducts() {
+        var box = $('editProducts');
+        if (!box) return;
+        if (!editOrderItems.length) {
+            box.innerHTML = '<div class="text-xs text-slate-400 text-center py-3 border rounded bg-slate-50">Belum ada produk.</div>';
+            return;
+        }
+        box.innerHTML = editOrderItems.map(function (it, i) {
+            return '<div class="border border-slate-200 rounded-lg p-2 bg-slate-50"><div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">' +
+                '<select id="editProd' + i + '" class="sm:col-span-7 w-full border rounded p-2 bg-white text-xs">' + getEditProductOptions(it.produk, it.kode) + '</select>' +
+                '<input id="editQty' + i + '" type="number" min="1" value="' + Number(it.qty || 1) + '" class="sm:col-span-2 w-full border rounded p-2 text-xs">' +
+                '<select id="editUnit' + i + '" class="sm:col-span-2 w-full border rounded p-2 bg-white text-xs">' +
+                '<option value="Pcs" ' + (String(it.satuan).toUpperCase() === 'PCS' ? 'selected' : '') + '>Pcs</option>' +
+                '<option value="Dus" ' + (String(it.satuan).toUpperCase() === 'DUS' ? 'selected' : '') + '>Dus</option></select>' +
+                '<button type="button" onclick="removeEditProduct(' + i + ')" class="sm:col-span-1 text-red-600 bg-red-50 border border-red-200 rounded p-2">✕</button>' +
                 '</div></div>';
         }).join('');
+    }
+
+    function syncEditProductsFromForm() {
+        if (!Array.isArray(editOrderItems)) editOrderItems = [];
+        for (var i = 0; i < editOrderItems.length; i++) {
+            var p = $('editProd' + i), q = $('editQty' + i), u = $('editUnit' + i);
+            if (!editOrderItems[i]) editOrderItems[i] = { produk: '', kode: '', qty: 1, satuan: 'Pcs' };
+            if (p) editOrderItems[i].produk = p.value;
+            if (q) editOrderItems[i].qty = Number(q.value) || 1;
+            if (u) editOrderItems[i].satuan = u.value;
+            var sel = (produkList || []).filter(function (x) { return String(x.nama || '').trim() === String(editOrderItems[i].produk || '').trim(); })[0];
+            if (sel && sel.kode) editOrderItems[i].kode = String(sel.kode).trim();
+        }
+    }
+
+    function addEditProduct() {
+        syncEditProductsFromForm();
+        editOrderItems.push({ produk: '', kode: '', qty: 1, satuan: 'Pcs' });
+        renderEditProducts();
+    }
+
+    function removeEditProduct(i) {
+        syncEditProductsFromForm();
+        editOrderItems.splice(i, 1);
+        renderEditProducts();
+    }
+
+    function setEditPayment(v) {
+        $('editPayment').value = v;
+        $('editPayCash').classList.toggle('on', v === 'CASH');
+        $('editPayCredit').classList.toggle('on', v === 'CREDIT');
+    }
+
+    function showEditError(msg) {
+        var el = $('editError');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.add('on');
+    }
+
+    function openEditOrder(id) {
+        if (editInFlight) { showModal('Edit Sedang Diproses', 'Perubahan order masih disimpan di server. Tunggu sebentar lalu coba lagi.'); return; }
+        var row = null;
+        for (var i = 0; i < riwayatRows.length; i++) {
+            if (String(riwayatRows[i].id || '') === String(id || '')) { row = riwayatRows[i]; break; }
+        }
+        if (!row) { showModal('Data Belum Termuat', 'Order tidak ditemukan pada data Riwayat. Muat ulang Riwayat lalu coba lagi.'); return; }
+        if (String(row.status || '').toUpperCase() !== 'PENDING') {
+            showModal('Tidak Dapat Diubah', 'Order ini sudah diproses sales/admin dan tidak dapat diedit.');
+            return;
+        }
+        editOrderId = String(id || '');
+        editOrderItems = (row.items || []).map(function (it) {
+            return {
+                produk: String(it.produk || '').trim(),
+                kode: String(it.kode || '').trim(),
+                qty: Number(it.qty) || 1,
+                satuan: String(it.satuan || 'Pcs').toUpperCase() === 'DUS' ? 'Dus' : 'Pcs'
+            };
+        });
+        if (!editOrderItems.length) editOrderItems = [{ produk: '', kode: '', qty: 1, satuan: 'Pcs' }];
+        var pay = String(row.payment || 'CASH').toUpperCase() === 'CREDIT' ? 'CREDIT' : 'CASH';
+        var iso = parseTanggalDisplay(row.tanggal);
+        var html = '<div style="text-align:left;">' +
+            '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">' +
+            '<div><label class="op-label">Tanggal</label><input type="date" id="editTanggal" class="op-input" value="' + esc(iso) + '"></div>' +
+            '<div><label class="op-label">Payment</label><div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">' +
+            '<button type="button" id="editPayCash" class="payment-btn rounded-xl border-2 px-3 py-2.5 text-xs bg-white text-slate-600 border-slate-200' + (pay === 'CASH' ? ' on' : '') + '" onclick="setEditPayment(\'CASH\')">CASH</button>' +
+            '<button type="button" id="editPayCredit" class="payment-btn rounded-xl border-2 px-3 py-2.5 text-xs bg-white text-slate-600 border-slate-200' + (pay === 'CREDIT' ? ' on' : '') + '" onclick="setEditPayment(\'CREDIT\')">CREDIT</button>' +
+            '</div><input type="hidden" id="editPayment" value="' + pay + '"></div>' +
+            '</div>' +
+            '<div class="mt-2"><label class="op-label">Note Order</label><input type="text" id="editNote" class="op-input" value="' + esc(row.note && row.note !== '-' ? row.note : '') + '" placeholder="-"></div>' +
+            '<div class="mt-3"><label class="op-label">Produk</label><div id="editProducts" class="space-y-2"></div>' +
+            '<button type="button" onclick="addEditProduct()" class="op-btn-ghost mt-2">+ Tambah Produk</button></div>' +
+            '<p id="editError" class="edit-error"></p>' +
+            '<div class="mt-4 flex items-center justify-end gap-2">' +
+            '<button type="button" class="op-btn op-btn-cancel" onclick="closeModal(false)">Batal</button>' +
+            '<button type="button" id="editSaveBtn" class="op-btn op-btn-ok" onclick="saveEditOrder()">Simpan Perubahan</button>' +
+            '</div></div>';
+        showModal('Edit Order', html);
+        hideModalFooter();
+        renderEditProducts();
+    }
+
+    function saveEditOrder() {
+        if (editInFlight || !editOrderId) return;
+        if (!profile) { showModal('Sesi Berakhir', 'Sesi login berakhir. Muat ulang halaman.'); return; }
+        syncEditProductsFromForm();
+        var valid = [];
+        for (var i = 0; i < editOrderItems.length; i++) {
+            var it = editOrderItems[i];
+            if (!String(it.produk || '').trim()) continue;
+            if (!(Number(it.qty) > 0)) { showEditError('Qty untuk "' + it.produk + '" minimal 1.'); return; }
+            valid.push({ kode: it.kode, produk: it.produk, qty: Number(it.qty), satuan: it.satuan });
+        }
+        if (!valid.length) { showEditError('Tambahkan minimal satu produk.'); return; }
+        editInFlight = true;
+        var btn = $('editSaveBtn');
+        if (btn) { btn.disabled = true; btn.textContent = 'Menyimpan...'; }
+        showLoading(true);
+        gsRun('outletPortalUpdateOrder', [editOrderId, profile.custCode, {
+            tanggal: $('editTanggal') ? $('editTanggal').value : todayIso(),
+            payment: $('editPayment') ? $('editPayment').value : 'CASH',
+            disc: '0%',
+            note: $('editNote') ? $('editNote').value : '-',
+            items: valid
+        }]).then(function (res) {
+            showLoading(false);
+            editInFlight = false;
+            if (btn) { btn.disabled = false; btn.textContent = 'Simpan Perubahan'; }
+            if (res && res.success) {
+                var msg = res.message || 'Order berhasil diperbarui.';
+                modalCallback = null;
+                closeModal(false);
+                showModal('Berhasil', esc(msg));
+                loadRiwayat(true);
+            } else {
+                showEditError((res && res.message) || 'Gagal memperbarui order.');
+            }
+        });
     }
 
     // ---------- Pencapaian (TANPA tabel/card — tampilan langsung) ----------
@@ -1312,25 +1561,64 @@
 
         var bws = res.bws;
         var bwsWrap = $('pencBwsWrap');
-        if (bws) {
+        if (bws && Array.isArray(bws.contracts) && bws.contracts.length) {
             bwsWrap.classList.remove('hidden');
-            var kontrakHtml = (bws.contracts || []).map(function (c) {
+            // Task 73: tampilan identik dengan DETAIL OUTLET KONTRAK pada portal sales
+            // (tampilkanDetailOutletKontrak): hero gradasi, grid Target/Actual/Gap/Point,
+            // progress "Pencapaian Volume Kontrak", tabel Point Trip per kategori.
+            var profName = profile ? (profile.outlet || '-') : '-';
+            var profChan = profile ? (profile.channel || '') : '';
+            var blocks = bws.contracts.map(function (c) {
                 var pct = Number(c.percentage) || 0;
-                return '<div class="qtr-row">' +
-                    '<div class="qtr-top"><div><span class="qtr-name" style="font-size:12.5px;">' + esc(c.start || '-') + ' s/d ' + esc(c.end || '-') + '</span></div>' +
-                    '<span class="qtr-pct" style="font-size:18px;">' + pct + '%</span></div>' +
-                    barHtml(pct) +
-                    '<div class="qtr-sub">' + c.actual + ' / ' + c.target + ' • gap ' + c.gap + '</div>' +
-                    '</div>';
-            }).join('') || '<p style="font-size:12px; color:#94a3b8; padding:10px 0;">Belum ada kontrak BWS aktif.</p>';
-            $('pencKontrak').innerHTML = kontrakHtml;
-            $('pencPointYear').textContent = res.year || '';
-            $('pencTotalPoint').textContent = bws.totalPoint || 0;
-            $('pencPoints').innerHTML = (bws.pointByCategory || []).map(function (c) {
-                return '<div class="point-row"><div><b>' + esc(c.kategori) + '</b>' +
-                    '<span style="color:#64766c; font-size:10.5px;"> — ' + (Math.round((c.karton || 0) * 100) / 100) + ' karton</span></div>' +
-                    '<span class="point-val">+' + c.point + ' poin</span></div>';
-            }).join('') || '<p style="font-size:12px; color:#94a3b8;">Belum ada point trip tercatat tahun ini.</p>';
+                var gap = Number(c.gap) || 0;
+                var pctBar = pct >= 100 ? 'bg-emerald-600' : (pct >= 80 ? 'bg-amber-500' : 'bg-red-500');
+                var trip = '';
+                if (bws.pointByCategory && bws.pointByCategory.length > 0) {
+                    var trows = bws.pointByCategory.map(function (row, idx) {
+                        var divText = row.divisor === 9.6 ? '/ 9,6' : (row.divisor === 12 ? '/ 12' : '-');
+                        return '<tr class="' + (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40') + ' border-b border-slate-100">' +
+                            '<td class="p-2 font-medium text-slate-700">' + esc(row.kategori) + '</td>' +
+                            '<td class="p-2 text-right text-slate-600">' + formatNumberID(row.volume, 1) + '</td>' +
+                            '<td class="p-2 text-right text-slate-600">' + formatNumberID(row.karton, 2) + ' <span class="text-[8px] text-slate-400">' + divText + '</span></td>' +
+                            '<td class="p-2 text-right font-bold text-indigo-700">' + formatNumberID(row.point, 2) + '</td></tr>';
+                    }).join('');
+                    trip = '<div class="mt-3 border border-slate-200 rounded-xl overflow-hidden">' +
+                        '<div class="px-3 py-2.5 bg-slate-50 border-b border-slate-200"><div class="font-bold text-slate-700 text-xs">Point Trip Tahun Berjalan</div></div>' +
+                        '<div class="overflow-x-auto"><table class="w-full text-[10px]"><thead><tr class="bg-white border-b border-slate-200 text-slate-500">' +
+                        '<th class="p-2 text-left font-bold">Kategori</th><th class="p-2 text-right font-bold">Volume</th><th class="p-2 text-right font-bold">Karton</th><th class="p-2 text-right font-bold">Point</th>' +
+                        '</tr></thead><tbody>' + trows + '</tbody></table></div></div>';
+                } else {
+                    trip = '<div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 text-[10px] text-slate-400 text-center">Belum ada Point Trip untuk tahun berjalan.</div>';
+                }
+                return '<div class="rounded-xl border border-slate-200 overflow-hidden bg-white">' +
+                    '<div class="bg-gradient-to-r from-slate-900 to-emerald-900 text-white p-3">' +
+                    '<div class="text-[9px] uppercase tracking-wider text-emerald-300 font-bold">Outlet Kontrak</div>' +
+                    '<div class="text-sm font-bold mt-1">' + esc(profName) + '</div>' +
+                    '<div class="text-[9px] text-slate-300 mt-1">' + esc(c.start || '-') + ' s/d ' + esc(c.end || '-') +
+                    (profChan ? ' • Channel ' + esc(profChan) : '') + '</div>' +
+                    '</div>' +
+                    '<div class="p-3 space-y-3">' +
+                    '<div class="grid grid-cols-2 gap-2">' +
+                    '<div class="rounded-xl border border-slate-200 p-2.5 bg-white"><div class="text-[9px] text-slate-400">Target</div>' +
+                    '<div class="text-sm font-bold text-slate-800 mt-1">' + formatNumberID(c.target, 1) + '</div></div>' +
+                    '<div class="rounded-xl border border-emerald-200 p-2.5 bg-emerald-50"><div class="text-[9px] text-emerald-600">Actual</div>' +
+                    '<div class="text-sm font-bold text-emerald-800 mt-1">' + formatNumberID(c.actual, 1) + '</div></div>' +
+                    '<div class="rounded-xl border border-slate-200 p-2.5 bg-white"><div class="text-[9px] text-slate-400">Gap</div>' +
+                    '<div class="text-sm font-bold ' + (gap <= 0 ? 'text-emerald-700' : 'text-red-600') + ' mt-1">' + formatNumberID(gap, 1) + '</div></div>' +
+                    '<div class="rounded-xl border border-indigo-200 p-2.5 bg-indigo-50"><div class="text-[9px] text-indigo-600">Point Trip</div>' +
+                    '<div class="text-sm font-bold text-indigo-800 mt-1">' + formatNumberID(bws.totalPoint, 2) + '</div></div>' +
+                    '</div>' +
+                    '<div><div class="flex justify-between items-center mb-1.5">' +
+                    '<span class="text-[10px] font-bold text-slate-600">Pencapaian Volume Kontrak berdasarkan Periode Mulai sampai Akhir</span>' +
+                    '<span class="text-[10px] font-bold text-slate-700">' + formatPercentID(pct) + '</span></div>' +
+                    '<div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full ' + pctBar + '" style="width:' + Math.min(Math.max(pct, 0), 100) + '%"></div></div></div>' +
+                    trip +
+                    '</div></div>';
+            }).join('');
+            $('pencKontrak').innerHTML = blocks;
+        } else if (bws) {
+            bwsWrap.classList.remove('hidden');
+            $('pencKontrak').innerHTML = '<p style="font-size:12px; color:#94a3b8; padding:10px 0;">Belum ada kontrak BWS aktif untuk outlet Anda.</p>';
         } else {
             bwsWrap.classList.add('hidden');
         }
