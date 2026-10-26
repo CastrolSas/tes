@@ -664,8 +664,40 @@
 
                 <!-- ================= INPUT ORDER ================= -->
                 <section id="tabInput" class="tab-content space-y-4">
-                    <!-- Task 68: kartu info order disembunyikan (permintaan user) — outlet langsung pilih produk; input tetap ada utk JS: tanggal=hari ini, payment=CASH, disc=0%, cashback kosong, note="-" -->
-                    <div class="op-card" style="padding:16px; display:none;">
+                    <!-- Task 74: kartu Target & Pencapaian kuartal berjalan — gaya Input Order step 2 portal sales -->
+                    <div class="op-card" style="padding:16px;">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                                <div id="opAchOutletName" class="text-[12px] font-extrabold text-emerald-800 leading-tight">-</div>
+                                <div class="text-[9px] text-slate-400 mt-1">CUST.CODE: <span id="opAchCustCode" class="font-bold text-slate-600">-</span></div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button type="button" id="opAchRefresh" onclick="refreshAchInput(this)" class="rounded-lg border border-emerald-200 px-2 py-1 text-[9px] font-bold text-emerald-700 inline-flex items-center justify-center gap-1">↻ Refresh</button>
+                                <button type="button" id="opAchEditInfo" onclick="toggleInfoOrder()" class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[9px] font-bold text-slate-600 inline-flex items-center justify-center">Edit informasi</button>
+                            </div>
+                        </div>
+                        <div id="opAchQuarterLabel" class="text-[9px] text-slate-400 mt-2 mb-2">Memuat target &amp; pencapaian...</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" id="opAchMonths">
+                            <div class="rounded-xl border border-slate-200 p-2.5"><div id="opAchMTitle1" class="text-[10px] font-extrabold text-slate-700">Bulan 1</div><div class="grid grid-cols-2 gap-2 mt-2"><div><div class="text-[8px] text-slate-400">Target</div><div id="opAchTargetM1" class="text-xs font-extrabold">-</div></div><div><div class="text-[8px] text-slate-400">Actual</div><div id="opAchActualM1" class="text-xs font-extrabold text-emerald-700">0,0 dus</div></div></div><div class="border-t mt-2 pt-2 flex justify-between text-[8px]"><span class="text-slate-400">Gap <b id="opAchGapM1" class="text-red-500">-</b></span><span class="text-slate-400">Ach <b id="opAchPctM1">0,0%</b></span></div></div>
+                            <div class="rounded-xl border border-slate-200 p-2.5"><div id="opAchMTitle2" class="text-[10px] font-extrabold text-slate-700">Bulan 2</div><div class="grid grid-cols-2 gap-2 mt-2"><div><div class="text-[8px] text-slate-400">Target</div><div id="opAchTargetM2" class="text-xs font-extrabold">-</div></div><div><div class="text-[8px] text-slate-400">Actual</div><div id="opAchActualM2" class="text-xs font-extrabold text-emerald-700">0,0 dus</div></div></div><div class="border-t mt-2 pt-2 flex justify-between text-[8px]"><span class="text-slate-400">Gap <b id="opAchGapM2" class="text-red-500">-</b></span><span class="text-slate-400">Ach <b id="opAchPctM2">0,0%</b></span></div></div>
+                            <div class="rounded-xl border border-slate-200 p-2.5"><div id="opAchMTitle3" class="text-[10px] font-extrabold text-slate-700">Bulan 3</div><div class="grid grid-cols-2 gap-2 mt-2"><div><div class="text-[8px] text-slate-400">Target</div><div id="opAchTargetM3" class="text-xs font-extrabold">-</div></div><div><div class="text-[8px] text-slate-400">Actual</div><div id="opAchActualM3" class="text-xs font-extrabold text-emerald-700">0,0 dus</div></div></div><div class="border-t mt-2 pt-2 flex justify-between text-[8px]"><span class="text-slate-400">Gap <b id="opAchGapM3" class="text-red-500">-</b></span><span class="text-slate-400">Ach <b id="opAchPctM3">0,0%</b></span></div></div>
+                        </div>
+                        <div class="mt-2 rounded-xl border border-emerald-200 bg-emerald-50/40 p-2.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="text-[10px] font-extrabold text-emerald-800">TOTAL KUARTAL</div>
+                                <div id="opAchQuarterTotalLabel" class="text-[9px] font-bold text-slate-400">Q berjalan</div>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+                                <div class="rounded-lg bg-white p-2"><div class="text-[8px] text-slate-400">Target</div><div id="opAchTargetQ" class="text-xs font-extrabold">-</div></div>
+                                <div class="rounded-lg bg-emerald-50 p-2"><div class="text-[8px] text-slate-400">Actual</div><div id="opAchActualQ" class="text-xs font-extrabold text-emerald-700">0,0 dus</div></div>
+                                <div class="rounded-lg bg-white p-2"><div class="text-[8px] text-slate-400">Gap</div><div id="opAchGapQ" class="text-xs font-extrabold text-red-500">-</div></div>
+                                <div class="rounded-lg bg-white p-2"><div class="text-[8px] text-slate-400">Ach</div><div id="opAchPctQ" class="text-xs font-extrabold">0,0%</div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Task 68: kartu info order disembunyikan (permintaan user) — outlet langsung pilih produk; input tetap ada utk JS: tanggal=hari ini, payment=CASH, disc=0%, cashback kosong, note="-". Task 74: bisa dibuka lewat tombol "Edit informasi" -->
+                    <div class="op-card" id="opInfoCard" style="padding:16px; display:none;">
                         <div class="flex items-center justify-between gap-2 flex-wrap">
                             <div>
                                 <p class="op-section-title">Input Order</p>
@@ -692,7 +724,7 @@
                             </div>
                             <div>
                                 <label class="op-label">Tanggal <span style="color:#dc2626;">*</span></label>
-                                <input type="date" id="opTanggal" class="op-input">
+                                <input type="date" id="opTanggal" class="op-input" onchange="renderInputAch()">
                             </div>
                             <div>
                                 <label class="op-label">Payment</label>
@@ -783,6 +815,27 @@
                         </div>
                         <input type="text" id="riwayatSearch" class="op-input mt-3" placeholder="Cari ID order / produk..." oninput="renderRiwayat()">
                     </div>
+
+                    <!-- Task 74: Pencapaian Bulanan per kuartal — gaya detail Monitoring portal sales + filter tahun -->
+                    <div class="op-card" style="padding:16px;">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <p class="op-section-title" style="margin:0;">Pencapaian per Kuartal</p>
+                            <div class="flex items-center gap-3">
+                                <label class="text-[10px] font-bold text-slate-500" style="display:flex; align-items:center; gap:6px;">Tahun
+                                    <select id="riwAchYear" class="op-input" style="width:auto; padding-top:6px; padding-bottom:6px;" aria-label="Filter tahun pencapaian" onchange="renderRiwayatAch()"></select>
+                                </label>
+                                <label class="text-[10px] font-bold text-slate-500" style="display:flex; align-items:center; gap:6px;">Kuartal
+                                    <select id="riwAchQuarter" class="op-input" style="width:auto; padding-top:6px; padding-bottom:6px;" aria-label="Pilih kuartal pencapaian" onchange="renderRiwayatAch()">
+                                        <option value="1">Q1</option>
+                                        <option value="2">Q2</option>
+                                        <option value="3">Q3</option>
+                                        <option value="4">Q4</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+                        <div id="riwAchBody" class="mt-3"></div>
+                    </div>
                     <div id="riwayatList" class="space-y-3"></div>
                 </section>
 
@@ -826,6 +879,8 @@
     var riwayatLoading = false;
     var pencapaianLoading = false;
     var submitInFlight = false;
+    var pencData = null;         // Task 74: respons outletPortalPencapaian (quarters + months + byYear/years)
+    var riwAchInit = false;      // Task 74: filter tahun/kuartal Riwayat sudah diinisialisasi
     var AUTH_KEY = 'castrolOutletAuth';
 
     // ---------- Util ----------
@@ -987,9 +1042,13 @@
         $('opOutletChannel').value = prof.channel || '-';
         $('opOutletSales').value = prof.sales || '-';
         $('inputBwsPill').classList.toggle('hidden', !prof.isBWS);
+        // Task 74: kartu Target & Pencapaian pada Input
+        $('opAchOutletName').textContent = prof.outlet || '-';
+        $('opAchCustCode').textContent = prof.custCode || '-';
         switchTab('input');
         loadProduk(true);
         loadRiwayat(true);
+        loadPencapaian(false);
     }
 
     function logoutOutlet() {
@@ -998,6 +1057,13 @@
             if (!isOk) return;
             try { localStorage.removeItem(AUTH_KEY); } catch (eStore) {}
             profile = null; produkList = []; shoppingCart = []; riwayatRows = [];
+            pencData = null; riwAchInit = false;
+            $('opAchOutletName').textContent = '-';
+            $('opAchCustCode').textContent = '-';
+            $('opAchQuarterLabel').textContent = 'Memuat target & pencapaian...';
+            $('opAchQuarterTotalLabel').textContent = 'Q berjalan';
+            $('riwAchYear').innerHTML = '';
+            $('riwAchBody').innerHTML = '';
             $('app').classList.add('hidden');
             $('loginPage').classList.remove('hidden');
             $('loginCustCode').value = '';
@@ -1015,7 +1081,7 @@
             if (nv) nv.classList.toggle('sidebar-item-active', k === tab);
         });
         closeDrawer();
-        if (tab === 'riwayat') loadRiwayat(false);
+        if (tab === 'riwayat') { loadRiwayat(false); loadPencapaian(false); }
         if (tab === 'pencapaian') loadPencapaian(false);
     }
     function toggleDrawer() {
@@ -1154,6 +1220,7 @@
             wrap.innerHTML = '<p class="text-xs text-slate-400 text-center py-3 border rounded bg-slate-50">Belum ada item.</p>';
             $('grandVol').textContent = '0';
             $('grandVal').textContent = 'Rp 0';
+            renderInputAch();
             return;
         }
         var html = '';
@@ -1176,6 +1243,7 @@
         wrap.innerHTML = html;
         $('grandVol').textContent = totalVol.toFixed(1);
         $('grandVal').textContent = fmtRp(totalVal);
+        renderInputAch();
     }
 
     // ---------- Kirim order ----------
@@ -1519,14 +1587,184 @@
 
     // ---------- Pencapaian (TANPA tabel/card — tampilan langsung) ----------
     function loadPencapaian(force) {
-        if (!profile || pencapaianLoading) return;
+        if (!profile || pencapaianLoading) return Promise.resolve();
         pencapaianLoading = true;
         if (force) showLoading(true);
-        gsRun('outletPortalPencapaian', [profile.custCode, !!force]).then(function (res) {
+        return gsRun('outletPortalPencapaian', [profile.custCode, !!force]).then(function (res) {
             pencapaianLoading = false;
             showLoading(false);
+            pencData = (res && res.success) ? res : null;
             renderPencapaian(res && res.success ? res : null);
+            renderInputAch();
+            renderRiwayatAch();
         });
+    }
+
+    // ---------- Task 74: Target & Pencapaian kuartal berjalan (gaya Input Order step 2 portal sales) ----------
+    function achFmt(v) {
+        return (Number(v) || 0).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    }
+    // Total dus dalam keranjang — rumus sama dengan getInputCartDusTotal pada portal sales.
+    function inputCartDusTotal() {
+        var channel = profile ? String(profile.channel || '').trim().toUpperCase() : '';
+        var totalVolume = shoppingCart.reduce(function (sum, item) {
+            var qty = Number(item.qty) || 0, pack = Number(item.pack) || 1;
+            var totalPcs = String(item.satuan || '').toUpperCase() === 'DUS' ? qty * pack : qty;
+            return sum + totalPcs * (Number(item.liter) || 0);
+        }, 0);
+        if (channel === 'PCO') return totalVolume / 12;
+        if (channel === 'MCO-4T') return totalVolume / 9.6;
+        return shoppingCart.reduce(function (sum, item) {
+            var qty = Number(item.qty) || 0, pack = Number(item.pack) || 1;
+            return sum + (String(item.satuan || '').toUpperCase() === 'DUS' ? qty : qty / pack);
+        }, 0);
+    }
+    // Task 74: "Edit informasi" membuka kartu info order (tanggal/payment/disc/cashback/note)
+    // yang disembunyikan sejak Task 68 — meniru tombol "Edit informasi" pada step 2 sales.
+    function toggleInfoOrder() {
+        var card = $('opInfoCard');
+        var willShow = (!card.style.display || card.style.display === 'none');
+        card.style.display = willShow ? '' : 'none';
+        $('opAchEditInfo').textContent = willShow ? 'Tutup informasi' : 'Edit informasi';
+    }
+    function refreshAchInput(btn) {
+        if (!profile) return;
+        var orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '⟳ Memuat...';
+        Promise.resolve(loadPencapaian(true)).then(function () {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }, function () {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        });
+    }
+    function currentQuarterObj() {
+        if (!pencData || !Array.isArray(pencData.quarters)) return null;
+        var arr = pencData.quarters;
+        return arr.filter(function (q) { return q.isCurrent; })[0] ||
+               arr.filter(function (q) { return (Number(q.target) || 0) > 0 || (Number(q.actual) || 0) > 0; })[0] || null;
+    }
+    function renderInputAch() {
+        var labelEl = $('opAchQuarterLabel');
+        if (!labelEl) return;
+        if (!pencData) { labelEl.textContent = 'Memuat target & pencapaian...'; return; }
+        var q = currentQuarterObj();
+        labelEl.textContent = q ? q.label : 'Target kuartal belum tersedia.';
+        var months = (q && Array.isArray(q.months)) ? q.months : [];
+        var dateVal = String($('opTanggal').value || '');
+        var dm = dateVal.match(/^\d{4}-(\d{1,2})-/);
+        var inputMonth = dm ? Number(dm[1]) : 0;
+        var cartDus = profile ? inputCartDusTotal() : 0;
+        var qActual = 0;
+        for (var i = 1; i <= 3; i++) {
+            var m = months[i - 1] || null;
+            if (m) {
+                $('opAchMTitle' + i).textContent = m.label || ('Bulan ' + i);
+                var target = Number(m.target) || 0;
+                var actual = (Number(m.actual) || 0) + (Number(m.month) === inputMonth ? cartDus : 0);
+                var gap = actual - target;
+                var ach = target > 0 ? (actual / target * 100) : 0;
+                $('opAchTargetM' + i).textContent = achFmt(target) + ' dus';
+                $('opAchActualM' + i).textContent = achFmt(actual) + ' dus';
+                $('opAchGapM' + i).textContent = achFmt(gap) + ' dus';
+                $('opAchPctM' + i).textContent = achFmt(ach) + '%';
+                qActual += actual;
+            } else {
+                $('opAchMTitle' + i).textContent = 'Bulan ' + i;
+                $('opAchTargetM' + i).textContent = '-';
+                $('opAchActualM' + i).textContent = '0,0 dus';
+                $('opAchGapM' + i).textContent = '-';
+                $('opAchPctM' + i).textContent = '0,0%';
+            }
+        }
+        $('opAchQuarterTotalLabel').textContent = q ? q.label : 'Q berjalan';
+        var qTarget = q ? (Number(q.target) || 0) : 0;
+        var qGap = qActual - qTarget;
+        var qAch = qTarget > 0 ? (qActual / qTarget * 100) : 0;
+        $('opAchTargetQ').textContent = achFmt(qTarget) + ' dus';
+        $('opAchActualQ').textContent = achFmt(qActual) + ' dus';
+        $('opAchGapQ').textContent = achFmt(qGap) + ' dus';
+        $('opAchPctQ').textContent = achFmt(qAch) + '%';
+    }
+
+    // ---------- Task 74: Pencapaian Bulanan per kuartal pada Riwayat (gaya detail Monitoring portal sales) ----------
+    var MONTH_NAMES_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    // Fallback bila respons belum memuat months (cache lama): target dibagi rata 3 bulan, actual di bulan pertama.
+    function riwAchEnsureMonths(q) {
+        if (q && Array.isArray(q.months) && q.months.length === 3) return;
+        var label = String((q && q.label) || '');
+        var ym = label.match(/(\d{4})/);
+        var year = ym ? Number(ym[1]) : ((pencData && pencData.year) || new Date().getFullYear());
+        var qn = q ? (Number(String(q.q || '').replace(/\D/g, '')) || 1) : 1;
+        var target = q ? (Number(q.target) || 0) : 0;
+        var actual = q ? (Number(q.actual) || 0) : 0;
+        var monthly = target > 0 ? target / 3 : 0;
+        q.months = [0, 1, 2].map(function (i) {
+            var mNo = (qn - 1) * 3 + i + 1;
+            return { month: mNo, year: year, label: MONTH_NAMES_ID[mNo - 1] + ' ' + year, target: monthly, actual: i === 0 ? actual : 0 };
+        });
+    }
+    function renderRiwayatAch() {
+        var yearSel = $('riwAchYear'), qSel = $('riwAchQuarter'), body = $('riwAchBody');
+        if (!yearSel || !qSel || !body) return;
+        if (!pencData || !pencData.byYear) {
+            body.innerHTML = '<p style="font-size:11px; color:#94a3b8; padding:4px 0;">Memuat pencapaian...</p>';
+            return;
+        }
+        if (!riwAchInit) {
+            riwAchInit = true;
+            var years = (Array.isArray(pencData.years) && pencData.years.length) ? pencData.years : [pencData.year];
+            yearSel.innerHTML = years.map(function (y) { return '<option value="' + esc(y) + '">' + esc(y) + '</option>'; }).join('');
+            var curQ = currentQuarterObj();
+            var cur = pencData.currentQuarter || (curQ ? Number(String(curQ.q || '').replace(/\D/g, '')) : 0) || 1;
+            qSel.value = String(cur);
+        }
+        var yKey = String(yearSel.value || pencData.year);
+        var qArr = pencData.byYear[yKey] || [];
+        var qn = parseInt(qSel.value, 10) || 1;
+        var title = 'Q' + qn + ' ' + yKey;
+        var q = null;
+        for (var i = 0; i < qArr.length; i++) {
+            if (Number(String(qArr[i].q || '').replace(/\D/g, '')) === qn) { q = qArr[i]; break; }
+        }
+        if (!q) {
+            body.innerHTML = '<p style="font-size:11px; color:#94a3b8; padding:4px 0;">Data pencapaian ' + esc(title) + ' belum tersedia.</p>';
+            return;
+        }
+        riwAchEnsureMonths(q);
+        var rows = '';
+        var tT = 0, aT = 0;
+        q.months.forEach(function (m) {
+            var tgt = Number(m.target) || 0, act = Number(m.actual) || 0, gap = act - tgt;
+            var ach = tgt > 0 ? (act / tgt * 100) : 0;
+            tT += tgt; aT += act;
+            var achCls = ach >= 100 ? 'text-emerald-700' : (ach >= 80 ? 'text-amber-600' : 'text-red-600');
+            rows += '<tr>' +
+                '<td class="p-1.5 text-left font-semibold text-slate-600 whitespace-nowrap">' + esc(m.label) + '</td>' +
+                '<td class="p-1.5 text-right text-slate-600">' + tgt.toFixed(1) + '</td>' +
+                '<td class="p-1.5 text-right text-slate-700 font-semibold">' + act.toFixed(1) + '</td>' +
+                '<td class="p-1.5 text-right ' + (gap >= 0 ? 'text-emerald-700' : 'text-red-600') + '">' + gap.toFixed(1) + '</td>' +
+                '<td class="p-1.5 text-right font-extrabold ' + achCls + '">' + (tgt > 0 ? ach.toFixed(1) + '%' : '-') + '</td>' +
+                '</tr>';
+        });
+        var tGap = aT - tT, tAch = tT > 0 ? (aT / tT * 100) : 0;
+        rows += '<tr class="bg-emerald-50/60 font-bold">' +
+            '<td class="p-1.5 text-left text-slate-700">Total ' + esc(title) + '</td>' +
+            '<td class="p-1.5 text-right text-slate-700">' + tT.toFixed(1) + '</td>' +
+            '<td class="p-1.5 text-right text-slate-800">' + aT.toFixed(1) + '</td>' +
+            '<td class="p-1.5 text-right ' + (tGap >= 0 ? 'text-emerald-700' : 'text-red-600') + '">' + tGap.toFixed(1) + '</td>' +
+            '<td class="p-1.5 text-right font-extrabold text-slate-800">' + (tT > 0 ? tAch.toFixed(1) + '%' : '-') + '</td>' +
+            '</tr>';
+        body.innerHTML = '<div class="rounded-xl border border-slate-200 bg-white p-3">' +
+            '<div class="text-[10px] font-extrabold text-slate-700">Pencapaian Bulanan — ' + esc(title) + '</div>' +
+            '<div class="overflow-x-auto mt-2"><table class="w-full text-[10px]"><thead><tr class="text-slate-400">' +
+            '<th class="p-1.5 text-left font-bold">Bulan</th><th class="p-1.5 text-right font-bold">Target</th><th class="p-1.5 text-right font-bold">Actual</th><th class="p-1.5 text-right font-bold">Gap</th><th class="p-1.5 text-right font-bold">Ach%</th>' +
+            '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+            '<div class="text-[8.5px] text-slate-400 mt-1.5">Target bulanan = target kuartal dibagi rata 3 bulan (dus).</div>' +
+            '</div>';
     }
     function barHtml(pct) {
         var w = Math.max(0, Math.min(100, pct));
