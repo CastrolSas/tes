@@ -7157,7 +7157,48 @@ startAutoRefresh();
         }
         function getEditOutletOptions(selected){let html='<option value="">-- Pilih Outlet --</option>',seen={};(outletDataList||[]).forEach(function(o){let n=String(o.outlet||'').trim();if(n&&!seen[n]){seen[n]=1;html+='<option value="'+escapeHtml(n)+'" '+(n===String(selected||'')?'selected':'')+'>'+escapeHtml(n)+'</option>';}});if(selected&&!seen[String(selected)])html='<option value="'+escapeHtml(selected)+'" selected>'+escapeHtml(selected)+'</option>'+html.slice(html.indexOf('</option>')+9);return html;}
         function getEditProductOptions(selected,selectedKode){let html='<option value="">-- Pilih Produk --</option>';let selectedText=String(selected||'').trim();let selectedCode=String(selectedKode||'').trim();let found=false;(produkDataList||[]).forEach(function(p){let n=String(p.nama||'').trim();if(!n)return;let kode=String(p.kode||'').trim();let isSelected=(selectedText&&n===selectedText)||(selectedCode&&kode===selectedCode);if(isSelected)found=true;html+='<option value="'+escapeHtml(n)+'" '+(isSelected?'selected':'')+'>'+escapeHtml(n)+' ('+Number(p.liter||0)+'L | Rp '+Number(p.harga||0).toLocaleString('id-ID')+')</option>';});if(selectedText&&!found){html+='<option value="'+escapeHtml(selectedText)+'" selected>'+escapeHtml(selectedText)+' (Produk saat ini)</option>';}return html;}
-        function renderEditOrderProducts(){let b=document.getElementById('editProducts');if(!b)return;if(!editOrderItems.length){b.innerHTML='<div class="text-xs text-slate-400 text-center py-3">Belum ada produk.</div>';return;}b.innerHTML=editOrderItems.map(function(it,i){return '<div class="border border-slate-200 rounded-lg p-2 mb-2 bg-slate-50"><div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center"><select id="editProd'+i+'" class="sm:col-span-7 w-full border rounded p-2 bg-white text-xs">'+getEditProductOptions(it.produk,it.kode)+'</select><input id="editQty'+i+'" type="number" min="1" value="'+Number(it.qty||1)+'" class="sm:col-span-2 w-full border rounded p-2 text-xs"><select id="editUnit'+i+'" class="sm:col-span-2 w-full border rounded p-2 bg-white text-xs"><option value="Pcs" '+(String(it.satuan).toUpperCase()==='PCS'?'selected':'')+'>Pcs</option><option value="Dus" '+(String(it.satuan).toUpperCase()==='DUS'?'selected':'')+'>Dus</option></select><button type="button" onclick="removeEditProduct('+i+')" class="sm:col-span-1 text-red-600 bg-red-50 border border-red-200 rounded p-2">✕</button></div></div>';}).join('');}
+        // Task 83: baris produk Edit Order dirapikan (kartu per item, Qty & Satuan sejajar).
+        // Satuan memakai tombol Pcs/Dus (seperti pemilihan PCO/MCO-4T); nilai tetap disimpan pada
+        // input hidden #editUnit{i} sehingga syncEditOrderProductsFromForm & simpanEditOrder yang
+        // membaca .value tidak perlu diubah (perilaku simpan tidak berubah).
+        function renderEditOrderProducts(){
+            let b=document.getElementById('editProducts');if(!b)return;
+            // Hancurkan instance select2 lama agar rapi saat daftar dirender ulang.
+            try{if(window.jQuery&&window.jQuery.fn&&window.jQuery.fn.select2){window.jQuery(b).find('select.searchable-select').each(function(){const $el=window.jQuery(this);if($el.hasClass('select2-hidden-accessible')){$el.select2('destroy');}});}}catch(eDes2){}
+            if(!editOrderItems.length){b.innerHTML='<div class="text-xs text-slate-400 text-center py-3 border border-dashed border-slate-200 rounded-xl bg-white">Belum ada produk.</div>';return;}
+            b.innerHTML=editOrderItems.map(function(it,i){
+                const satuanNorm=String(it.satuan==null?'':it.satuan).trim().toUpperCase();
+                const isPcs=satuanNorm!=='DUS';
+                return '<div class="border border-slate-200 rounded-xl p-2.5 mb-2 bg-slate-50">'
+                    +'<div class="flex items-center justify-between mb-1.5">'
+                        +'<span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Item '+(i+1)+'</span>'
+                        +'<button type="button" onclick="removeEditProduct('+i+')" title="Hapus item ini" aria-label="Hapus item '+(i+1)+'" class="w-7 h-7 inline-flex items-center justify-center rounded-lg border border-red-200 bg-white text-red-500 hover:bg-red-50 transition text-xs leading-none">&#10005;</button>'
+                    +'</div>'
+                    +'<select id="editProd'+i+'" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 bg-white text-xs searchable-select">'+getEditProductOptions(it.produk,it.kode)+'</select>'
+                    +'<div class="grid grid-cols-2 gap-2 mt-2">'
+                        +'<div><label class="block text-[10px] font-bold text-slate-600 mb-1">Qty</label><input id="editQty'+i+'" type="number" min="1" value="'+Number(it.qty||1)+'" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 bg-white text-xs"></div>'
+                        +'<div><label class="block text-[10px] font-bold text-slate-600 mb-1">Satuan</label>'
+                            +'<div class="flex rounded-xl border border-slate-200 bg-white overflow-hidden" style="height:38px">'
+                                +'<button type="button" id="editUnitPcs'+i+'" onclick="setEditUnitSatuan('+i+',\'Pcs\')" class="flex-1 '+(isPcs?'bg-emerald-700 text-white':'bg-transparent text-slate-700')+' font-semibold text-xs transition">Pcs</button>'
+                                +'<button type="button" id="editUnitDus'+i+'" onclick="setEditUnitSatuan('+i+',\'Dus\')" class="flex-1 '+(!isPcs?'bg-emerald-700 text-white':'bg-transparent text-slate-700')+' font-semibold text-xs transition">Dus</button>'
+                            +'</div>'
+                            +'<input type="hidden" id="editUnit'+i+'" value="'+(isPcs?'Pcs':'Dus')+'">'
+                        +'</div>'
+                    +'</div>'
+                +'</div>';
+            }).join('');
+            // Task 83: dropdown produk diberi pencarian (select2) seperti Input Order step 2.
+            try{
+                if(window.jQuery&&window.jQuery.fn&&window.jQuery.fn.select2){
+                    const $modal=window.jQuery('#customModal');
+                    window.jQuery(b).find('select.searchable-select').each(function(){
+                        const $el=window.jQuery(this);
+                        if($el.hasClass('select2-hidden-accessible'))return;
+                        $el.select2({width:'100%',dropdownParent:$modal,placeholder:'-- Pilih Produk --'});
+                    });
+                }
+            }catch(eSel2){console.warn('Select2 edit order tidak tersedia, memakai select biasa.',eSel2);}
+        }
         // Simpan nilai yang sedang diketik pada form sebelum daftar produk dirender ulang.
         function syncEditOrderProductsFromForm(){
             if(!Array.isArray(editOrderItems)) editOrderItems=[];
@@ -7186,6 +7227,15 @@ startAutoRefresh();
             }).getListProduk();
         }
         function removeEditProduct(i){syncEditOrderProductsFromForm();editOrderItems.splice(i,1);renderEditOrderProducts();}
+        // Task 83: toggle tombol Pcs/Dus per item pada Edit Order (visual seperti pemilihan PCO/MCO-4T).
+        function setEditUnitSatuan(i,satuan){
+            const hidden=document.getElementById('editUnit'+i);
+            if(hidden)hidden.value=(satuan==='Dus'?'Dus':'Pcs');
+            const isPcs=satuan!=='Dus';
+            const bP=document.getElementById('editUnitPcs'+i),bD=document.getElementById('editUnitDus'+i);
+            if(bP)bP.className='flex-1 '+(isPcs?'bg-emerald-700 text-white':'bg-transparent text-slate-700')+' font-semibold text-xs transition';
+            if(bD)bD.className='flex-1 '+(!isPcs?'bg-emerald-700 text-white':'bg-transparent text-slate-700')+' font-semibold text-xs transition';
+        }
         function renderEditOrderForm(o){
             var discValue = o && o.disc != null ? String(o.disc).trim() : '0%';
             // Nilai DISC dari sheet tersimpan sebagai desimal persen (2% = 0.02).
@@ -7214,7 +7264,7 @@ startAutoRefresh();
                     '<div><label class="block text-[10px] font-bold text-slate-600 mb-1">Disc</label><input type="text" id="editDisc" value="'+escapeHtml(discValue)+'" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 bg-white text-xs"></div>'+
                     '<div><label class="block text-[10px] font-bold text-slate-600 mb-1">Cashback</label><select id="editCashback" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 bg-white text-xs">'+cashbackOptions+'</select></div>'+
                 '</div>'+
-                '<div class="border-t pt-3"><div class="flex justify-between items-center mb-2"><b>Produk</b><button type="button" onclick="addEditProduct()" class="bg-emerald-600 text-white rounded px-3 py-1.5 text-[10px] font-bold">+ Tambah Produk</button></div><div id="editProducts"></div></div></div>';
+                '<div class="border-t pt-3"><div class="flex justify-between items-center mb-2"><div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Produk</div><button type="button" onclick="addEditProduct()" class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-3.5 py-2 text-[10px] font-bold shadow-sm transition">+ Tambah Produk</button></div><div id="editProducts" class="mt-2"></div></div></div>';
             renderEditOrderProducts();
         }
         function simpanEditOrder(){
@@ -12938,8 +12988,8 @@ function renderRiwayatCards(data) {
         const noteText = String(item.note || '').trim();
         const noteHtml = (noteText && noteText !== '-') ? '<div class="rw2-note"><span class="rw2-note-label">Note:</span> ' + escapeHtml(noteText) + '</div>' : '';
         const rw2Hint = rw2Key === 'pending'
-            ? ''
-            : '';
+            ? 'Order belum diproses \u2014 masih dapat diedit atau dihapus.'
+            : 'Order sudah diproses sales/admin \u2014 hubungi admin bila ada perubahan.';
         cards += `
             <article class="rw2-card rw2-${rw2Key}">
                 <div class="rw2-head">
