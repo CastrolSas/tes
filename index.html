@@ -12938,8 +12938,8 @@ function renderRiwayatCards(data) {
         const noteText = String(item.note || '').trim();
         const noteHtml = (noteText && noteText !== '-') ? '<div class="rw2-note"><span class="rw2-note-label">Note:</span> ' + escapeHtml(noteText) + '</div>' : '';
         const rw2Hint = rw2Key === 'pending'
-            ? 'Order belum diproses \u2014 masih dapat diedit atau dihapus.'
-            : 'Order sudah diproses sales/admin \u2014 hubungi admin bila ada perubahan.';
+            ? ''
+            : '';
         cards += `
             <article class="rw2-card rw2-${rw2Key}">
                 <div class="rw2-head">
