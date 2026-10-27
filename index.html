@@ -13057,6 +13057,33 @@ var approvalViewMode = 'chart';
 var approvalLoading = false;
 var approvalStatusInFlight = false;
 
+// Task 84: sama seperti Tagihan — tombol Approve/Decline/Pending tetap aktif
+// meskipun data approval dimuat ulang di latar belakang (override per ID
+// sampai server mengonfirmasi / TTL berakhir).
+var approvalStatusOverride = {};
+var APPROVAL_STATUS_OVERRIDE_TTL = 300000;
+function approvalSetStatusOverride(idInput, status) {
+    const key = String(idInput || '').trim();
+    const st = String(status || '').trim().toUpperCase();
+    if (!key || (st !== 'APPROVE' && st !== 'DECLINE' && st !== 'PENDING')) return;
+    approvalStatusOverride[key] = { status: st, ts: Date.now() };
+}
+function approvalClearStatusOverride(idInput) {
+    delete approvalStatusOverride[String(idInput || '').trim()];
+}
+function approvalApplyStatusOverrides(data) {
+    const now = Date.now();
+    Object.keys(approvalStatusOverride).forEach(function(key) {
+        const ov = approvalStatusOverride[key];
+        if (!ov || (now - Number(ov.ts || 0)) > APPROVAL_STATUS_OVERRIDE_TTL) { delete approvalStatusOverride[key]; return; }
+        const it = (data || []).find(function(x){ return String(x.id || '').trim() === key; });
+        if (!it) return;
+        const srv = String(it.status || 'PENDING').trim().toUpperCase();
+        if (srv === ov.status) { delete approvalStatusOverride[key]; return; }
+        it.status = ov.status;
+    });
+}
+
 function canUseApprovalMenu() {
     return String(currentUsernameInput||'').trim().toLowerCase()==='admin' || String(currentUser||'').trim()==='';
 }
@@ -13099,6 +13126,8 @@ function loadApproval(forceReload, silentRefresh) {
 function handleApprovalLoaded(data) {
     globalApprovalData = Array.isArray(data) ? data : [];
     appLocalCacheSet('APPROVAL_' + String(currentUsernameInput||'').toUpperCase(), globalApprovalData);
+    // Task 84: paksa status pilihan user ke data segar sebelum di-render.
+    approvalApplyStatusOverrides(globalApprovalData);
     populateApprovalFilters();
     filterApproval();
 }
@@ -13107,8 +13136,13 @@ function populateApprovalFilters() {
     const fill = function(sel, values, label) {
         if (!sel) return;
         const prev = String(sel.value || '');
-        sel.innerHTML = '<option value="">' + label + '</option>' + values.map(function(v){ return '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>'; }).join('');
-        if (values.indexOf(prev) !== -1) sel.value = prev;
+        let html = '<option value="">' + label + '</option>' + values.map(function(v){ return '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>'; }).join('');
+        // Task 84: pilihan filter dipertahankan meski data dimuat ulang di
+        // latar belakang — opsi yang tidak ada di data terbaru tetap
+        // ditampilkan agar select tidak melompat kembali ke "Semua ...".
+        if (prev && values.indexOf(prev) === -1) html += '<option value="' + escapeHtml(prev) + '">' + escapeHtml(prev) + '</option>';
+        sel.innerHTML = html;
+        if (prev) sel.value = prev;
     };
     const uniqSorted = function(arr, mapper) {
         return [...new Set((arr || []).map(mapper).filter(Boolean))].sort(function(a,b){ return a.localeCompare(b, 'id'); });
@@ -13262,12 +13296,13 @@ function ubahStatusApprovalSatuan(idInput, statusBaru) {
         return;
     }
     approvalTerapkanStatusLokal([{ id: id, status: target }]);
+    approvalSetStatusOverride(id, target);
     approvalStatusInFlight = true;
     google.script.run
         .withSuccessHandler(function(res) {
             approvalStatusInFlight = false;
             if (!res || res.success === false) {
-                approvalTerapkanStatusLokal([{ id: id, status: cur }]);
+                approvalClearStatusOverride(id); approvalTerapkanStatusLokal([{ id: id, status: cur }]);
                 showModal('Gagal Approval', (res && res.message) ? res.message : 'Perubahan status tidak tersimpan. Silakan coba lagi.');
                 return;
             }
@@ -13279,7 +13314,7 @@ function ubahStatusApprovalSatuan(idInput, statusBaru) {
         })
         .withFailureHandler(function(err) {
             approvalStatusInFlight = false;
-            approvalTerapkanStatusLokal([{ id: id, status: cur }]);
+            approvalClearStatusOverride(id); approvalTerapkanStatusLokal([{ id: id, status: cur }]);
             showModal('Gagal Approval', (err && err.message ? err.message : 'Terjadi kesalahan saat mengubah status.'));
         })
         .updateOrderStatusBatchSync([{ id: id, status: target }], currentUsernameInput, currentUser);
@@ -13477,6 +13512,11 @@ function doneBulkStatusApproval() {
         '.inv-table td{padding:6px 8px;border-bottom:1px solid #f1f5f9;color:#334155;}' +
         '.inv-body .overflow-x-auto table.inv-table th{text-align:center;}' +
         '.inv-body .overflow-x-auto table.inv-table td{text-align:center;}' +
+        // Task 84: hanya kolom Produk (kolom ke-2) rata kiri; No/Qty/Satuan tetap tengah,
+        // baris kosong (colspan) tetap di tengah.
+        '.inv-body .overflow-x-auto table.inv-table th:nth-child(2){text-align:left;}' +
+        '.inv-body .overflow-x-auto table.inv-table td:nth-child(2){text-align:left;}' +
+        '.inv-body .overflow-x-auto table.inv-table td[colspan]{text-align:center;}' +
         '.inv-totrow td{background:#f8fafc;font-weight:900;color:#0f172a;border-top:2px solid #e2e8f0;}' +
         '.inv-stamp{display:inline-block;padding:5px 14px;border:2.5px solid;border-radius:8px;font-weight:900;font-size:13px;letter-spacing:.12em;transform:rotate(-6deg);margin-top:8px;}' +
         '.inv-stamp-lunas{color:#059669;border-color:#059669;background:rgba(5,150,105,.06);}' +
@@ -13519,6 +13559,37 @@ var tagihanLoading = false;
 var tagihanStatusInFlight = false;
 var tagihanSelectedIds = {};
 var TAGIHAN_UMUR_MERAH = 45;
+
+// Task 84: pilihan tombol Lunas/Belum TETAP tampil aktif meskipun data
+// dimuat ulang di latar belakang. Status terpilih dicatat sebagai override
+// per ID dan dipaksa ke data terbaru dari server sampai server mengonfirmasi
+// status yang sama (atau sampai TTL berakhir) — reload senyap tidak lagi
+// mengembalikan tampilan ke status lama (pembacaan sheet bisa stale sekejap
+// setelah tulis).
+var tagihanStatusOverride = {};
+var TAGIHAN_STATUS_OVERRIDE_TTL = 300000;
+function tagihanSetStatusOverride(idInput, status) {
+    const key = String(idInput || '').trim();
+    const st = String(status || '').trim().toUpperCase();
+    if (!key || (st !== 'LUNAS' && st !== 'BELUM LUNAS')) return;
+    tagihanStatusOverride[key] = { status: st, ts: Date.now() };
+}
+function tagihanClearStatusOverride(idInput) {
+    delete tagihanStatusOverride[String(idInput || '').trim()];
+}
+function tagihanApplyStatusOverrides(data) {
+    const now = Date.now();
+    Object.keys(tagihanStatusOverride).forEach(function(key) {
+        const ov = tagihanStatusOverride[key];
+        if (!ov || (now - Number(ov.ts || 0)) > TAGIHAN_STATUS_OVERRIDE_TTL) { delete tagihanStatusOverride[key]; return; }
+        const it = (data || []).find(function(x){ return String(x.id || '').trim() === key; });
+        if (!it) return;
+        const srv = String(it.statusTagihan || 'BELUM LUNAS').trim().toUpperCase();
+        if (srv === ov.status) { delete tagihanStatusOverride[key]; return; }
+        it.statusTagihan = ov.status;
+        it.tanggalLunas = (ov.status === 'LUNAS') ? tagihanTanggalHariIniStr() : '';
+    });
+}
 
 function tagihanIsAdminScope() {
     return String(currentUsernameInput||'').trim().toLowerCase()==='admin' || String(currentUser||'').trim()==='';
@@ -13651,6 +13722,8 @@ function loadTagihan(forceReload, silentRefresh) {
 function handleTagihanLoaded(res) {
     globalTagihanData = (res && Array.isArray(res.data)) ? res.data : [];
     appLocalCacheSet(tagihanCacheKey(), globalTagihanData);
+    // Task 84: paksa status pilihan user ke data segar sebelum di-render.
+    tagihanApplyStatusOverrides(globalTagihanData);
     populateTagihanFilters();
     filterTagihan();
 }
@@ -14143,8 +14216,13 @@ function populateTagihanFilters() {
     const fill = function(sel, values, label) {
         if (!sel) return;
         const prev = String(sel.value || '');
-        sel.innerHTML = '<option value="">' + label + '</option>' + values.map(function(v){ return '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>'; }).join('');
-        if (values.indexOf(prev) !== -1) sel.value = prev;
+        let html = '<option value="">' + label + '</option>' + values.map(function(v){ return '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>'; }).join('');
+        // Task 84: pilihan filter dipertahankan meski data dimuat ulang di
+        // latar belakang — opsi yang tidak ada di data terbaru tetap
+        // ditampilkan agar select tidak melompat kembali ke "Semua ...".
+        if (prev && values.indexOf(prev) === -1) html += '<option value="' + escapeHtml(prev) + '">' + escapeHtml(prev) + '</option>';
+        sel.innerHTML = html;
+        if (prev) sel.value = prev;
     };
     const uniqSorted = function(arr, mapper) {
         return [...new Set((arr || []).map(mapper).filter(Boolean))].sort(function(a,b){ return a.localeCompare(b, 'id'); });
@@ -14395,12 +14473,13 @@ function ubahStatusTagihanSatuan(idInput, statusBaru) {
     // menunggu proses simpan (tanpa loading); proses berjalan tetap sama di
     // belakang layar, dan bila gagal status dikembalikan ke semula.
     tagihanTerapkanStatusLokal([{ id: id, status: target }]);
+    tagihanSetStatusOverride(id, target);
     tagihanStatusInFlight = true;
     google.script.run
         .withSuccessHandler(function(res) {
             tagihanStatusInFlight = false;
             if (!res || res.success === false) {
-                tagihanTerapkanStatusLokal([{ id: id, status: cur }]);
+                tagihanClearStatusOverride(id); tagihanTerapkanStatusLokal([{ id: id, status: cur }]);
                 showModal('Gagal Simpan Tagihan', (res && res.message) ? res.message : 'Perubahan status tagihan tidak tersimpan. Silakan coba lagi.');
                 return;
             }
@@ -14408,7 +14487,7 @@ function ubahStatusTagihanSatuan(idInput, statusBaru) {
         })
         .withFailureHandler(function(err) {
             tagihanStatusInFlight = false;
-            tagihanTerapkanStatusLokal([{ id: id, status: cur }]);
+            tagihanClearStatusOverride(id); tagihanTerapkanStatusLokal([{ id: id, status: cur }]);
             showModal('Gagal Simpan Tagihan', (err && err.message ? err.message : 'Terjadi kesalahan saat menyimpan status tagihan.'));
         })
         .updateStatusTagihanSync([{ id: id, status: target }], currentUsernameInput, currentUser);
@@ -14437,6 +14516,8 @@ function terapkanStatusTagihanMassal(statusBaru) {
                     return;
                 }
                 tagihanTerapkanStatusLokal(changes);
+                // Task 84: pilihan massal juga tetap aktif saat reload senyap berjalan.
+                changes.forEach(function(ch) { tagihanSetStatusOverride(ch.id, target); });
                 showModal('Tagihan Tersimpan', (res && res.message) ? res.message : (changes.length + ' tagihan diperbarui.'));
                 resetPilihanStatusTagihan();
                 try { loadTagihan(true, true); } catch (eReload) {}
