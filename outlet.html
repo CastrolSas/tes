@@ -15,7 +15,7 @@
     var isAppsScriptHost = host === 'script.google.com' || host === 'script.googleusercontent.com';
     if (isAppsScriptHost) return;
 
-    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzs5A5L9R8NwR9hcMaPE_mE25qMoW4jR-0qfuaOkGLuh70P85hplOL4DkHcp_uylqoF/exec';
+    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5dkNkseL2AXyP4T3vRATCQEnRC3Ft5ho29iUObmj-Y3H-vRunigrQheYt3jzoBq-p/exec';
     var BRIDGE_URL = CASTROL_APPS_SCRIPT_URL + (CASTROL_APPS_SCRIPT_URL.indexOf('?') >= 0 ? '&' : '?') + 'bridge=1';
     var seq = 0;
     var pending = Object.create(null);
@@ -320,8 +320,8 @@
             margin:0;
         }
         .castrol-greet-role{ font-size:8.5px; font-weight:800; color:#008a45; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; }
+        /* Task 76: badge Online jadi item flex biasa di grup tombol kanan (samping tombol refresh) — tidak lagi absolute */
         .cst-header-online{
-            position:absolute; right:112px; top:50%; transform:translateY(-50%);
             display:inline-flex; align-items:center; gap:6px;
             background:#e8f5ee; color:#008a45; border:1px solid #c9e8d6;
             font-size:10.5px; font-weight:800; border-radius:999px; padding:5px 11px; white-space:nowrap;
@@ -551,6 +551,13 @@
         .op-ach-strip > div{ flex:0 0 auto; width:210px; scroll-snap-align:start; }
         .op-ach-nav{ width:24px; height:24px; border:1px solid #dbe5df; background:#fff; color:#51625a; border-radius:999px; font-size:14px; line-height:1; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-weight:700; padding:0; }
         .op-ach-nav:active{ background:#eef5f1; }
+        /* Task 76: desktop — kartu bulan memenuhi lebar kontainer (pas dgn layar, tanpa ruang kosong);
+           mobile tetap strip horizontal yg bisa digeser (tidak diubah). */
+        @media (min-width:1024px){
+            .op-ach-strip{ overflow-x:visible; padding-bottom:0; }
+            .op-ach-strip > div{ flex:1 1 0; width:auto; }
+            .op-ach-nav{ display:none; }
+        }
 
         /* Scrollbar gaya sales */
         #app ::-webkit-scrollbar, #appContent ::-webkit-scrollbar{ width:9px; height:9px; }
@@ -565,7 +572,7 @@
             h1.castrol-greet-name{ max-width:150px; }
             .castrol-greet-hi{ font-size:8px; }
             .castrol-greet-role{ font-size:8px; }
-            .cst-header-online{ display:none; }
+            /* Task 76: badge Online TIDAK disembunyikan di mobile — tampil di kanan, samping tombol refresh */
         }
         @media (max-width:480px){
             h1.castrol-greet-name{ max-width:105px; }
@@ -631,8 +638,9 @@
                     <span id="greetRole" class="castrol-greet-role">OUTLET</span>
                 </div>
             </div>
-            <span class="cst-header-online" aria-hidden="true"><i></i>Online</span>
             <div style="display:flex; align-items:center; gap:8px;">
+                <!-- Task 76: badge Online dipindah ke grup tombol kanan — sejajar samping tombol refresh (desktop & mobile) -->
+                <span class="cst-header-online" aria-hidden="true"><i></i>Online</span>
                 <button type="button" id="btnRefresh" class="header-btn" aria-label="Muat ulang data" title="Muat ulang data">
                     <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
                 </button>
@@ -678,8 +686,8 @@
                                 <div class="text-[9px] text-slate-400 mt-1">CUST.CODE: <span id="opAchCustCode" class="font-bold text-slate-600">-</span></div>
                             </div>
                             <div class="flex items-center gap-1.5 shrink-0">
+                                <!-- Task 76: tombol "Edit informasi" dihapus sesuai permintaan -->
                                 <button type="button" id="opAchRefresh" onclick="refreshAchInput(this)" class="rounded-lg border border-emerald-200 px-2 py-1 text-[9px] font-bold text-emerald-700 inline-flex items-center justify-center gap-1">↻ Refresh</button>
-                                <button type="button" id="opAchEditInfo" onclick="toggleInfoOrder()" class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[9px] font-bold text-slate-600 inline-flex items-center justify-center">Edit informasi</button>
                             </div>
                         </div>
                         <div class="flex items-center justify-between gap-2 mt-2 mb-2">
@@ -854,16 +862,7 @@
                         </div>
                         <div id="pencAchBody" class="mt-3"></div>
                     </div>
-                    <div class="op-card" style="padding:16px;">
-                        <div class="flex items-center justify-between gap-2 flex-wrap">
-                            <div>
-                                <p class="op-section-title">Pencapaian <span id="pencYear">—</span></p>
-                                <p class="op-section-sub" id="pencSub">Pencapaian volume per quartal.</p>
-                            </div>
-                            <button type="button" onclick="loadPencapaian(true)" class="op-btn-ghost">⟳ Muat Ulang</button>
-                        </div>
-                        <div id="pencQuarters" style="margin-top:6px;"></div>
-                    </div>
+                    <!-- Task 76: kartu "Pencapaian <tahun>" (bar kuartal) DIHAPUS sesuai permintaan — halaman Pencapaian kini: Pencapaian per Kuartal + Outlet Kontrak -->
 
                     <div id="pencBwsWrap" class="hidden space-y-4">
                         <!-- Task 73: tampilan sama dengan DETAIL OUTLET KONTRAK di portal sales -->
@@ -1635,11 +1634,15 @@
     }
     // Task 74: "Edit informasi" membuka kartu info order (tanggal/payment/disc/cashback/note)
     // yang disembunyikan sejak Task 68 — meniru tombol "Edit informasi" pada step 2 sales.
+    // Task 76: tombol "Edit informasi" dihapus dari kartu Input — fungsi disimpan dgn guard
+    // (kartu info opInfoCard tetap tersembunyi seperti sejak Task 68) bila suatu saat dipakai lagi.
     function toggleInfoOrder() {
         var card = $('opInfoCard');
+        if (!card) return;
         var willShow = (!card.style.display || card.style.display === 'none');
         card.style.display = willShow ? '' : 'none';
-        $('opAchEditInfo').textContent = willShow ? 'Tutup informasi' : 'Edit informasi';
+        var btn = $('opAchEditInfo');
+        if (btn) btn.textContent = willShow ? 'Tutup informasi' : 'Edit informasi';
     }
     function refreshAchInput(btn) {
         if (!profile) return;
@@ -1792,16 +1795,17 @@
         return '<div class="op-progress"><i class="' + (pct >= 100 ? 'over' : '') + '" style="width:' + w + '%"></i></div>';
     }
     function renderPencapaian(res) {
+        // Task 76: markup kuartal (pencQuarters/pencYear/pencSub) dihapus — guard null bila markup tak ada.
         var wrap = $('pencQuarters');
         if (!res || !Array.isArray(res.quarters)) {
-            wrap.innerHTML = '<p style="font-size:12px; color:#94a3b8; padding:18px 0;">Gagal memuat pencapaian. Coba muat ulang.</p>';
+            if (wrap) wrap.innerHTML = '<p style="font-size:12px; color:#94a3b8; padding:18px 0;">Gagal memuat pencapaian. Coba muat ulang.</p>';
             $('pencBwsWrap').classList.add('hidden');
             return;
         }
-        $('pencYear').textContent = res.year || '-';
-        $('pencSub').textContent = 'Pencapaian volume per quartal' +
+        var yearEl = $('pencYear'); if (yearEl) yearEl.textContent = res.year || '-';
+        var subEl = $('pencSub'); if (subEl) subEl.textContent = 'Pencapaian volume per quartal' +
             (res.outlet && res.outlet.channel ? ' — channel ' + res.outlet.channel : '') + '.';
-        wrap.innerHTML = res.quarters.map(function (q) {
+        if (wrap) wrap.innerHTML = res.quarters.map(function (q) {
             var hasTarget = Number(q.target) > 0;
             var pct = hasTarget ? q.pct : null;
             var pctHtml = pct === null
