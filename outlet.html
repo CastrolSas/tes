@@ -546,6 +546,12 @@
         .riw-card.st-DECLINE{ border-left-color:#dc2626; }
         .riw-card.st-PROSES{ border-left-color:#64748b; }
 
+        /* Task 75: strip bulan pencapaian pada Input — layout ke samping, bisa digeser kiri/kanan */
+        .op-ach-strip{ display:flex; gap:8px; overflow-x:auto; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch; padding-bottom:2px; }
+        .op-ach-strip > div{ flex:0 0 auto; width:210px; scroll-snap-align:start; }
+        .op-ach-nav{ width:24px; height:24px; border:1px solid #dbe5df; background:#fff; color:#51625a; border-radius:999px; font-size:14px; line-height:1; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-weight:700; padding:0; }
+        .op-ach-nav:active{ background:#eef5f1; }
+
         /* Scrollbar gaya sales */
         #app ::-webkit-scrollbar, #appContent ::-webkit-scrollbar{ width:9px; height:9px; }
         #app ::-webkit-scrollbar-track, #appContent ::-webkit-scrollbar-track{ background:transparent; }
@@ -664,7 +670,7 @@
 
                 <!-- ================= INPUT ORDER ================= -->
                 <section id="tabInput" class="tab-content space-y-4">
-                    <!-- Task 74: kartu Target & Pencapaian kuartal berjalan — gaya Input Order step 2 portal sales -->
+                    <!-- Task 74: kartu Target & Pencapaian kuartal berjalan — gaya Input Order step 2 portal sales. Task 75: bulan disusun KE SAMPING dlm strip horizontal yg bisa digeser kiri/kanan -->
                     <div class="op-card" style="padding:16px;">
                         <div class="flex items-start justify-between gap-2">
                             <div class="min-w-0 flex-1">
@@ -676,8 +682,14 @@
                                 <button type="button" id="opAchEditInfo" onclick="toggleInfoOrder()" class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[9px] font-bold text-slate-600 inline-flex items-center justify-center">Edit informasi</button>
                             </div>
                         </div>
-                        <div id="opAchQuarterLabel" class="text-[9px] text-slate-400 mt-2 mb-2">Memuat target &amp; pencapaian...</div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" id="opAchMonths">
+                        <div class="flex items-center justify-between gap-2 mt-2 mb-2">
+                            <div id="opAchQuarterLabel" class="text-[9px] text-slate-400">Memuat target &amp; pencapaian...</div>
+                            <div class="flex items-center gap-1">
+                                <button type="button" aria-label="Geser kiri" onclick="scrollAchStrip(-1)" class="op-ach-nav">‹</button>
+                                <button type="button" aria-label="Geser kanan" onclick="scrollAchStrip(1)" class="op-ach-nav">›</button>
+                            </div>
+                        </div>
+                        <div class="op-ach-strip" id="opAchMonths">
                             <div class="rounded-xl border border-slate-200 p-2.5"><div id="opAchMTitle1" class="text-[10px] font-extrabold text-slate-700">Bulan 1</div><div class="grid grid-cols-2 gap-2 mt-2"><div><div class="text-[8px] text-slate-400">Target</div><div id="opAchTargetM1" class="text-xs font-extrabold">-</div></div><div><div class="text-[8px] text-slate-400">Actual</div><div id="opAchActualM1" class="text-xs font-extrabold text-emerald-700">0,0 dus</div></div></div><div class="border-t mt-2 pt-2 flex justify-between text-[8px]"><span class="text-slate-400">Gap <b id="opAchGapM1" class="text-red-500">-</b></span><span class="text-slate-400">Ach <b id="opAchPctM1">0,0%</b></span></div></div>
                             <div class="rounded-xl border border-slate-200 p-2.5"><div id="opAchMTitle2" class="text-[10px] font-extrabold text-slate-700">Bulan 2</div><div class="grid grid-cols-2 gap-2 mt-2"><div><div class="text-[8px] text-slate-400">Target</div><div id="opAchTargetM2" class="text-xs font-extrabold">-</div></div><div><div class="text-[8px] text-slate-400">Actual</div><div id="opAchActualM2" class="text-xs font-extrabold text-emerald-700">0,0 dus</div></div></div><div class="border-t mt-2 pt-2 flex justify-between text-[8px]"><span class="text-slate-400">Gap <b id="opAchGapM2" class="text-red-500">-</b></span><span class="text-slate-400">Ach <b id="opAchPctM2">0,0%</b></span></div></div>
                             <div class="rounded-xl border border-slate-200 p-2.5"><div id="opAchMTitle3" class="text-[10px] font-extrabold text-slate-700">Bulan 3</div><div class="grid grid-cols-2 gap-2 mt-2"><div><div class="text-[8px] text-slate-400">Target</div><div id="opAchTargetM3" class="text-xs font-extrabold">-</div></div><div><div class="text-[8px] text-slate-400">Actual</div><div id="opAchActualM3" class="text-xs font-extrabold text-emerald-700">0,0 dus</div></div></div><div class="border-t mt-2 pt-2 flex justify-between text-[8px]"><span class="text-slate-400">Gap <b id="opAchGapM3" class="text-red-500">-</b></span><span class="text-slate-400">Ach <b id="opAchPctM3">0,0%</b></span></div></div>
@@ -816,16 +828,22 @@
                         <input type="text" id="riwayatSearch" class="op-input mt-3" placeholder="Cari ID order / produk..." oninput="renderRiwayat()">
                     </div>
 
-                    <!-- Task 74: Pencapaian Bulanan per kuartal — gaya detail Monitoring portal sales + filter tahun -->
+                    <!-- Task 75: kartu "Pencapaian per Kuartal" dipindah ke halaman Pencapaian -->
+                    <div id="riwayatList" class="space-y-3"></div>
+                </section>
+
+                <!-- ================= PENCAPAIAN (tanpa tabel/card) ================= -->
+                <section id="tabPencapaian" class="tab-content hidden space-y-4">
+                    <!-- Task 75: Pencapaian per Kuartal — pindahan dari halaman Riwayat (Task 74); gaya detail Monitoring portal sales + filter Tahun/Kuartal -->
                     <div class="op-card" style="padding:16px;">
                         <div class="flex items-center justify-between gap-2 flex-wrap">
                             <p class="op-section-title" style="margin:0;">Pencapaian per Kuartal</p>
                             <div class="flex items-center gap-3">
                                 <label class="text-[10px] font-bold text-slate-500" style="display:flex; align-items:center; gap:6px;">Tahun
-                                    <select id="riwAchYear" class="op-input" style="width:auto; padding-top:6px; padding-bottom:6px;" aria-label="Filter tahun pencapaian" onchange="renderRiwayatAch()"></select>
+                                    <select id="pencAchYear" class="op-input" style="width:auto; padding-top:6px; padding-bottom:6px;" aria-label="Filter tahun pencapaian" onchange="renderPencAch()"></select>
                                 </label>
                                 <label class="text-[10px] font-bold text-slate-500" style="display:flex; align-items:center; gap:6px;">Kuartal
-                                    <select id="riwAchQuarter" class="op-input" style="width:auto; padding-top:6px; padding-bottom:6px;" aria-label="Pilih kuartal pencapaian" onchange="renderRiwayatAch()">
+                                    <select id="pencAchQuarter" class="op-input" style="width:auto; padding-top:6px; padding-bottom:6px;" aria-label="Pilih kuartal pencapaian" onchange="renderPencAch()">
                                         <option value="1">Q1</option>
                                         <option value="2">Q2</option>
                                         <option value="3">Q3</option>
@@ -834,13 +852,8 @@
                                 </label>
                             </div>
                         </div>
-                        <div id="riwAchBody" class="mt-3"></div>
+                        <div id="pencAchBody" class="mt-3"></div>
                     </div>
-                    <div id="riwayatList" class="space-y-3"></div>
-                </section>
-
-                <!-- ================= PENCAPAIAN (tanpa tabel/card) ================= -->
-                <section id="tabPencapaian" class="tab-content hidden space-y-4">
                     <div class="op-card" style="padding:16px;">
                         <div class="flex items-center justify-between gap-2 flex-wrap">
                             <div>
@@ -880,7 +893,7 @@
     var pencapaianLoading = false;
     var submitInFlight = false;
     var pencData = null;         // Task 74: respons outletPortalPencapaian (quarters + months + byYear/years)
-    var riwAchInit = false;      // Task 74: filter tahun/kuartal Riwayat sudah diinisialisasi
+    var pencAchInit = false;     // Task 74/75: filter tahun/kuartal Pencapaian sudah diinisialisasi (pindahan dari Riwayat)
     var AUTH_KEY = 'castrolOutletAuth';
 
     // ---------- Util ----------
@@ -1057,13 +1070,13 @@
             if (!isOk) return;
             try { localStorage.removeItem(AUTH_KEY); } catch (eStore) {}
             profile = null; produkList = []; shoppingCart = []; riwayatRows = [];
-            pencData = null; riwAchInit = false;
+            pencData = null; pencAchInit = false;
             $('opAchOutletName').textContent = '-';
             $('opAchCustCode').textContent = '-';
             $('opAchQuarterLabel').textContent = 'Memuat target & pencapaian...';
             $('opAchQuarterTotalLabel').textContent = 'Q berjalan';
-            $('riwAchYear').innerHTML = '';
-            $('riwAchBody').innerHTML = '';
+            $('pencAchYear').innerHTML = '';
+            $('pencAchBody').innerHTML = '';
             $('app').classList.add('hidden');
             $('loginPage').classList.remove('hidden');
             $('loginCustCode').value = '';
@@ -1081,7 +1094,8 @@
             if (nv) nv.classList.toggle('sidebar-item-active', k === tab);
         });
         closeDrawer();
-        if (tab === 'riwayat') { loadRiwayat(false); loadPencapaian(false); }
+        // Task 75: Riwayat tidak lagi memuat data pencapaian (kartu pindah ke halaman Pencapaian).
+        if (tab === 'riwayat') loadRiwayat(false);
         if (tab === 'pencapaian') loadPencapaian(false);
     }
     function toggleDrawer() {
@@ -1596,7 +1610,7 @@
             pencData = (res && res.success) ? res : null;
             renderPencapaian(res && res.success ? res : null);
             renderInputAch();
-            renderRiwayatAch();
+            renderPencAch();
         });
     }
 
@@ -1639,6 +1653,13 @@
             btn.disabled = false;
             btn.innerHTML = orig;
         });
+    }
+    // Task 75: geser strip bulan pencapaian ke kiri/kanan (tombol ‹ ›; swipe sentuh lewat overflow-x).
+    function scrollAchStrip(dir) {
+        var strip = $('opAchMonths');
+        if (!strip) return;
+        try { strip.scrollBy({ left: dir * 218, behavior: 'smooth' }); }
+        catch (eScroll) { strip.scrollLeft += dir * 218; }
     }
     function currentQuarterObj() {
         if (!pencData || !Array.isArray(pencData.quarters)) return null;
@@ -1689,11 +1710,11 @@
         $('opAchPctQ').textContent = achFmt(qAch) + '%';
     }
 
-    // ---------- Task 74: Pencapaian Bulanan per kuartal pada Riwayat (gaya detail Monitoring portal sales) ----------
+    // ---------- Task 74/75: Pencapaian Bulanan per kuartal pada halaman Pencapaian (pindahan dari Riwayat; gaya detail Monitoring portal sales) ----------
     var MONTH_NAMES_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     // Fallback bila respons belum memuat months (cache lama): target dibagi rata 3 bulan, actual di bulan pertama.
-    function riwAchEnsureMonths(q) {
+    function pencAchEnsureMonths(q) {
         if (q && Array.isArray(q.months) && q.months.length === 3) return;
         var label = String((q && q.label) || '');
         var ym = label.match(/(\d{4})/);
@@ -1707,15 +1728,15 @@
             return { month: mNo, year: year, label: MONTH_NAMES_ID[mNo - 1] + ' ' + year, target: monthly, actual: i === 0 ? actual : 0 };
         });
     }
-    function renderRiwayatAch() {
-        var yearSel = $('riwAchYear'), qSel = $('riwAchQuarter'), body = $('riwAchBody');
+    function renderPencAch() {
+        var yearSel = $('pencAchYear'), qSel = $('pencAchQuarter'), body = $('pencAchBody');
         if (!yearSel || !qSel || !body) return;
         if (!pencData || !pencData.byYear) {
             body.innerHTML = '<p style="font-size:11px; color:#94a3b8; padding:4px 0;">Memuat pencapaian...</p>';
             return;
         }
-        if (!riwAchInit) {
-            riwAchInit = true;
+        if (!pencAchInit) {
+            pencAchInit = true;
             var years = (Array.isArray(pencData.years) && pencData.years.length) ? pencData.years : [pencData.year];
             yearSel.innerHTML = years.map(function (y) { return '<option value="' + esc(y) + '">' + esc(y) + '</option>'; }).join('');
             var curQ = currentQuarterObj();
@@ -1734,7 +1755,7 @@
             body.innerHTML = '<p style="font-size:11px; color:#94a3b8; padding:4px 0;">Data pencapaian ' + esc(title) + ' belum tersedia.</p>';
             return;
         }
-        riwAchEnsureMonths(q);
+        pencAchEnsureMonths(q);
         var rows = '';
         var tT = 0, aT = 0;
         q.months.forEach(function (m) {
