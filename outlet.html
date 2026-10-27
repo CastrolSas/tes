@@ -1305,16 +1305,38 @@
     }
 
     // ---------- Produk & cashback ----------
+    // Task 78: filter pemilihan produk berdasarkan channel outlet (kolom H sheet PRODUK = typeProduk).
+    // MCO-4T -> tampilkan produk MCO-4T & MCO-2T; PCO -> hanya PCO; produk CTM tidak pernah tampil.
+    function outletProdukTypeOf(p) {
+        return String((p && p.typeProduk != null) ? p.typeProduk : '')
+            .replace(/\u00A0/g, ' ').trim().toUpperCase().replace(/\s+/g, '');
+    }
+    function outletAllowedProdukTypes() {
+        var ch = String(profile ? (profile.channel || '') : '')
+            .replace(/\u00A0/g, ' ').trim().toUpperCase().replace(/\s+/g, '');
+        if (ch === 'MCO-4T' || ch === 'MCO-2T') return ['MCO-4T', 'MCO-2T'];
+        if (ch === 'PCO') return ['PCO'];
+        return null; // channel outlet tidak dikenal -> tanpa filter channel (CTM tetap disembunyikan)
+    }
+    function filterProdukChannelOutlet(list) {
+        var allowed = outletAllowedProdukTypes();
+        return (Array.isArray(list) ? list : []).filter(function (p) {
+            var t = outletProdukTypeOf(p);
+            if (t === 'CTM') return false;
+            if (!allowed) return true;
+            return allowed.indexOf(t) !== -1;
+        });
+    }
     function loadProduk(force) {
         if (!profile) return Promise.resolve();
         return gsRun('outletPortalProduk', [profile.custCode]).then(function (res) {
             if (res && res.success && Array.isArray(res.data)) {
-                produkList = res.data;
+                produkList = filterProdukChannelOutlet(res.data);
             }
             if (!res || !res.success) {
                 // Coba jalur master yang sama dengan portal sales bila khusus outlet gagal.
                 return gsRun('getListProduk', []).then(function (r2) {
-                    if (r2 && Array.isArray(r2)) produkList = r2;
+                    if (r2 && Array.isArray(r2)) produkList = filterProdukChannelOutlet(r2);
                 });
             }
         }).then(function () {
