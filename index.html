@@ -4550,8 +4550,32 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                         <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3 items-center">
                           <input id="searchHargaNett" oninput="renderHargaNett()" placeholder="Cari produk..." class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs">
                           <div class="flex items-center justify-center gap-1"><button type="button" id="filterProdukPCOHargaNett" onclick="setHargaNettProductType('PCO')" class="flex-1 px-2 py-2.5 border border-slate-200 rounded-xl text-xs">PCO</button><button type="button" id="filterProdukMCOHargaNett" onclick="setHargaNettProductType('MCO-4T')" class="flex-1 px-2 py-2.5 border border-slate-200 rounded-xl text-xs">MCO-4T</button><input type="hidden" id="filterProdukHargaNett" value=""></div>
-                          <input id="filterCashbackHargaNett" list="hargaNettCashbackOptions" oninput="renderHargaNett()" placeholder="Cari Cashback..." class="w-full min-w-0 px-3 py-2.5 border border-slate-200 rounded-xl text-xs"><datalist id="hargaNettCashbackOptions"></datalist>
-                          <input id="filterQuarterHargaNett" list="hargaNettQuarterOptions" oninput="renderHargaNett()" placeholder="Cari Quartal..." class="w-full min-w-0 px-3 py-2.5 border border-slate-200 rounded-xl text-xs"><datalist id="hargaNettQuarterOptions"></datalist>
+                          <div class="relative" id="hnCashbackDdRoot">
+                            <input type="hidden" id="filterCashbackHargaNett" value="">
+                            <button type="button" id="hnCashbackBtn" aria-expanded="false" aria-haspopup="true" aria-controls="hnCashbackPanel" onclick="toggleHnCashbackDd()" class="w-full flex items-center justify-between gap-2 py-2.5 px-3 bg-white border border-slate-200 rounded-xl text-xs" style="min-height:42px;">
+                              <span id="hnCashbackLabel" class="truncate text-slate-400">- Pilih Cashback -</span>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-slate-400"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <div id="hnCashbackPanel" class="hidden absolute z-40 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden">
+                              <div class="p-2 border-b border-slate-100">
+                                <input id="hnCashbackSearch" type="text" placeholder="Cari Cashback..." oninput="renderHnCashbackOptions()" class="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                              </div>
+                              <div id="hnCashbackOptions" class="max-h-64 overflow-y-auto"></div>
+                            </div>
+                          </div>
+                          <div class="relative" id="hnQuarterDdRoot">
+                            <input type="hidden" id="filterQuarterHargaNett" value="">
+                            <button type="button" id="hnQuarterBtn" aria-expanded="false" aria-haspopup="true" aria-controls="hnQuarterPanel" onclick="toggleHnQuarterDd()" class="w-full flex items-center justify-between gap-2 py-2.5 px-3 bg-white border border-slate-200 rounded-xl text-xs" style="min-height:42px;">
+                              <span id="hnQuarterLabel" class="truncate text-slate-400">- Pilih Quartal -</span>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-slate-400"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <div id="hnQuarterPanel" class="hidden absolute z-40 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden">
+                              <div class="p-2 border-b border-slate-100">
+                                <input id="hnQuarterSearch" type="text" placeholder="Cari Quartal..." oninput="renderHnQuarterOptions()" class="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                              </div>
+                              <div id="hnQuarterOptions" class="max-h-64 overflow-y-auto"></div>
+                            </div>
+                          </div>
                           <input id="discountHargaNett" type="number" min="0" max="100" step="0.01" oninput="renderHargaNett()" placeholder="Discount (%)" aria-label="Discount persen" class="w-full min-w-0 px-3 py-2.5 border border-slate-200 rounded-xl text-xs">
                         </div>
                         <div id="hargaNettTableView" class="overflow-x-auto rounded-lg border border-slate-200"><table class="text-[10px] border-collapse" style="width:max-content;min-width:0;table-layout:auto"><thead><tr class="bg-slate-100 text-slate-700">
@@ -8918,6 +8942,8 @@ startAutoRefresh();
         let hargaNettQuarterChoices = [];
         let hargaNettCashbackMap = {};
         let hargaNettExtraCashback = {};
+        let hargaNettCashbackFiltered = []; // Task 86: opsi dropdown Cashback (hasil filter PCO/MCO-4T)
+        let hargaNettQuarterFiltered = []; // Task 86: opsi dropdown Quartal
         function formatHargaNett(n) { return 'Rp ' + (Number(n)||0).toLocaleString('id-ID',{maximumFractionDigits:0}); }
         let hargaNettLoadedAt = 0, hargaNettLastUserKey = '';
         function loadHargaNett(forceRefresh) {
@@ -8926,8 +8952,7 @@ startAutoRefresh();
             // Cache klien 5 menit: berpindah tab tidak lagi memicu permintaan baru ke server.
             if (!forceRefresh && hargaNettData.length && hargaNettLastUserKey === hargaNettUserKey && (Date.now() - hargaNettLoadedAt < 300000)) {
                 renderHargaNettCashbackChoices();
-                const qselCached=document.getElementById('hargaNettQuarterOptions');
-                if(qselCached){qselCached.innerHTML=hargaNettQuarterChoices.map(c=>'<option value="'+escapeHtml(c.value)+'"></option>').join('');}
+                renderHargaNettQuarterChoices(); // Task 86: isi dropdown Quartal (menggantikan datalist)
                 renderHargaNett();
                 return;
             }
@@ -8940,24 +8965,30 @@ startAutoRefresh();
                 hargaNettQuarterChoices = Array.isArray(res.quarterChoices)?res.quarterChoices:[];
                 hargaNettCashbackMap = res.cashbackMap || {};
                 renderHargaNettCashbackChoices();
-                const qsel=document.getElementById('hargaNettQuarterOptions');
-                if(qsel){qsel.innerHTML=hargaNettQuarterChoices.map(c=>'<option value="'+escapeHtml(c.value)+'"></option>').join('');}
+                renderHargaNettQuarterChoices(); // Task 86: isi dropdown Quartal (menggantikan datalist)
                 renderHargaNett();
             }).withFailureHandler(function(err){ body.innerHTML='<tr><td colspan="6" class="p-5 text-center text-red-500">'+escapeHtml(err&&err.message||'Gagal memuat data.')+'</td></tr>'; }).getHargaNettData(!!forceRefresh);
         }
         function renderHargaNettCashbackChoices() {
-            const sel=document.getElementById('hargaNettCashbackOptions'); if(!sel)return;
+            // Task 86: isi dropdown Cashback (dulu: datalist hargaNettCashbackOptions).
             const type=String((document.getElementById('filterProdukHargaNett')||{}).value||'').trim().toUpperCase();
             let allowedTerms=null;
             if(type==='PCO') allowedTerms=['PCO','CAS'];
             else if(type==='MCO-4T') allowedTerms=['MCO-4T','BP'];
-            const choices=allowedTerms ? hargaNettCashbackChoices.filter(function(item){
+            hargaNettCashbackFiltered=allowedTerms ? hargaNettCashbackChoices.filter(function(item){
                 const value=String(item && item.value || '').toUpperCase();
                 return allowedTerms.some(function(term){return value.includes(term);});
-            }) : hargaNettCashbackChoices;
-            sel.innerHTML=choices.map(c=>'<option value="'+escapeHtml(c.value)+'"></option>').join('');
+            }) : hargaNettCashbackChoices.slice();
             const input=document.getElementById('filterCashbackHargaNett');
-            if(input && input.value && !choices.some(function(c){return String(c.value)===input.value;})) input.value='';
+            if(input && input.value && !hargaNettCashbackFiltered.some(function(c){return String(c.value)===input.value;})) setHnCashbackFilterValue('');
+            renderHnCashbackOptions();
+        }
+        function renderHargaNettQuarterChoices() {
+            // Task 86: isi dropdown Quartal (dulu: datalist hargaNettQuarterOptions).
+            hargaNettQuarterFiltered=hargaNettQuarterChoices.slice();
+            const input=document.getElementById('filterQuarterHargaNett');
+            if(input && input.value && hargaNettQuarterFiltered.length && !hargaNettQuarterFiltered.some(function(c){return String(c.value)===input.value;})) setHnQuarterFilterValue('');
+            renderHnQuarterOptions();
         }
         function renderHargaNett() {
             const body=document.getElementById('hargaNettBody'); if(!body)return;
@@ -9117,7 +9148,7 @@ startAutoRefresh();
             }).join('');
             const bonus=Math.max(0,Number((document.getElementById('hnBonus')||{}).value||0));
             const grand=Math.max(0,net-bonus);
-            const campaign=String((document.getElementById('filterCashbackHargaNett')||{}).selectedOptions?.[0]?.textContent||'').trim();
+            const campaign=String((document.getElementById('filterCashbackHargaNett')||{}).value||'').trim(); // Task 86: filter kini dropdown (hidden input), selectedOptions tidak ada pada input
             win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Simulasi Invoice</title><style>'+
               '*{box-sizing:border-box}body{margin:0;background:#eef2f7;font-family:Arial,Helvetica,sans-serif;color:#172033;font-size:11px;-webkit-print-color-adjust:exact;print-color-adjust:exact}.sheet{max-width:1100px;margin:24px auto;background:#fff;padding:34px 38px;border-radius:14px;box-shadow:0 8px 30px #18243a14}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:22px;border-bottom:3px solid #173b68}.eyebrow{font-size:10px;font-weight:700;letter-spacing:2px;color:#64748b;text-transform:uppercase;margin-bottom:8px}.title{font-size:27px;letter-spacing:-.5px;font-weight:800;color:#173b68;margin:0}.subtitle{color:#64748b;margin-top:7px;font-size:11px}.badge{background:#e8f1ff;color:#174a83;padding:9px 13px;border-radius:8px;font-size:10px;font-weight:700;white-space:nowrap}.meta{display:flex;gap:12px;margin:20px 0}.meta-card{flex:1;background:#f6f8fb;border:1px solid #e5eaf1;border-radius:9px;padding:12px 14px;min-width:0}.label{font-size:9px;color:#718096;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}.value{font-size:12px;font-weight:700;overflow-wrap:anywhere}.section-title{font-size:13px;font-weight:800;margin:24px 0 10px;color:#1c2c43}.table-wrap{border:1px solid #e3e8ef;border-radius:9px;overflow:hidden}table{width:100%;border-collapse:collapse;font-size:10px}thead{display:table-header-group}th{background:#173b68;color:#fff;text-align:left;font-size:9px;letter-spacing:.3px;padding:11px 8px;white-space:nowrap}td{padding:11px 8px;border-bottom:1px solid #e8edf3;vertical-align:top}tbody tr:nth-child(even){background:#f8fafc}tbody tr:last-child td{border-bottom:0}.num{color:#94a3b8;width:30px}.product{font-weight:700;color:#1e293b;line-height:1.4}.muted{font-size:9px;color:#94a3b8;margin-top:4px}.center{text-align:center;white-space:nowrap}.right{text-align:right;white-space:nowrap}.strong{font-weight:800;color:#173b68}.negative{color:#dc4b4b}.cashback{color:#0b896b}.star{font-size:9px;color:#b77905;white-space:nowrap}.bottom{display:flex;justify-content:flex-end;margin-top:18px}.summary{width:360px;border:1px solid #e3e8ef;border-radius:10px;padding:8px 15px;background:#fbfcfe}.sumrow{display:flex;justify-content:space-between;gap:18px;padding:8px 0;color:#596579;border-bottom:1px solid #edf0f4}.sumrow b{color:#25334a;white-space:nowrap}.sumrow.total{border:0;border-top:2px solid #173b68;margin-top:5px;padding-top:13px;color:#173b68;font-size:13px;font-weight:800}.sumrow.total b{font-size:17px;color:#173b68}.foot{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #e5eaf1;margin-top:24px;padding-top:12px;color:#94a3b8;font-size:9px}.foot strong{color:#64748b}@page{size:A4 landscape;margin:9mm}@media print{body{background:#fff}.sheet{max-width:none;margin:0;padding:8px;border-radius:0;box-shadow:none}.meta{margin:14px 0}.section-title{margin-top:18px}th,td{padding:8px 6px}.summary{width:330px}.foot{margin-top:16px}}'+
               '</style></head><body><main class="sheet"><header class="top"><div><div class="eyebrow">INVOICE</div><h1 class="title">PT. Sukses Adi Surya</h1><div class="subtitle">Jl. Muncul II, Komplek Pergudangan Gedangan</div></div><div class="badge">Castrol</div></header><section class="meta"><div class="meta-card"><div class="label">Tanggal Cetak</div><div class="value">'+escapeHtml(new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}))+'</div></div><div class="meta-card"><div class="label">Program</div><div class="value">'+escapeHtml(campaign||'-')+'</div></div><div class="meta-card"><div class="label">Jumlah Item</div><div class="value">'+hargaNettInvoiceCart.length+' produk</div></div></section><div class="section-title">Rincian Produk</div><div class="table-wrap"><table><thead><tr><th>No.</th><th>SKU / Produk</th><th>Qty</th><th>Harga Unit</th><th>Subtotal</th><th>Diskon</th><th>Cashback</th><th>Nett Subtotal</th></tr></thead><tbody>'+rows+'</tbody></table></div><section class="bottom"><div class="summary"><div class="sumrow"><span>Subtotal Pricelist</span><b>'+formatHargaNett(gross)+'</b></div><div class="sumrow"><span>Total Diskon Produk</span><b class="negative">-'+formatHargaNett(disc)+'</b></div><div class="sumrow"><span>Total Cashback</span><b class="cashback">-'+formatHargaNett(cashback)+'</b></div><div class="sumrow"><span>Total Extra Cashback</span><b class="cashback">-'+formatHargaNett(extra)+'</b></div><div class="sumrow"><span>Bonus Cashback</span><b>-'+formatHargaNett(bonus)+'</b></div><div class="sumrow total"><span>Grand Total Nett</span><b>'+formatHargaNett(grand)+'</b></div></div></section><footer class="foot"><span><strong>BCA</strong> 0102178899 a.n PT Sukses Adi Surya</span><span>Dicetak '+escapeHtml(new Date().toLocaleString('id-ID'))+'</span></footer></main></body></html>');
@@ -9164,6 +9195,115 @@ startAutoRefresh();
         }
         function setHargaNettProductType(type) { const el=document.getElementById('filterProdukHargaNett'); if(!el)return; el.value=(el.value===type?'':type); ['PCO','MCO-4T'].forEach(function(t){const b=document.getElementById(t==='PCO'?'filterProdukPCOHargaNett':'filterProdukMCOHargaNett');if(b){const active=el.value===t;b.classList.toggle('bg-emerald-700',active);b.classList.toggle('text-white',active);b.classList.toggle('border-emerald-700',active);}}); renderHargaNettCashbackChoices(); renderHargaNett(); }
         function setHargaNettExtraCashback(produk, value) { hargaNettExtraCashback[String(produk||'')] = Math.max(0, Number(value)||0); renderHargaNett(); }
+        // ===== Task 86: dropdown berpencarian Cashback & Quartal (meniru dropdown Generate Link Outlet) =====
+        function hnDdSetLabel(labelEl, value, placeholder) {
+            if (!labelEl) return;
+            labelEl.textContent = value ? value : placeholder;
+            labelEl.classList.toggle('text-slate-400', !value);
+        }
+        function setHnCashbackFilterValue(v) {
+            const input=document.getElementById('filterCashbackHargaNett');
+            if(input) input.value=String(v||'');
+            hnDdSetLabel(document.getElementById('hnCashbackLabel'), String(v||''), '- Pilih Cashback -');
+        }
+        function setHnQuarterFilterValue(v) {
+            const input=document.getElementById('filterQuarterHargaNett');
+            if(input) input.value=String(v||'');
+            hnDdSetLabel(document.getElementById('hnQuarterLabel'), String(v||''), '- Pilih Quartal -');
+        }
+        function toggleHnCashbackDd() { const p=document.getElementById('hnCashbackPanel'); if(!p)return; if(p.classList.contains('hidden')) openHnCashbackDd(); else closeHnCashbackDd(); }
+        function openHnCashbackDd() {
+            closeHnQuarterDd();
+            const p=document.getElementById('hnCashbackPanel'); if(!p)return;
+            p.classList.remove('hidden');
+            const b=document.getElementById('hnCashbackBtn'); if(b)b.setAttribute('aria-expanded','true');
+            const s=document.getElementById('hnCashbackSearch'); if(s)s.value='';
+            renderHnCashbackOptions();
+            try { if(s)s.focus(); } catch(eF1) {}
+        }
+        function closeHnCashbackDd() {
+            const p=document.getElementById('hnCashbackPanel'); if(!p)return;
+            p.classList.add('hidden');
+            const b=document.getElementById('hnCashbackBtn'); if(b)b.setAttribute('aria-expanded','false');
+        }
+        function renderHnCashbackOptions() {
+            const wrap=document.getElementById('hnCashbackOptions'); if(!wrap)return;
+            const q=String((document.getElementById('hnCashbackSearch')||{}).value||'').trim().toLowerCase();
+            const list=hargaNettCashbackFiltered.filter(function(c){const v=String(c&&c.value||'');return !q||v.toLowerCase().indexOf(q)>=0;});
+            const current=String((document.getElementById('filterCashbackHargaNett')||{}).value||'');
+            let html='<button type="button" class="hn-cb-option w-full text-left px-3 py-2.5 border-b border-slate-100 hover:bg-emerald-50 transition" data-v="">Semua Cashback<span class="block text-[10px] text-slate-400">Tanpa filter</span></button>';
+            if(!list.length){
+                html+='<div class="px-3 py-4 text-[11px] text-slate-400 text-center">'+((hargaNettCashbackChoices&&hargaNettCashbackChoices.length)?'Cashback tidak ditemukan.':'Belum ada pilihan Cashback.')+'</div>';
+            } else {
+                html+=list.map(function(c){
+                    const v=String(c.value||''); const active=v===current;
+                    return '<button type="button" class="hn-cb-option w-full text-left px-3 py-2.5 border-b border-slate-100 transition '+(active?'bg-emerald-50 font-bold text-emerald-800':'hover:bg-emerald-50')+'" data-v="'+escapeHtml(v)+'">'+escapeHtml(v)+(active?' <span class="text-[10px]">✓</span>':'')+'</button>';
+                }).join('');
+            }
+            wrap.innerHTML=html;
+            Array.prototype.forEach.call(wrap.querySelectorAll('.hn-cb-option'),function(btn){
+                btn.addEventListener('click',function(){
+                    setHnCashbackFilterValue(btn.getAttribute('data-v')||'');
+                    closeHnCashbackDd();
+                    renderHargaNett();
+                });
+            });
+        }
+        function toggleHnQuarterDd() { const p=document.getElementById('hnQuarterPanel'); if(!p)return; if(p.classList.contains('hidden')) openHnQuarterDd(); else closeHnQuarterDd(); }
+        function openHnQuarterDd() {
+            closeHnCashbackDd();
+            const p=document.getElementById('hnQuarterPanel'); if(!p)return;
+            p.classList.remove('hidden');
+            const b=document.getElementById('hnQuarterBtn'); if(b)b.setAttribute('aria-expanded','true');
+            const s=document.getElementById('hnQuarterSearch'); if(s)s.value='';
+            renderHnQuarterOptions();
+            try { if(s)s.focus(); } catch(eF2) {}
+        }
+        function closeHnQuarterDd() {
+            const p=document.getElementById('hnQuarterPanel'); if(!p)return;
+            p.classList.add('hidden');
+            const b=document.getElementById('hnQuarterBtn'); if(b)b.setAttribute('aria-expanded','false');
+        }
+        function renderHnQuarterOptions() {
+            const wrap=document.getElementById('hnQuarterOptions'); if(!wrap)return;
+            const q=String((document.getElementById('hnQuarterSearch')||{}).value||'').trim().toLowerCase();
+            const list=hargaNettQuarterFiltered.filter(function(c){const v=String(c&&c.value||'');return !q||v.toLowerCase().indexOf(q)>=0;});
+            const current=String((document.getElementById('filterQuarterHargaNett')||{}).value||'');
+            let html='<button type="button" class="hn-qt-option w-full text-left px-3 py-2.5 border-b border-slate-100 hover:bg-emerald-50 transition" data-v="">Semua Quartal<span class="block text-[10px] text-slate-400">Tanpa filter</span></button>';
+            if(!list.length){
+                html+='<div class="px-3 py-4 text-[11px] text-slate-400 text-center">'+((hargaNettQuarterChoices&&hargaNettQuarterChoices.length)?'Quartal tidak ditemukan.':'Belum ada pilihan Quartal.')+'</div>';
+            } else {
+                html+=list.map(function(c){
+                    const v=String(c.value||''); const active=v===current;
+                    return '<button type="button" class="hn-qt-option w-full text-left px-3 py-2.5 border-b border-slate-100 transition '+(active?'bg-emerald-50 font-bold text-emerald-800':'hover:bg-emerald-50')+'" data-v="'+escapeHtml(v)+'">'+escapeHtml(v)+(active?' <span class="text-[10px]">✓</span>':'')+'</button>';
+                }).join('');
+            }
+            wrap.innerHTML=html;
+            Array.prototype.forEach.call(wrap.querySelectorAll('.hn-qt-option'),function(btn){
+                btn.addEventListener('click',function(){
+                    setHnQuarterFilterValue(btn.getAttribute('data-v')||'');
+                    closeHnQuarterDd();
+                    renderHargaNett();
+                });
+            });
+        }
+        // Task 86: tutup dropdown Harga Nett bila klik di luar komponen atau menekan Escape (pola Generate Link Outlet).
+        (function(){
+            document.addEventListener('click',function(ev){
+                const p1=document.getElementById('hnCashbackPanel');
+                if(p1&&!p1.classList.contains('hidden')){const r1=document.getElementById('hnCashbackDdRoot');if(r1&&!r1.contains(ev.target))closeHnCashbackDd();}
+                const p2=document.getElementById('hnQuarterPanel');
+                if(p2&&!p2.classList.contains('hidden')){const r2=document.getElementById('hnQuarterDdRoot');if(r2&&!r2.contains(ev.target))closeHnQuarterDd();}
+            });
+            document.addEventListener('keydown',function(ev){
+                if(ev&&ev.key==='Escape'){
+                    const p1=document.getElementById('hnCashbackPanel');
+                    if(p1&&!p1.classList.contains('hidden'))closeHnCashbackDd();
+                    const p2=document.getElementById('hnQuarterPanel');
+                    if(p2&&!p2.classList.contains('hidden'))closeHnQuarterDd();
+                }
+            });
+        })();
         function loadPricelist(forceRefresh, silentRefresh) {
             const tbody = document.getElementById('listPricelistTableBody');
             if (!tbody) return;
