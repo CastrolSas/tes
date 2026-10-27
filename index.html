@@ -1516,7 +1516,7 @@ html,body{height:100%;}
     var isAppsScriptHost = host === 'script.google.com' || host === 'script.googleusercontent.com';
     if (isAppsScriptHost) return;
 
-    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzs5A5L9R8NwR9hcMaPE_mE25qMoW4jR-0qfuaOkGLuh70P85hplOL4DkHcp_uylqoF/exec';
+    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5dkNkseL2AXyP4T3vRATCQEnRC3Ft5ho29iUObmj-Y3H-vRunigrQheYt3jzoBq-p/exec';
     var BRIDGE_URL = CASTROL_APPS_SCRIPT_URL + (CASTROL_APPS_SCRIPT_URL.indexOf('?') >= 0 ? '&' : '?') + 'bridge=1';
     // Task 67: URL deploy diekspos untuk fitur Generate Link Outlet.
     window.__CASTROL_DEPLOY_URL__ = CASTROL_APPS_SCRIPT_URL;
@@ -3239,17 +3239,103 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
    pinch zoom iOS >= 10 tetap berfungsi). */
 /* Task 60: pengaman panel dropdown Produk by Outlet — tidak pernah melebihi lebar
    viewport; daftar opsi tanpa scroll horizontal. */
-/* Task 77: panel dropdown "Produk by Outlet" & "Generate link Outlet" memakai
-   position:fixed (posisi dihitung JS saat dibuka) supaya TIDAK pernah terpotong
-   overflow:hidden #app.app-shell / pembungkus konten pada layar pendek —
-   sebelumnya panel absolute terpotong tepat di dasar layar ("seperti tertutup
-   frame"). Panel jadi flex kolom: kotak pencarian selalu terlihat, daftar opsi
-   menyusut & scroll di dalam, tinggi panel tidak pernah melebihi layar. */
-#produkOutletDropdownPanel, #genOutletPanel { max-width: calc(100vw - 16px); }
-#produkOutletDropdownPanel:not(.hidden), #genOutletPanel:not(.hidden) { display: flex; flex-direction: column; }
-#produkOutletDropdownPanel > div:first-child, #genOutletPanel > div:first-child { flex: 0 0 auto; }
-#produkOutletOptions, #genOutletOptions { flex: 1 1 auto; min-height: 0; }
+#produkOutletDropdownPanel { max-width: calc(100vw - 24px); }
 .po-outlet-options { overflow-x: hidden; }
+</style>
+<style id="castrol-mobile-filter-dropdown-fit-fix">
+/* ============================================================================
+   Task 70: PERBAIKAN TAMPILAN MOBILE — tombol filter (dropdown kustom) pada
+   halaman "Produk by Outlet" (#tabProdukOutlet) dan "Generate Link Outlet"
+   (#tabGenerateOutlet) tampak terpotong di layar HP.
+   Latar belakang: kedua halaman memakai tombol dropdown kustom (bukan <select>
+   bawaan seperti halaman lain). Isi tombol berupa flex (label + ikon panah)
+   dan panel dropdown-nya absolute; tanpa batas min-width/max-width, pada layar
+   sempit teks/ikon dapat mendorong tombol maupun panel melebihi tepi kartu/
+   layar sehingga tampak terpotong (di desktop tidak terlihat karena lebarnya
+   cukup). Perbaikan di bawah ini murni CSS tampilan — tidak mengubah fungsi,
+   JS, maupun tampilan desktop.
+   ============================================================================ */
+
+/* 1) Tombol dropdown tidak pernah lebih lebar dari kartu penampungnya */
+#filterProdukOutletBtn,
+#genOutletBtn {
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* 2) Label di dalam tombol: boleh menyusut; teks panjang dipotong rapi
+      (elipsis) agar tidak mendorong ikon panah keluar tepi tombol */
+#filterProdukOutletLabel,
+#genOutletLabel {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 3) Ikon panah tidak ikut mengecil / terdorong keluar dari tombol */
+#filterProdukOutletBtn > svg,
+#genOutletBtn > svg {
+  flex: 0 0 auto;
+}
+
+/* 4) Akar & panel dropdown tidak pernah melebihi lebar kartu/layar.
+      Panel Generate Link Outlet kini mendapat pengaman yang sama dengan
+      panel Produk by Outlet (Task 60). */
+#produkOutletDropdownRoot,
+#genOutletDdRoot {
+  min-width: 0;
+  max-width: 100%;
+}
+#produkOutletDropdownPanel,
+#genOutletPanel {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 5) Khusus layar mobile: kartu filter pas di layar, panel dropdown selalu
+      muat secara vertikal (sisa daftar digulir di dalam, bukan terpotong) */
+@media (max-width: 767px) {
+  #tabProdukOutlet > div.bg-white,
+  #tabGenerateOutlet > div.bg-white {
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  #produkOutletDropdownPanel,
+  #genOutletPanel {
+    max-height: 62vh;
+    max-height: 62dvh;
+    overflow: hidden;
+  }
+  #produkOutletDropdownPanel #produkOutletOptions,
+  #genOutletPanel #genOutletOptions {
+    max-height: calc(62vh - 110px);
+    max-height: calc(62dvh - 110px);
+  }
+  /* Scrollbar daftar opsi dibuat terlihat agar jelas daftar bisa digulung */
+  #produkOutletOptions,
+  #genOutletOptions {
+    scrollbar-width: thin;
+    scrollbar-color: #9db4a6 #eef2ef;
+    overscroll-behavior: contain;
+  }
+  #produkOutletOptions::-webkit-scrollbar,
+  #genOutletOptions::-webkit-scrollbar {
+    width: 8px;
+  }
+  #produkOutletOptions::-webkit-scrollbar-thumb,
+  #genOutletOptions::-webkit-scrollbar-thumb {
+    background: #9db4a6;
+    border-radius: 8px;
+  }
+  #produkOutletOptions::-webkit-scrollbar-track,
+  #genOutletOptions::-webkit-scrollbar-track {
+    background: #eef2ef;
+  }
+}
 </style>
 </head>
 <body class="bg-slate-50 font-sans">
@@ -3940,7 +4026,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                                 <span id="filterProdukOutletLabel" class="truncate text-slate-400">- Pilih produk -</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                             </button>
-                            <div id="produkOutletDropdownPanel" class="hidden fixed z-40 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden">
+                            <div id="produkOutletDropdownPanel" class="hidden absolute z-40 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden">
                                 <div class="p-2 border-b border-slate-100 bg-white">
                                     <div class="relative">
                                         <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
@@ -4314,7 +4400,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                         <div class="flex items-start justify-between gap-2 flex-wrap">
                             <div>
                                 <h2 class="text-sm font-extrabold text-slate-800">🔗 Generate Link Outlet</h2>
-                                <p class="text-[10px] text-slate-500 mt-0.5">Pilih outlet lalu buat tautan Portal Outlet — outlet yang mengklik link akan otomatis login dengan CUST.CODE-nya (menu: Input Order, Riwayat Order, Pencapaian).</p>
+                                <p class="text-[10px] text-slate-500 mt-0.5"></p>
                             </div>
                         </div>
                         <div class="mt-3 relative" id="genOutletDdRoot">
@@ -4324,7 +4410,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                                 <span id="genOutletLabel" class="truncate text-slate-400">- Pilih outlet -</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="m6 9 6 6 6-6"/></svg>
                             </button>
-                            <div id="genOutletPanel" class="hidden fixed z-40 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden">
+                            <div id="genOutletPanel" class="hidden absolute z-40 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden">
                                 <div class="p-2 border-b border-slate-100">
                                     <input id="genOutletSearch" type="text" placeholder="Cari nama outlet / CUST.CODE..." oninput="renderGenOutletOptions()" class="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                 </div>
@@ -4341,7 +4427,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                                 </div>
                             </div>
                             <button type="button" onclick="shareGenWa()" class="mt-2 w-full rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-extrabold py-2.5 hover:bg-emerald-100">Kirim via WhatsApp</button>
-                            <p class="text-[9px] text-slate-400 mt-2">Link otomatis login dengan CUST.CODE outlet terpilih — jangan dibagikan ke outlet lain.</p>
+                            <p class="text-[9px] text-slate-400 mt-2"></p>
                         </div>
                     </div>
                 </div>
@@ -13502,44 +13588,17 @@ function toggleProdukOutletDropdown() {
     else closeProdukOutletDropdown();
 }
 
-// Task 77: panel fixed diposisikan dari rect tombol — bebas clipping ancestor,
-// max-height mengikuti sisa tinggi layar; bila ruang bawah sempit, buka ke atas.
-function positionProdukOutletPanel() {
-    const panel = document.getElementById('produkOutletDropdownPanel');
-    const btn = document.getElementById('filterProdukOutletBtn');
-    if (!panel || !btn || panel.classList.contains('hidden')) return;
-    const r = btn.getBoundingClientRect();
-    const vw = window.innerWidth || document.documentElement.clientWidth;
-    const vh = window.innerHeight || document.documentElement.clientHeight;
-    const width = Math.max(160, Math.min(r.width, vw - 8));
-    const left = Math.max(4, Math.min(r.left, vw - width - 4));
-    let maxH = vh - (r.bottom + 4) - 8;
-    if (maxH < 140 && (r.top - 8) > maxH) {
-        panel.style.top = 'auto';
-        panel.style.bottom = (vh - r.top + 4) + 'px';
-        maxH = r.top - 12;
-    } else {
-        panel.style.top = (r.bottom + 4) + 'px';
-        panel.style.bottom = 'auto';
-    }
-    if (maxH < 120) maxH = 120;
-    panel.style.left = left + 'px';
-    panel.style.width = width + 'px';
-    panel.style.maxHeight = maxH + 'px';
-}
 function openProdukOutletDropdown() {
     const panel = document.getElementById('produkOutletDropdownPanel');
     const btn = document.getElementById('filterProdukOutletBtn');
     if (!panel) return;
     panel.classList.remove('hidden');
-    positionProdukOutletPanel();
     if (btn) btn.setAttribute('aria-expanded', 'true');
     // Task 55b: kosongkan pencarian sebelum render agar sisa filter tidak tertinggal.
     const search = document.getElementById('produkOutletSearch');
     if (search) search.value = '';
     renderProdukOutletOptions();
-    positionProdukOutletPanel(); // Task 77: hitung ulang setelah daftar opsi terisi
-    if (search) { setTimeout(function(){ try { search.focus({ preventScroll: true }); } catch (e) { try { search.focus(); } catch (e2) {} } }, 30); }
+    if (search) { setTimeout(function(){ try { search.focus(); } catch (e) {} }, 30); }
 }
 
 function closeProdukOutletDropdown() {
@@ -13613,38 +13672,12 @@ function toggleGenOutletDd() {
     const panel = document.getElementById('genOutletPanel');
     if (panel.classList.contains('hidden')) openGenOutletDd(); else closeGenOutletDd();
 }
-// Task 77: panel fixed diposisikan JS (sama seperti dropdown Produk by Outlet).
-function positionGenOutletPanel() {
-    const panel = document.getElementById('genOutletPanel');
-    const btn = document.getElementById('genOutletBtn');
-    if (!panel || !btn || panel.classList.contains('hidden')) return;
-    const r = btn.getBoundingClientRect();
-    const vw = window.innerWidth || document.documentElement.clientWidth;
-    const vh = window.innerHeight || document.documentElement.clientHeight;
-    const width = Math.max(160, Math.min(r.width, vw - 8));
-    const left = Math.max(4, Math.min(r.left, vw - width - 4));
-    let maxH = vh - (r.bottom + 4) - 8;
-    if (maxH < 140 && (r.top - 8) > maxH) {
-        panel.style.top = 'auto';
-        panel.style.bottom = (vh - r.top + 4) + 'px';
-        maxH = r.top - 12;
-    } else {
-        panel.style.top = (r.bottom + 4) + 'px';
-        panel.style.bottom = 'auto';
-    }
-    if (maxH < 120) maxH = 120;
-    panel.style.left = left + 'px';
-    panel.style.width = width + 'px';
-    panel.style.maxHeight = maxH + 'px';
-}
 function openGenOutletDd() {
     document.getElementById('genOutletPanel').classList.remove('hidden');
-    positionGenOutletPanel();
     document.getElementById('genOutletBtn').setAttribute('aria-expanded', 'true');
     document.getElementById('genOutletSearch').value = '';
     renderGenOutletOptions();
-    positionGenOutletPanel();
-    try { document.getElementById('genOutletSearch').focus({ preventScroll: true }); } catch (eF) { try { document.getElementById('genOutletSearch').focus(); } catch (eF2) {} }
+    try { document.getElementById('genOutletSearch').focus(); } catch (eF) {}
 }
 function closeGenOutletDd() {
     document.getElementById('genOutletPanel').classList.add('hidden');
@@ -13713,7 +13746,7 @@ function shareGenWa() {
     const val = String(document.getElementById('genLinkInput').value || '');
     if (!val) return;
     const o = selectedGenOutlet || {};
-    const text = 'Berikut link Portal Outlet untuk ' + (o.outlet || 'outlet Anda') + '. Klik untuk input order, lihat riwayat order, dan pencapaian: ' + val;
+    const text = 'Berikut link Portal Outlet untuk ' + (o.outlet || 'outlet Anda') + '. Klik untuk input order dan cek pencapaian order anda: ' + val;
     window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 }
 function loadGenerateOutlet() {
@@ -13747,24 +13780,6 @@ function loadGenerateOutlet() {
             const panel = document.getElementById('produkOutletDropdownPanel');
             if (panel && !panel.classList.contains('hidden')) closeProdukOutletDropdown();
         }
-    });
-})();
-
-// Task 77: dropdown fixed otomatis tertutup bila halaman di-scroll / window
-// di-resize agar posisinya tidak lepas dari tombolnya (scroll INTERNAL di
-// dalam daftar opsi dikecualikan supaya daftar tetap bisa digulir).
-(function() {
-    document.addEventListener('scroll', function(ev) {
-        const p1 = document.getElementById('produkOutletDropdownPanel');
-        if (p1 && !p1.classList.contains('hidden') && !p1.contains(ev.target)) closeProdukOutletDropdown();
-        const p2 = document.getElementById('genOutletPanel');
-        if (p2 && !p2.classList.contains('hidden') && !p2.contains(ev.target)) closeGenOutletDd();
-    }, true);
-    window.addEventListener('resize', function() {
-        const p1 = document.getElementById('produkOutletDropdownPanel');
-        if (p1 && !p1.classList.contains('hidden')) closeProdukOutletDropdown();
-        const p2 = document.getElementById('genOutletPanel');
-        if (p2 && !p2.classList.contains('hidden')) closeGenOutletDd();
     });
 })();
 
