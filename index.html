@@ -3337,6 +3337,57 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
   }
 }
 </style>
+<style id="castrol-mainpage-dropdown-clip-fix">
+/* ============================================================================
+   Task 71: PENYEBAB ASLI panel dropdown terpotong di tengah layar (mobile).
+   "Pembungkus" yang menutupi = #mainPage - div pembungkus SEMUA halaman tab.
+   Pada layar mobile #mainPage diberi aturan lama `overflow-x:hidden`, dan
+   menurut spesifikasi CSS kombinasi overflow-x:hidden + overflow-y:visible
+   tidak diizinkan: overflow-y otomatis dihitung menjadi `auto`, sehingga
+   #mainPage diam-diam menjadi scroll container vertikal. Tingginya hanya
+   sebatas isi halaman (tidak full ke bawah layar), sedangkan panel dropdown
+   halaman "Produk by Outlet" & "Generate Link Outlet" adalah position:absolute
+   yang menggantung MELEWATI batas bawah #mainPage. Akibatnya bagian panel di
+   bawah batas itu terpotong garis lurus (seolah ditutup bingkai), padahal
+   ruang di bawahnya hanyalah area kosong wrapper konten + background body.
+   Solusi: jadikan #mainPage BUKAN scroll container di mobile dengan
+   overflow-x:clip - memotong overflow horizontal TANPA menciptakan scroll
+   container (overflow-y tetap visible, panel tidak dipotong lagi). Browser
+   lama yang belum mendukung `clip` di-fallback ke overflow terlihat; pemotongan
+   horizontal tetap dijaga oleh body (overflow-x:hidden) dan wrapper konten
+   utama (#app > .p-4.flex-1.overflow-y-auto, overflow-x:hidden!important).
+   Murni CSS - tidak mengubah fungsi, JS, maupun tampilan desktop.
+   ============================================================================ */
+@media (max-width:767px){
+  #mainPage{
+    overflow-x: clip;
+    overflow-y: visible;
+  }
+}
+@supports not (overflow-x: clip){
+  @media (max-width:767px){
+    #mainPage{
+      overflow-x: visible;
+      overflow-y: visible;
+    }
+  }
+}
+
+/* Tambahan Task 71: mode LANDSCAPE (layar pendek) - panel dibatasi agar
+   tetap berakhir di dalam layar; sisa daftar tetap bisa digulir di dalam
+   panel (angka 228px = tinggi terukur header+judul+kartu filter di atas
+   panel pada posisi scroll paling atas). */
+@media (max-width:767px) and (orientation: landscape){
+  #produkOutletDropdownPanel,
+  #genOutletPanel{
+    max-height: calc(100dvh - 228px);
+  }
+  #produkOutletDropdownPanel #produkOutletOptions,
+  #genOutletPanel #genOutletOptions{
+    max-height: calc(100dvh - 288px);
+  }
+}
+</style>
 </head>
 <body class="bg-slate-50 font-sans">
 
