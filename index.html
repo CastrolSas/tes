@@ -11177,14 +11177,128 @@ if(tab==='tagihan')loadTagihan(false, true);
             if (count) count.textContent = rows.length.toLocaleString('id-ID') + ' customer';
         }
 
-        // Task 89: Export Excel seluruh data customer (.xls berbasis tabel HTML, tanpa dependensi;
-        // urutan & nama kolom mengikuti header sheet OUTLET sehingga kolom tambahan ikut terbawa).
+        // ===== Task 96: Export Excel Customer = file .xlsx ASLI =====
+        // Lama: tabel HTML di-rename .xls dengan MIME ms-excel palsu -> Excel modern
+        // menolaknya ("file rusak"). Baru: Open XML (.xlsx) asli dibangun manual
+        // (zip STORE + CRC32, tanpa dependensi eksternal) -> valid dibuka Excel/
+        // LibreOffice/Google Sheets. 4 kolom Task 91 tetap: DAY VISIT, OUTLET, DSR, CHANNEL.
+        function _customerXmlEscape(v) {
+            return String(v == null ? '' : v)
+                .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+        }
+        function _customerXlsxColLetter(n) { // 0 -> A, 25 -> Z, 26 -> AA
+            let s = '';
+            let k = Number(n) + 1;
+            while (k > 0) { const m = (k - 1) % 26; s = String.fromCharCode(65 + m) + s; k = Math.floor((k - 1) / 26); }
+            return s;
+        }
+        function _customerCrc32(bytes) {
+            let table = _customerCrc32._t;
+            if (!table) {
+                table = new Int32Array(256);
+                for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); table[n] = c; }
+                _customerCrc32._t = table;
+            }
+            let crc = -1;
+            for (let i = 0; i < bytes.length; i++) crc = (crc >>> 8) ^ table[(crc ^ bytes[i]) & 0xFF];
+            return (crc ^ -1) >>> 0;
+        }
+        // Rakit file .xlsx (zip metode STORE) dari array 2 dimensi string. Return Uint8Array.
+        function _customerBuildXlsx(sheetName, table) {
+            const esc = _customerXmlEscape;
+            const escSheet = esc(String(sheetName || 'Data')).slice(0, 31);
+            let nCols = 0;
+            table.forEach(function(r) { nCols = Math.max(nCols, r.length); });
+            let colsDef = '';
+            for (let c = 0; c < nCols; c++) colsDef += '<col min="' + (c + 1) + '" max="' + (c + 1) + '" width="22" customWidth="1"/>';
+            let rowsXml = '';
+            table.forEach(function(row, ri) {
+                let cells = '';
+                for (let ci = 0; ci < row.length; ci++) {
+                    const ref = _customerXlsxColLetter(ci) + (ri + 1);
+                    const val = String(row[ci] == null ? '' : row[ci]).slice(0, 32767);
+                    cells += '<c r="' + ref + '" t="inlineStr"><is><t xml:space="preserve">' + esc(val) + '</t></is></c>';
+                }
+                rowsXml += '<row r="' + (ri + 1) + '">' + cells + '</row>';
+            });
+            const parts = [
+                ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+                    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+                    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+                    '<Default Extension="xml" ContentType="application/xml"/>' +
+                    '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+                    '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+                    '</Types>'],
+                ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+                    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+                    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+                    '</Relationships>'],
+                ['xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+                    '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+                    '<sheets><sheet name="' + escSheet + '" sheetId="1" r:id="rId1"/></sheets></workbook>'],
+                ['xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+                    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+                    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
+                    '</Relationships>'],
+                ['xl/worksheets/sheet1.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+                    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+                    '<cols>' + colsDef + '</cols><sheetData>' + rowsXml + '</sheetData></worksheet>']
+            ];
+            const enc = new TextEncoder();
+            const localChunks = [];
+            const centralEntries = [];
+            let offset = 0;
+            const d = new Date();
+            const dosTime = ((d.getHours() & 31) << 11) | ((d.getMinutes() & 63) << 5) | (Math.floor(d.getSeconds() / 2) & 31);
+            const dosDate = (((d.getFullYear() - 1980) & 127) << 9) | (((d.getMonth() + 1) & 15) << 5) | (d.getDate() & 31);
+            parts.forEach(function(p) {
+                const nameBytes = enc.encode(p[0]);
+                const dataBytes = enc.encode(p[1]);
+                const crc = _customerCrc32(dataBytes);
+                const lh = new DataView(new ArrayBuffer(30));
+                lh.setUint32(0, 0x04034b50, true);
+                lh.setUint16(4, 20, true); lh.setUint16(6, 0, true); lh.setUint16(8, 0, true);
+                lh.setUint16(10, dosTime, true); lh.setUint16(12, dosDate, true);
+                lh.setUint32(14, crc, true);
+                lh.setUint32(18, dataBytes.length, true); lh.setUint32(22, dataBytes.length, true);
+                lh.setUint16(26, nameBytes.length, true); lh.setUint16(28, 0, true);
+                localChunks.push(new Uint8Array(lh.buffer), nameBytes, dataBytes);
+                const ch = new DataView(new ArrayBuffer(46));
+                ch.setUint32(0, 0x02014b50, true);
+                ch.setUint16(4, 20, true); ch.setUint16(6, 20, true);
+                ch.setUint16(8, 0, true); ch.setUint16(10, 0, true);
+                ch.setUint16(12, dosTime, true); ch.setUint16(14, dosDate, true);
+                ch.setUint32(16, crc, true);
+                ch.setUint32(20, dataBytes.length, true); ch.setUint32(24, dataBytes.length, true);
+                ch.setUint16(28, nameBytes.length, true); ch.setUint16(30, 0, true); ch.setUint16(32, 0, true);
+                ch.setUint16(34, 0, true); ch.setUint16(36, 0, true); ch.setUint32(38, 0, true);
+                ch.setUint32(42, offset, true);
+                centralEntries.push({ hdr: new Uint8Array(ch.buffer), name: nameBytes });
+                offset += 30 + nameBytes.length + dataBytes.length;
+            });
+            let centralSize = 0;
+            centralEntries.forEach(function(c) { centralSize += c.hdr.length + c.name.length; });
+            const eocd = new DataView(new ArrayBuffer(22));
+            eocd.setUint32(0, 0x06054b50, true);
+            eocd.setUint16(4, 0, true); eocd.setUint16(6, 0, true);
+            eocd.setUint16(8, parts.length, true); eocd.setUint16(10, parts.length, true);
+            eocd.setUint32(12, centralSize, true); eocd.setUint32(16, offset, true); eocd.setUint16(20, 0, true);
+            const out = new Uint8Array(offset + centralSize + 22);
+            let pos = 0;
+            localChunks.forEach(function(c) { out.set(c, pos); pos += c.length; });
+            centralEntries.forEach(function(c) { out.set(c.hdr, pos); pos += c.hdr.length; out.set(c.name, pos); pos += c.name.length; });
+            out.set(new Uint8Array(eocd.buffer), pos);
+            return out;
+        }
+        // Export Excel seluruh data customer. Task 96: file .xlsx asli;
+        // Task 91: HANYA 4 kolom, urutan: DAY VISIT, OUTLET, DSR, CHANNEL.
         function exportTambahCustomerExcel() {
             const headers = (globalTambahCustomerData && globalTambahCustomerData.headers) || [];
             const rows = (globalTambahCustomerData && globalTambahCustomerData.rows) || [];
             if (!headers.length) { showModal('Informasi', 'Data customer belum dimuat. Buka halaman ini sampai data tampil lalu coba lagi.'); return; }
             if (!rows.length) { showModal('Informasi', 'Belum ada data customer untuk diexport.'); return; }
-            // Task 91: export HANYA 4 kolom, urutan sesuai permintaan: DAY VISIT, OUTLET, DSR, CHANNEL.
             const exportCols = [
                 ['DAY VISIT', _customerFieldIndexClient(headers, ['DAY VISIT'])],
                 ['OUTLET', _customerFieldIndexClient(headers, ['OUTLET', 'NAMA OUTLET'])],
@@ -11192,23 +11306,19 @@ if(tab==='tagihan')loadTagihan(false, true);
                 ['CHANNEL', _customerFieldIndexClient(headers, ['CHANNEL', 'CHANNEL OUTLET'])]
             ].filter(function (col) { return col[1] >= 0; });
             if (!exportCols.length) { showModal('Informasi', 'Kolom DAY VISIT / OUTLET / DSR / CHANNEL tidak ditemukan pada data customer.'); return; }
-            let html = '<html><head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Customer</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>';
-            html += '<table border="1"><thead><tr>' + exportCols.map(function(col) {
-                return '<th style="background:#059669;color:#ffffff;font-weight:bold;">' + _customerEscape(String(col[0] == null ? '' : col[0])) + '</th>';
-            }).join('') + '</tr></thead><tbody>';
+            const table = [exportCols.map(function(col) { return String(col[0]); })];
             rows.forEach(function(item) {
                 const values = Array.isArray(item.values) ? item.values : [];
-                html += '<tr>' + exportCols.map(function(col) {
-                    const v = values[col[1]] == null ? '' : String(values[col[1]]);
-                    return '<td>' + _customerEscape(v) + '</td>';
-                }).join('') + '</tr>';
+                table.push(exportCols.map(function(col) {
+                    return values[col[1]] == null ? '' : String(values[col[1]]);
+                }));
             });
-            html += '</tbody></table></body></html>';
             try {
-                const blob = new Blob(['\ufeff' + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+                const bytes = _customerBuildXlsx('Customer', table);
+                const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = 'Customer_' + new Date().toISOString().slice(0, 10) + '.xls';
+                a.download = 'Customer_' + new Date().toISOString().slice(0, 10) + '.xlsx';
                 document.body.appendChild(a);
                 a.click();
                 setTimeout(function() { try { URL.revokeObjectURL(a.href); if (a.parentNode) a.parentNode.removeChild(a); } catch (eRev) {} }, 1000);
