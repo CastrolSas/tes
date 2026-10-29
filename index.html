@@ -5521,8 +5521,7 @@ startAutoRefresh();
                 const idKey = String(item && item.id != null ? item.id : '');
                 return '<button type="button" class="input-step2-tagihan-row" onclick="bukaInvoiceTagihan(\'' + escapeHtml(idKey) + '\')">' +
                     '<span class="min-w-0 text-left">' +
-                        '<span class="block font-extrabold text-[10px] text-slate-700 truncate">' + escapeHtml(idKey || '-') + '</span>' +
-                        '<span class="block text-[8px] text-slate-400">' + escapeHtml(tagihanFormatTanggalID(item && item.tanggalNota)) + ' \u00b7 ' + usia + ' hari</span>' +
+                        '<span class="block text-[10px] text-slate-600">' + escapeHtml(tagihanFormatTanggalID(item && item.tanggalNota)) + ' \u00b7 ' + usia + ' hari</span>' +
                     '</span>' +
                     '<span class="shrink-0 text-right">' +
                         '<span class="block font-extrabold text-[10px] ' + (merah ? 'text-red-600' : 'text-slate-700') + '">Rp ' + Number(item && item.nominal ? item.nominal : 0).toLocaleString('id-ID') + '</span>' +
