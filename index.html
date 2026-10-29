@@ -2288,6 +2288,18 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-ser
 }
 </style>
 
+<style id="castrol-input-step2-tagihan">
+/* Task 94: panel TAGIHAN BELUM LUNAS pada Step 2 - ringkas, daftar scroll (mobile tidak memanjang ke bawah) */
+.input-step2-tagihan-scroll{max-height:168px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;-webkit-overflow-scrolling:touch;padding-right:2px}
+.input-step2-tagihan-scroll::-webkit-scrollbar{width:4px}
+.input-step2-tagihan-scroll::-webkit-scrollbar-thumb{background:rgba(180,83,9,.28);border-radius:999px}
+.input-step2-tagihan-row{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;background:#fff;border:1px solid #fde68a;border-radius:10px;padding:5px 8px;text-align:left;transition:background .15s ease;cursor:pointer}
+.input-step2-tagihan-row:hover{background:#fffbeb}
+@media(max-width:640px){
+  .input-step2-tagihan-scroll{max-height:120px}
+  .input-step2-tagihan-row{padding:4px 7px;border-radius:9px}
+}
+</style>
 <style id="castrol-step2-simple-meta">
 /* STEP 2 - customer/channel dibuat sangat sederhana, tanpa kartu/box */
 #inputStep2 .step2-outlet-summary{
@@ -3922,6 +3934,14 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                                   <div class="rounded-xl border border-slate-200 p-2.5"><div class="text-[10px] font-extrabold text-slate-700">Bulan 3</div><div class="grid grid-cols-2 gap-2 mt-2"><div><div class="text-[8px] text-slate-400">Target</div><div id="inputAchTargetM3_2" class="text-xs font-extrabold">-</div></div><div><div class="text-[8px] text-slate-400">Actual</div><div id="inputAchActualM3_2" class="text-xs font-extrabold text-emerald-700">0,0 dus</div></div></div><div class="border-t mt-2 pt-2 flex justify-between text-[8px]"><span class="text-slate-400">Gap <b id="inputAchGapM3_2" class="text-red-500">-</b></span><span class="text-slate-400">Ach <b id="inputAchPctM3_2">0,0%</b></span></div></div>
                                 </div>
                                 <div class="mt-2 rounded-xl border border-emerald-200 bg-emerald-50/40 p-2.5"><div class="flex items-center justify-between gap-2"><div class="text-[10px] font-extrabold text-emerald-800">TOTAL KUARTAL</div><div id="inputTargetQuarterTotalLabel2" class="text-[9px] font-bold text-slate-400">Q berjalan</div></div><div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2"><div class="rounded-lg bg-white p-2"><div class="text-[8px] text-slate-400">Target</div><div id="inputAchTargetQ_2" class="text-xs font-extrabold">-</div></div><div class="rounded-lg bg-emerald-50 p-2"><div class="text-[8px] text-slate-400">Actual</div><div id="inputAchActualQ_2" class="text-xs font-extrabold text-emerald-700">0,0 dus</div></div><div class="rounded-lg bg-white p-2"><div class="text-[8px] text-slate-400">Gap</div><div id="inputAchGapQ_2" class="text-xs font-extrabold text-red-500">-</div></div><div class="rounded-lg bg-white p-2"><div class="text-[8px] text-slate-400">Ach</div><div id="inputAchPctQ_2" class="text-xs font-extrabold">0,0%</div></div></div></div>
+                                <!-- Task 94: tagihan BELUM LUNAS outlet ini (di bawah TOTAL KUARTAL) -->
+                                <div id="inputStep2Tagihan" class="mt-2 rounded-xl border border-amber-200 bg-amber-50/60 p-2.5 hidden">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="text-[10px] font-extrabold text-amber-800">TAGIHAN BELUM LUNAS</div>
+                                        <div id="inputStep2TagihanCount" class="text-[9px] font-bold text-amber-700 shrink-0">-</div>
+                                    </div>
+                                    <div id="inputStep2TagihanList" class="mt-1.5 space-y-1 overflow-y-auto input-step2-tagihan-scroll"></div>
+                                </div>
                             </div>
                             </div>
 
@@ -5261,7 +5281,8 @@ startAutoRefresh();
             } catch(e) {}
             try {
                 const ann = res.pengumuman;
-                if (ann && ann.success) { renderHomeRebuildBanner(ann.data); showAnnouncementPage(ann.data); }
+                // Task 94: halaman pengumuman pasca-login dihilangkan - banner beranda tetap tampil.
+                if (ann && ann.success) { renderHomeRebuildBanner(ann.data); }
             } catch(e) {}
             try {
                 if (Array.isArray(res.outlets)) {
@@ -5446,16 +5467,23 @@ startAutoRefresh();
             document.getElementById('inputStep2').classList.remove('hidden');
             const custCodeStep2 = document.getElementById('inputCustCode').value || '-';
             const channelStep2 = document.getElementById('inputChannel').value || '-';
-            document.getElementById('inputStep2Outlet').textContent = outlet;
-            document.getElementById('inputStep2CustCode').textContent = custCodeStep2;
-            document.getElementById('inputStep2Channel').textContent = channelStep2;
+            // Task 94: elemen ringkasan lama sudah tidak ada di markup (refactor step 2) -
+            // akses dibuat null-safe agar updateInputWizardIndicator/renderCart/tagihan tetap jalan.
+            const elStep2Outlet = document.getElementById('inputStep2Outlet');
+            if (elStep2Outlet) elStep2Outlet.textContent = outlet;
+            const elStep2CustCode = document.getElementById('inputStep2CustCode');
+            if (elStep2CustCode) elStep2CustCode.textContent = custCodeStep2;
+            const elStep2Channel = document.getElementById('inputStep2Channel');
+            if (elStep2Channel) elStep2Channel.textContent = channelStep2;
             const outletHeading = document.getElementById('inputStep2OutletHeading');
             const custCodeHeading = document.getElementById('inputStep2CustCodeHeading');
             if (outletHeading) outletHeading.textContent = outlet;
             if (custCodeHeading) custCodeHeading.textContent = custCodeStep2;
-            document.getElementById('inputStep2Meta').textContent = 'Cust. Code ' + custCodeStep2 + ' · Channel ' + channelStep2;
+            const elStep2Meta = document.getElementById('inputStep2Meta');
+            if (elStep2Meta) elStep2Meta.textContent = 'Cust. Code ' + custCodeStep2 + ' · Channel ' + channelStep2;
             updateInputWizardIndicator(2);
             renderCart();
+            loadInputStep2Tagihan(); // Task 94: tagihan belum lunas outlet terpilih
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
@@ -5464,6 +5492,70 @@ startAutoRefresh();
             document.getElementById('inputStep1').classList.remove('hidden');
             updateInputWizardIndicator(1);
             window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        // ===== Task 94: TAGIHAN BELUM LUNAS pada Step 2 Input Order =====
+        let inputStep2TagihanFetching = false;
+        function inputStep2TagihanBelum(outletName) {
+            const target = String(outletName == null ? '' : outletName).trim().toUpperCase();
+            if (!target) return [];
+            const src = Array.isArray(globalTagihanData) ? globalTagihanData : [];
+            return src.filter(function(item) {
+                const st = String(item && item.statusTagihan != null ? item.statusTagihan : '').trim().toUpperCase();
+                if (st !== 'BELUM LUNAS') return false;
+                return String(item && item.outlet != null ? item.outlet : '').trim().toUpperCase() === target;
+            });
+        }
+        function renderInputStep2Tagihan(outletName) {
+            const box = document.getElementById('inputStep2Tagihan');
+            const list = document.getElementById('inputStep2TagihanList');
+            if (!box || !list) return;
+            const rows = inputStep2TagihanBelum(outletName);
+            if (!rows.length) { box.classList.add('hidden'); list.innerHTML = ''; return; }
+            rows.sort(function(a, b) { return Number(b && b.usia ? b.usia : 0) - Number(a && a.usia ? a.usia : 0); });
+            const count = document.getElementById('inputStep2TagihanCount');
+            if (count) count.textContent = rows.length + ' nota';
+            list.innerHTML = rows.map(function(item) {
+                const usia = tagihanUsiaHari(item);
+                const merah = usia >= TAGIHAN_UMUR_MERAH;
+                const idKey = String(item && item.id != null ? item.id : '');
+                return '<button type="button" class="input-step2-tagihan-row" onclick="bukaInvoiceTagihan(\'' + escapeHtml(idKey) + '\')">' +
+                    '<span class="min-w-0 text-left">' +
+                        '<span class="block font-extrabold text-[10px] text-slate-700 truncate">' + escapeHtml(idKey || '-') + '</span>' +
+                        '<span class="block text-[8px] text-slate-400">' + escapeHtml(tagihanFormatTanggalID(item && item.tanggalNota)) + ' \u00b7 ' + usia + ' hari</span>' +
+                    '</span>' +
+                    '<span class="shrink-0 text-right">' +
+                        '<span class="block font-extrabold text-[10px] ' + (merah ? 'text-red-600' : 'text-slate-700') + '">Rp ' + Number(item && item.nominal ? item.nominal : 0).toLocaleString('id-ID') + '</span>' +
+                        '<span class="block text-[8px] text-slate-400">' + escapeHtml(String(item && item.payment != null ? item.payment : '-')) + '</span>' +
+                    '</span>' +
+                '</button>';
+            }).join('');
+            box.classList.remove('hidden');
+        }
+        function loadInputStep2Tagihan() {
+            const box = document.getElementById('inputStep2Tagihan');
+            if (!box) return;
+            const outlet = String(($('#inputOutlet').val() || '')).trim();
+            if (!outlet) { box.classList.add('hidden'); return; }
+            if (Array.isArray(globalTagihanData) && globalTagihanData.length) { renderInputStep2Tagihan(outlet); return; }
+            if (inputStep2TagihanFetching) return;
+            inputStep2TagihanFetching = true;
+            box.classList.remove('hidden');
+            const count = document.getElementById('inputStep2TagihanCount');
+            const list = document.getElementById('inputStep2TagihanList');
+            if (count) count.textContent = 'Memuat...';
+            if (list) list.innerHTML = '';
+            const salesArg = tagihanIsAdminScope() ? '' : String(currentUser || '').trim();
+            google.script.run.withSuccessHandler(function(res) {
+                inputStep2TagihanFetching = false;
+                globalTagihanData = (res && Array.isArray(res.data)) ? res.data : [];
+                try { appLocalCacheSet(tagihanCacheKey(), globalTagihanData); } catch (eCache) {}
+                renderInputStep2Tagihan(outlet);
+            }).withFailureHandler(function(err) {
+                inputStep2TagihanFetching = false;
+                box.classList.add('hidden');
+                console.warn('Gagal memuat tagihan Step 2:', err && err.message ? err.message : err);
+            }).getTagihanData(salesArg, currentUsernameInput);
         }
 
         function renderCashbackOptionsForInputChannel() {
@@ -11668,7 +11760,7 @@ function checkActivePengumuman() {
     google.script.run.withSuccessHandler(function(res) {
         var data = res && res.success ? res.data : [];
         renderHomeRebuildBanner(data);
-        showAnnouncementPage(data);
+        // Task 94: showAnnouncementPage dihapus - halaman pengumuman pasca-login tidak ditampilkan lagi.
     }).withFailureHandler(function(err) {
         console.warn('Gagal memuat pengumuman:', err && err.message ? err.message : err);
     }).getPengumumanAktif();
