@@ -1716,10 +1716,10 @@ html{scroll-behavior:auto!important}
 <style id="home-rebuild-clean-v1">
 #tabHome.home-rebuild{width:100%}
 .home-rebuild-wrap{width:100%;max-width:1180px;margin:0 auto;padding:0 0 18px;box-sizing:border-box}
-.home-rebuild-banner{position:relative;width:100%;height:clamp(110px,15vw,175px);border-radius:18px;overflow:hidden;background:#0f172a;box-shadow:0 8px 24px rgba(15,23,42,.08);display:none;margin-bottom:14px}
-.home-rebuild-banner.show{display:block}.home-rebuild-track{height:100%;display:flex;transition:transform .4s ease;touch-action:pan-y}.home-rebuild-slide{min-width:100%;height:100%;display:flex;align-items:center;justify-content:center;cursor:zoom-in;user-select:none}.home-rebuild-slide img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}.home-rebuild-caption{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:20px 14px 10px;background:linear-gradient(transparent,rgba(0,0,0,.72));color:#fff;font-size:11px;font-weight:800;line-height:1.35;text-align:left;pointer-events:none}.home-rebuild-slide{position:relative}
+.home-rebuild-banner{position:relative;width:100%;border:1px solid #e2e8f0;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 10px 28px rgba(15,23,42,.10);display:none;margin-bottom:14px}
+.home-rebuild-banner.show{display:block}.home-rebuild-stage{position:relative;height:clamp(150px,20vw,235px);background:#0f172a;overflow:hidden}.home-rebuild-track{height:100%;display:flex;transition:transform .4s ease;touch-action:pan-y}.home-rebuild-slide{position:relative;min-width:100%;height:100%;display:flex;align-items:center;justify-content:center;cursor:zoom-in;user-select:none}.home-rebuild-slide img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}.home-rebuild-foot{padding:10px 14px 12px;background:#fff;border-top:1px solid #eef2f7}.home-rebuild-caption{padding:8px 2px 0;color:#0f172a;font-size:12px;font-weight:700;line-height:1.55;text-align:left;white-space:pre-wrap;word-break:break-word}.home-rebuild-caption:empty{display:none}
 .home-rebuild-arrow{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:50%;background:rgba(0,0,0,.42);color:#fff;font-size:24px;line-height:1;z-index:3;cursor:pointer}.home-rebuild-arrow.prev{left:10px}.home-rebuild-arrow.next{right:10px}
-.home-rebuild-dots{position:absolute;left:0;right:0;bottom:9px;display:flex;justify-content:center;gap:5px;z-index:3;pointer-events:none}.home-rebuild-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.55)}.home-rebuild-dot.active{width:17px;border-radius:99px;background:#fff}
+.home-rebuild-dots{display:flex;justify-content:center;gap:5px;pointer-events:none}.home-rebuild-dot{width:6px;height:6px;border-radius:50%;background:#cbd5e1;transition:width .25s ease,background .25s ease}.home-rebuild-dot.active{width:17px;border-radius:99px;background:#047857}.home-rebuild-banner.single .home-rebuild-dots{display:none}.home-rebuild-banner.single .home-rebuild-arrow{display:none}
 
 /* Beranda: grafik mingguan dan ringkasan status transaksi */
 .home-weekly-section,.home-status-section{padding:13px 14px;border-top:1px solid #eef2f7}.home-weekly-title{font-size:11px;font-weight:900;color:#0f172a}.home-weekly-sub{font-size:9px;color:#94a3b8;margin-top:3px}.home-weekly-chart{position:relative;width:100%;margin-top:8px;min-height:160px;overflow:visible}.home-weekly-chart svg{display:block;width:100%;height:auto;touch-action:pan-y}.home-weekly-chart .weekly-point{cursor:pointer;outline:none}.home-weekly-chart .weekly-point:focus circle,.home-weekly-chart .weekly-point.selected circle{stroke:#047857;stroke-width:4}.home-weekly-detail{position:absolute;z-index:5;display:none;width:158px;max-width:calc(100% - 12px);border:0;background:#182132;color:#fff;border-radius:13px;padding:9px 11px;box-shadow:0 8px 22px rgba(15,23,42,.2);pointer-events:none;font-size:10px;line-height:1.45}.home-weekly-detail.show{display:block}.home-weekly-detail-day{font-size:10px;font-weight:900;color:#fff;margin-bottom:3px}.home-weekly-detail-grid{display:flex;flex-direction:column;gap:1px}.home-weekly-detail-grid span{display:none}.home-weekly-detail-grid b{display:block;color:#d1fae5;font-size:10px;font-weight:700;margin-top:0;overflow-wrap:anywhere}.home-weekly-detail-grid div:nth-child(3) b{color:#e2e8f0}.home-status-filters{display:flex;gap:8px;margin:9px 0}.home-status-filters label{font-size:9px;color:#64748b;font-weight:800;display:flex;align-items:center;gap:5px}.home-status-filters select{border:1px solid #cbd5e1;border-radius:7px;padding:5px 7px;font-size:10px;color:#334155;background:white;max-width:130px}.home-status-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.home-status-card{border:1px solid #e2e8f0;border-radius:11px;padding:10px 8px;text-align:left;background:#fff;display:flex;flex-direction:column;gap:3px;cursor:pointer;min-width:0}.home-status-card span{font-size:9px;font-weight:900}.home-status-card b{font-size:19px;line-height:1.2;color:#0f172a}.home-status-card small{font-size:8px;color:#64748b}.home-status-card.approve{border-color:#a7f3d0;background:#f0fdf4}.home-status-card.approve span{color:#047857}.home-status-card.pending{border-color:#fde68a;background:#fffbeb}.home-status-card.pending span{color:#b45309}.home-status-card.decline{border-color:#fecaca;background:#fef2f2}.home-status-card.decline span{color:#b91c1c}.home-status-card:focus{outline:2px solid #94a3b8;outline-offset:2px}.home-status-list-wrap{margin-top:10px}.home-status-list-title{font-size:10px;font-weight:900;color:#334155;margin-bottom:6px}
@@ -1747,7 +1747,7 @@ html{scroll-behavior:auto!important}
 .home-rebuild-outlet-table th:first-child,.home-rebuild-outlet-table td:first-child{width:52%;text-align:left}.home-rebuild-outlet-table th:nth-child(2),.home-rebuild-outlet-table td:nth-child(2){width:16%}.home-rebuild-outlet-table th:nth-child(3),.home-rebuild-outlet-table td:nth-child(3){width:16%}.home-rebuild-outlet-table th:nth-child(4),.home-rebuild-outlet-table td:nth-child(4){width:16%}.home-rebuild-outlet-table th{padding:7px 8px;background:#f1f5f9;color:#475569;font-weight:900;text-align:center;white-space:nowrap}.home-rebuild-outlet-table td{padding:7px 8px;border-top:1px solid #eef2f7;color:#334155;font-weight:700;white-space:nowrap}.home-rebuild-outlet-table td:nth-child(2),.home-rebuild-outlet-table td:nth-child(3),.home-rebuild-outlet-table td:nth-child(4){text-align:center}.home-status-approve{color:#047857;font-weight:900}.home-status-decline{color:#dc2626;font-weight:900}.home-status-pending{color:#d97706;font-weight:900}.home-rebuild-empty{font-size:10px;color:#94a3b8;text-align:center;padding:14px}
 .home-rebuild-notif{padding:0 14px 12px}.home-rebuild-notif-item{display:flex;gap:8px;padding:9px 0;border-bottom:1px solid #eef2f7;text-align:left;width:100%}.home-rebuild-notif-item:last-child{border-bottom:0}.home-rebuild-notif-dot{width:7px;height:7px;border-radius:50%;background:#10b981;flex:none;margin-top:4px}.home-rebuild-notif-dot.unread{background:#f59e0b}.home-rebuild-notif-title{font-size:10px;font-weight:800;color:#334155}.home-rebuild-notif-msg{font-size:9px;color:#64748b;margin-top:2px}.home-rebuild-notif-time{font-size:8px;color:#94a3b8;margin-top:3px}
 .home-rebuild-lightbox{position:fixed;inset:0;z-index:100002;background:rgba(2,6,23,.96);display:none;align-items:center;justify-content:center;overflow:hidden;touch-action:none}.home-rebuild-lightbox.open{display:flex}.home-rebuild-lightbox img{max-width:none;max-height:none;width:auto;height:auto;object-fit:contain;transform-origin:center;user-select:none;touch-action:none;cursor:grab}.home-rebuild-lightbox .home-rebuild-download{position:absolute;right:64px;top:14px;min-height:40px;padding:0 14px;border:1px solid rgba(255,255,255,.25);border-radius:999px;background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:800;z-index:3;cursor:pointer}.home-rebuild-lightbox .home-rebuild-download:hover{background:rgba(255,255,255,.25)}.home-rebuild-lightbox .close{position:absolute;right:14px;top:14px;width:40px;height:40px;border:0;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;font-size:25px;z-index:3;cursor:pointer}
-@media(max-width:640px){.home-rebuild-outlet-table{table-layout:fixed;width:100%}.home-rebuild-outlet-table th:first-child,.home-rebuild-outlet-table td:first-child{width:46%}.home-rebuild-outlet-table th:nth-child(2),.home-rebuild-outlet-table td:nth-child(2),.home-rebuild-outlet-table th:nth-child(3),.home-rebuild-outlet-table td:nth-child(3),.home-rebuild-outlet-table th:nth-child(4),.home-rebuild-outlet-table td:nth-child(4){width:18%;text-align:center}.home-rebuild-lightbox img{max-width:calc(100vw - 20px);max-height:calc(100vh - 20px);width:auto;height:auto}.home-rebuild-wrap{padding-bottom:12px}.home-rebuild-banner{height:105px;border-radius:12px;margin-bottom:8px}.home-rebuild-arrow{width:32px;height:32px;font-size:20px}.home-rebuild-card{border-radius:14px;margin-bottom:10px}.home-rebuild-head{padding:10px 11px}.home-rebuild-title{font-size:11px}.home-rebuild-sub{font-size:8px}.home-rebuild-date{font-size:8px}.home-rebuild-metrics{display:flex;flex-direction:row;flex-wrap:nowrap;gap:6px;padding:8px}.home-rebuild-metric{flex:1 1 0;min-width:0;padding:8px;border-radius:11px}.home-rebuild-icon{width:23px;height:23px;border-radius:7px;font-size:12px;margin-bottom:4px}.home-rebuild-label{font-size:6.5px;letter-spacing:.03em;overflow:hidden;text-overflow:ellipsis}.home-rebuild-value{font-size:16px;margin-top:5px}.home-rebuild-unit{font-size:7px;margin-top:3px}.home-rebuild-compare{margin-top:6px;gap:3px}.home-rebuild-compare .home-rebuild-performance-yesterday{font-size:6px}.home-rebuild-compare .home-rebuild-performance-change{font-size:6.5px}.home-rebuild-performance{padding:0 8px 8px}
+@media(max-width:640px){.home-rebuild-outlet-table{table-layout:fixed;width:100%}.home-rebuild-outlet-table th:first-child,.home-rebuild-outlet-table td:first-child{width:46%}.home-rebuild-outlet-table th:nth-child(2),.home-rebuild-outlet-table td:nth-child(2),.home-rebuild-outlet-table th:nth-child(3),.home-rebuild-outlet-table td:nth-child(3),.home-rebuild-outlet-table th:nth-child(4),.home-rebuild-outlet-table td:nth-child(4){width:18%;text-align:center}.home-rebuild-lightbox img{max-width:calc(100vw - 20px);max-height:calc(100vh - 20px);width:auto;height:auto}.home-rebuild-wrap{padding-bottom:12px}.home-rebuild-banner{border-radius:12px;margin-bottom:8px}.home-rebuild-stage{height:150px}.home-rebuild-foot{padding:8px 10px 10px}.home-rebuild-caption{font-size:11px}.home-rebuild-arrow{width:32px;height:32px;font-size:20px}.home-rebuild-card{border-radius:14px;margin-bottom:10px}.home-rebuild-head{padding:10px 11px}.home-rebuild-title{font-size:11px}.home-rebuild-sub{font-size:8px}.home-rebuild-date{font-size:8px}.home-rebuild-metrics{display:flex;flex-direction:row;flex-wrap:nowrap;gap:6px;padding:8px}.home-rebuild-metric{flex:1 1 0;min-width:0;padding:8px;border-radius:11px}.home-rebuild-icon{width:23px;height:23px;border-radius:7px;font-size:12px;margin-bottom:4px}.home-rebuild-label{font-size:6.5px;letter-spacing:.03em;overflow:hidden;text-overflow:ellipsis}.home-rebuild-value{font-size:16px;margin-top:5px}.home-rebuild-unit{font-size:7px;margin-top:3px}.home-rebuild-compare{margin-top:6px;gap:3px}.home-rebuild-compare .home-rebuild-performance-yesterday{font-size:6px}.home-rebuild-compare .home-rebuild-performance-change{font-size:6.5px}.home-rebuild-performance{padding:0 8px 8px}
 .home-rebuild-performance-title{font-size:8px;margin-bottom:5px}
 .home-rebuild-performance-grid{gap:5px}
 .home-rebuild-performance-item{padding:6px;border-radius:9px}
@@ -2298,6 +2298,12 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-ser
 @media(max-width:640px){
   .input-step2-tagihan-scroll{max-height:120px}
   .input-step2-tagihan-row{padding:4px 7px;border-radius:9px}
+}
+.input-step2-tagihan-info{display:flex;align-items:center;justify-content:space-between;gap:6px;flex:1;min-width:0}
+.input-step2-tagihan-aksi{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.input-step2-tagihan-aksi .tg-btn{padding:3px 8px;font-size:9px;border-radius:7px}
+@media(max-width:380px){
+  .input-step2-tagihan-aksi .tg-btn{padding:2.5px 6px;font-size:8.5px}
 }
 </style>
 <style id="castrol-step2-simple-meta">
@@ -3795,10 +3801,15 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             </ul>
                         </section>
                         <section id="homeRebuildBanner" class="home-rebuild-banner" aria-label="Banner pengumuman">
-                            <div id="homeRebuildTrack" class="home-rebuild-track"></div>
-                            <button type="button" class="home-rebuild-arrow prev" onclick="homeRebuildPrev(event)" aria-label="Sebelumnya">‹</button>
-                            <button type="button" class="home-rebuild-arrow next" onclick="homeRebuildNext(event)" aria-label="Berikutnya">›</button>
-                            <div id="homeRebuildDots" class="home-rebuild-dots"></div>
+                            <div class="home-rebuild-stage">
+                                <div id="homeRebuildTrack" class="home-rebuild-track"></div>
+                                <button type="button" class="home-rebuild-arrow prev" onclick="homeRebuildPrev(event)" aria-label="Sebelumnya">‹</button>
+                                <button type="button" class="home-rebuild-arrow next" onclick="homeRebuildNext(event)" aria-label="Berikutnya">›</button>
+                            </div>
+                            <div class="home-rebuild-foot">
+                                <div id="homeRebuildDots" class="home-rebuild-dots"></div>
+                                <div id="homeRebuildCaption" class="home-rebuild-caption" aria-live="polite"></div>
+                            </div>
                         </section>
                         <section id="homeDsrFilterWrap" class="home-dsr-filter hidden"><label for="homeDsrFilter">Filter DSR / Sales</label><select id="homeDsrFilter"><option value="">Semua DSR</option></select><button type="button" onclick="resetHomeDsrFilter()">Reset</button></section>
                         <section class="cst-kpi-grid" aria-label="Ringkasan transaksi hari ini">
@@ -3817,6 +3828,11 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                                 <div id="homeWeeklyChart" class="home-weekly-chart"><div class="home-rebuild-empty">Memuat grafik...</div></div>
                             </section>
                         </div>
+                        <section id="cstKunjunganCard" class="cst-card cst-kunjungan-card hidden" aria-label="Kunjungan bengkel hari ini">
+                            <div class="cst-card-head"><span class="cst-card-ic" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.6v3.2M16 3.6v3.2M4.4 10.4h15.2M5.6 5.8h12.8a1.6 1.6 0 0 1 1.6 1.6v11.2a1.6 1.6 0 0 1-1.6 1.6H5.6a1.6 1.6 0 0 1-1.6-1.6V7.4a1.6 1.6 0 0 1 1.6-1.6Z"/></svg></span><h3 class="cst-card-title">Kunjungan Bengkel Hari ini</h3><span id="cstKunjunganLabel" class="cst-kunjungan-label"></span><span id="cstKunjunganCount" class="cst-kunjungan-count">0 bengkel</span></div>
+                            <div id="cstKunjunganSub" class="cst-kunjungan-sub"></div>
+                            <div class="cst-kunjungan-tblwrap"><table class="cst-kunjungan-table"><thead><tr><th style="width:6%;">No</th><th style="width:32%;text-align:left;">Nama Outlet</th><th style="width:14%;">CUST.CODE</th><th style="width:16%;">DSR</th><th style="width:15%;">Day Visit</th><th style="width:17%;">Jadwal</th></tr></thead><tbody id="cstKunjunganBody"><tr><td colspan="6" class="cst-kunjungan-empty">Memuat...</td></tr></tbody></table></div>
+                        </section>
                         <section class="cst-card cst-status-card" aria-label="Ringkasan status transaksi outlet">
                             <div class="cst-card-head"><span class="cst-card-ic" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.4v4.9l3.1 1.9"/></svg></span><h3 class="cst-card-title">Ringkasan Status Transaksi Outlet</h3><div class="home-status-filters"><label>Bulan <select id="homeStatusMonth"></select></label><label>Tahun <select id="homeStatusYear"></select></label></div></div>
                             <div id="cstStatusGrid" class="cst-status-grid"></div>
@@ -4812,6 +4828,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             run(function(){ loadPencapaianSalesFilter(); });
             run(function(){ loadInputMasterData(); });
             run(function(){ loadNotifications(true); });
+            run(function(){ checkActivePengumuman(); }); /* Task 101: refresh global memuat ulang banner & teks berjalan pengumuman */
 
             finishGlobalRefreshIfReady(startedAt);
         }
@@ -5281,7 +5298,7 @@ startAutoRefresh();
             try {
                 const ann = res.pengumuman;
                 // Task 94: halaman pengumuman pasca-login dihilangkan - banner beranda tetap tampil.
-                if (ann && ann.success) { renderHomeRebuildBanner(ann.data); }
+                if (ann && ann.success) { renderHomeRebuildBanner(ann.data); renderAnnouncementHeaderMarquee(ann.data); } /* Task 101: teks berjalan ikut diisi saat login */
             } catch(e) {}
             try {
                 if (Array.isArray(res.outlets)) {
@@ -5307,6 +5324,7 @@ startAutoRefresh();
                     homeLastQueryKey = String(currentUsernameInput||'') + '|' + String(currentUser||'') + '|' + selectedHomeDsr();
                     applyHomeHariIni(window._homeHariIniCache);
                     if (!homeHasCustomMonthYear()) applyHomeBeranda(window._homeBerandaCache || {});
+                    try { if (res.kunjungan) applyKunjunganHariIni(res.kunjungan); } catch (eKjBoot) {}
                     // Task 37: isi cache per-DSR dari data boot lalu prefetch senyap opsi sales.
                     try{ window._homeDsrCache=window._homeDsrCache||{}; window._homeDsrCache[homeLastQueryKey]={hi:window._homeHariIniCache,ber:window._homeBerandaCache,at:Date.now()}; }catch(e){}
                     _prefetchHomeDsrOptions(selectedHomeDsr());
@@ -5518,15 +5536,26 @@ startAutoRefresh();
                 const usia = tagihanUsiaHari(item);
                 const merah = usia >= TAGIHAN_UMUR_MERAH;
                 const idKey = String(item && item.id != null ? item.id : '');
-                return '<button type="button" class="input-step2-tagihan-row" onclick="bukaInvoiceTagihan(\'' + escapeHtml(idKey) + '\')">' +
-                    '<span class="min-w-0 text-left">' +
-                        '<span class="block text-[10px] text-slate-600">' + escapeHtml(tagihanFormatTanggalID(item && item.tanggalNota)) + ' \u00b7 ' + usia + ' hari</span>' +
+                const idJs = escapeHtml(idKey);
+                const stRow = String(item && item.statusTagihan != null ? item.statusTagihan : 'BELUM LUNAS').trim().toUpperCase();
+                const aktifLunas = stRow === 'LUNAS';
+                const aksi = (item && item.isCash) ? '' :
+                    '<span class="input-step2-tagihan-aksi" onclick="event.stopPropagation()">' +
+                        '<button type="button" onclick="ubahStatusTagihanSatuan(\'' + idJs + '\',\'LUNAS\')" class="tg-btn tg-btn-lunas' + (aktifLunas ? ' is-active' : '') + '" title="Tandai LUNAS">Lunas</button>' +
+                        '<button type="button" onclick="ubahStatusTagihanSatuan(\'' + idJs + '\',\'BELUM LUNAS\')" class="tg-btn tg-btn-belum' + (!aktifLunas ? ' is-active' : '') + '" title="Tandai BELUM LUNAS">Belum</button>' +
+                    '</span>';
+                return '<div class="input-step2-tagihan-row" role="button" tabindex="0" onclick="bukaInvoiceTagihan(\'' + idJs + '\')" onkeydown="inputStep2TagihanRowKey(event,\'' + idJs + '\')">' +
+                    '<span class="input-step2-tagihan-info">' +
+                        '<span class="min-w-0 text-left">' +
+                            '<span class="block text-[10px] text-slate-600">' + escapeHtml(tagihanFormatTanggalID(item && item.tanggalNota)) + ' \u00b7 ' + usia + ' hari</span>' +
+                        '</span>' +
+                        '<span class="shrink-0 text-right">' +
+                            '<span class="block font-extrabold text-[10px] ' + (merah ? 'text-red-600' : 'text-slate-700') + '">Rp ' + Number(item && item.nominal ? item.nominal : 0).toLocaleString('id-ID') + '</span>' +
+                            '<span class="block text-[8px] text-slate-400">' + escapeHtml(String(item && item.payment != null ? item.payment : '-')) + '</span>' +
+                        '</span>' +
                     '</span>' +
-                    '<span class="shrink-0 text-right">' +
-                        '<span class="block font-extrabold text-[10px] ' + (merah ? 'text-red-600' : 'text-slate-700') + '">Rp ' + Number(item && item.nominal ? item.nominal : 0).toLocaleString('id-ID') + '</span>' +
-                        '<span class="block text-[8px] text-slate-400">' + escapeHtml(String(item && item.payment != null ? item.payment : '-')) + '</span>' +
-                    '</span>' +
-                '</button>';
+                    aksi +
+                '</div>';
             }).join('');
             box.classList.remove('hidden');
         }
@@ -5554,6 +5583,25 @@ startAutoRefresh();
                 box.classList.add('hidden');
                 console.warn('Gagal memuat tagihan Step 2:', err && err.message ? err.message : err);
             }).getTagihanData(salesArg, currentUsernameInput);
+        }
+
+        // Task 103: segarkan panel TAGIHAN BELUM LUNAS Step 2 dari data global
+        // terbaru - dipanggil saat status berubah / data tagihan dimuat ulang.
+        function refreshInputStep2TagihanFromGlobal() {
+            try {
+                const box = document.getElementById('inputStep2Tagihan');
+                if (!box || box.classList.contains('hidden')) return;
+                if (!Array.isArray(globalTagihanData) || !globalTagihanData.length) return;
+                const outlet = String(($('#inputOutlet').val() || '')).trim();
+                if (!outlet) return;
+                renderInputStep2Tagihan(outlet);
+            } catch (eRef) {}
+        }
+        function inputStep2TagihanRowKey(e, id) {
+            if (e && (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar')) {
+                e.preventDefault();
+                bukaInvoiceTagihan(id);
+            }
         }
 
         function renderCashbackOptionsForInputChannel() {
@@ -10208,6 +10256,7 @@ startAutoRefresh();
             const dsrCached = window._homeDsrCache && window._homeDsrCache[qkey];
             if (!force && dsrCached) {
                 window._homeHariIniCache = dsrCached.hi; window._homeBerandaCache = dsrCached.ber;
+                if (dsrCached.kj) applyKunjunganHariIni(dsrCached.kj);
                 homeLastLoadedAt = dsrCached.at; homeLastQueryKey = qkey;
                 applyHomeHariIni(dsrCached.hi);
                 if (homeHasCustomMonthYear()) loadHomeWeeklyAndStatus();
@@ -10234,6 +10283,8 @@ startAutoRefresh();
                 applyHomeHariIni(window._homeHariIniCache);
                 if(homeHasCustomMonthYear())loadHomeWeeklyAndStatus();
                 else applyHomeBeranda(window._homeBerandaCache||{});
+                if (res && res.kunjungan) applyKunjunganHariIni(res.kunjungan);
+                else if (!kunjunganLegacyTried) { kunjunganLegacyTried = true; loadKunjunganHariIni(false); }
                 _prefetchHomeDsrOptions(dsr);
             }).withFailureHandler(function(){window._homeAllUnavailable=true;loadHomeRebuildLegacy(dsr);}).getDashboardBerandaAll(currentUser||'',currentUsernameInput||'',0,0,dsr,false);
         }
@@ -10249,13 +10300,14 @@ startAutoRefresh();
                     window._homeDsrFetching[k]=false;
                     if(res&&res.success){
                         window._homeDsrCache=window._homeDsrCache||{};
-                        window._homeDsrCache[k]={hi:res.hariIni||{},ber:res.beranda||{},at:Date.now()};
+                        window._homeDsrCache[k]={hi:res.hariIni||{},ber:res.beranda||{},kj:res.kunjungan||null,at:Date.now()};
                         if(rerenderIfCurrent&&selectedHomeDsr()===dsr&&!window._appBootstrapInFlight){
                             window._homeHariIniCache=res.hariIni||{};window._homeBerandaCache=res.beranda||{};
                             homeLastLoadedAt=Date.now();homeLastQueryKey=k;
                             applyHomeHariIni(window._homeHariIniCache);
                             if(homeHasCustomMonthYear())loadHomeWeeklyAndStatus();
                             else applyHomeBeranda(window._homeBerandaCache||{});
+                            if (res.kunjungan) applyKunjunganHariIni(res.kunjungan);
                         }
                     }
                 }).withFailureHandler(function(){window._homeDsrFetching[k]=false;}).getDashboardBerandaAll(acct,user,0,0,dsr,false);
@@ -10285,6 +10337,128 @@ startAutoRefresh();
                 })();
             }catch(e){}
         }
+        // ===== Task 102: Kunjungan Bengkel Hari ini (sumber: kolom DAY VISIT sheet OUTLET) =====
+        // Backend menghitung pola bergantian mingguan (set hari ganjil "1,3" vs genap "2,4",
+        // acuan hari ini) dan label gabungan "Jumat1,3". Klik baris -> detail seperti halaman Outlet.
+        let globalKunjunganData = null;
+        let kunjunganLoading = false;
+        let kunjunganLegacyTried = false;
+        function applyKunjunganHariIni(k) {
+            try {
+                const card = document.getElementById('cstKunjunganCard');
+                if (!card) return;
+                if (!k || !k.success || !Array.isArray(k.items)) { card.classList.add('hidden'); return; }
+                card.classList.remove('hidden');
+                globalKunjunganData = k;
+                const lbl = document.getElementById('cstKunjunganLabel');
+                if (lbl) lbl.textContent = String(k.scheduleLabel || '');
+                const sub = document.getElementById('cstKunjunganSub');
+                if (sub) sub.textContent = 'Pola bergantian mingguan \u2014 minggu ini: ' + String(k.setLabel || '-') + ' \u00b7 minggu depan: ' + String(k.nextSetLabel || '-') + ' \u00b7 minggu depannya lagi: ' + String(k.setLabel || '-') + '.';
+                const cnt = document.getElementById('cstKunjunganCount');
+                if (cnt) cnt.textContent = (k.count || 0) + ' bengkel';
+                const body = document.getElementById('cstKunjunganBody');
+                if (!body) return;
+                const items = k.items;
+                if (!items.length) { body.innerHTML = '<tr><td colspan="6" class="cst-kunjungan-empty">Tidak ada kunjungan bengkel hari ini.</td></tr>'; return; }
+                let html = '';
+                items.forEach(function(item, idx) {
+                    const dataString = encodeURIComponent(JSON.stringify({ outlet: item.outlet || '', dsr: item.dsr || '', custCode: item.custCode || '', dayVisit: item.dayVisit || '', label: item.label || '' }));
+                    html += '<tr class="' + (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60') + ' border-b border-slate-100 hover:bg-emerald-50/60 cursor-pointer transition" onclick="openKunjunganDetail(\'' + dataString + '\')" title="Ketuk untuk melihat detail outlet">' +
+                        '<td>' + (idx + 1) + '</td>' +
+                        '<td class="kj-outlet">' + escapeHtml(item.outlet || '-') + '</td>' +
+                        '<td>' + escapeHtml(item.custCode || '-') + '</td>' +
+                        '<td>' + escapeHtml(item.dsr || '-') + '</td>' +
+                        '<td>' + escapeHtml(item.dayVisit || '-') + '</td>' +
+                        '<td><span class="cst-kunjungan-label">' + escapeHtml(item.label || '') + '</span></td>' +
+                        '</tr>';
+                });
+                body.innerHTML = html;
+            } catch (e) {}
+        }
+        function loadKunjunganHariIni(forceReload) {
+            try {
+                if (kunjunganLoading) return;
+                kunjunganLoading = true;
+                google.script.run
+                    .withSuccessHandler(function(res) { kunjunganLoading = false; applyKunjunganHariIni(res); })
+                    .withFailureHandler(function() { kunjunganLoading = false; })
+                    .getKunjunganBengkelHariIni(currentUser || '', currentUsernameInput || '', selectedHomeDsr() || '', !!forceReload);
+            } catch (e) { kunjunganLoading = false; }
+        }
+        function _kunjunganNorm_(s) { return String(s == null ? '' : s).toUpperCase().replace(/\s+/g, ' ').trim(); }
+        function _kunjunganQuarterSort_(keys) {
+            return keys.slice().sort(function(a, b) {
+                function qk(v) { const m = String(v || '').match(/Q\s*([1-4])\s*(\d{4})/i); return m ? Number(m[2]) * 10 + Number(m[1]) : -1; }
+                return qk(b) - qk(a) || String(b).localeCompare(String(a));
+            });
+        }
+        function openKunjunganDetail(encodedData) {
+            let info = null;
+            try { info = JSON.parse(decodeURIComponent(encodedData)); } catch (e) { return; }
+            if (!info) return;
+            if (Object.keys(rawMonitoringDataObject || {}).length > 0) { _openKunjunganDetailFromMonitoring(info); return; }
+            try {
+                showLoading(true);
+                google.script.run
+                    .withSuccessHandler(function(dataObj) {
+                        showLoading(false);
+                        try { rawMonitoringDataObject = dataObj || {}; } catch (eStore) {}
+                        _openKunjunganDetailFromMonitoring(info);
+                    })
+                    .withFailureHandler(function() { showLoading(false); _openKunjunganDetailFallback(info); })
+                    .getMonitoringOutletData(currentUser || '', currentUsernameInput || '');
+            } catch (e) { _openKunjunganDetailFallback(info); }
+        }
+        function _openKunjunganDetailFromMonitoring(info) {
+            const quarters = _kunjunganQuarterSort_(Object.keys(rawMonitoringDataObject || {}));
+            const quarter = quarters.length ? quarters[0] : '';
+            const map = quarter ? rawMonitoringDataObject[quarter] : null;
+            const arr = map ? Object.keys(map).map(function(k) { return map[k]; }) : [];
+            const oKey = _kunjunganNorm_(info.outlet), cKey = _kunjunganNorm_(info.custCode), dKey = _kunjunganNorm_(info.dsr);
+            let row = null;
+            if (oKey && cKey) row = arr.find(function(it) { return _kunjunganNorm_(it && it.outlet) === oKey && _kunjunganNorm_(it && it.custCode) === cKey && (!dKey || !_kunjunganNorm_(it && it.dsr) || _kunjunganNorm_(it && it.dsr) === dKey); });
+            if (!row && oKey && cKey) row = arr.find(function(it) { return _kunjunganNorm_(it && it.outlet) === oKey && _kunjunganNorm_(it && it.custCode) === cKey; });
+            if (!row && oKey) row = arr.find(function(it) { return _kunjunganNorm_(it && it.outlet) === oKey; });
+            if (!row) { _openKunjunganDetailFallback(info); return; }
+            const target = Number(row.targetQuarter || 0), actual = Number(row.totalQuarterVol || 0);
+            const achievement = target > 0 ? (actual / target) * 100 : 0;
+            const dataString = encodeURIComponent(JSON.stringify({
+                outlet: row.outlet || info.outlet || '',
+                dsr: row.dsr || info.dsr || '',
+                custCode: row.custCode || info.custCode || '',
+                quarter: quarter,
+                total: actual,
+                targetQuarter: target,
+                targetQuarterLiter: Number(row.targetQuarterLiter || 0),
+                targetMonthly: Number(row.targetMonthly || 0),
+                targetMonthlyLiter: Number(row.targetMonthlyLiter || 0),
+                achievement: achievement,
+                m1: row.m1, m2: row.m2, m3: row.m3
+            }));
+            tampilkanDetailMonitoring(dataString);
+        }
+        function _openKunjunganDetailFallback(info) {
+            try {
+                setDetailModalNoFooter();
+                document.getElementById('modalTitle').textContent = 'DETAIL';
+                document.getElementById('modalSubtitle').textContent = (info.outlet || '') + (info.custCode ? ' \u2022 CUST.CODE ' + info.custCode : '');
+                document.getElementById('modalBody').innerHTML =
+                    '<div class="mt-3 rounded-xl border border-slate-200 bg-white p-3">' +
+                    '<div class="text-[10px] font-extrabold text-slate-700">Kunjungan Bengkel Hari ini</div>' +
+                    '<div class="mt-2 overflow-x-auto"><table class="w-full text-[10px]"><tbody>' +
+                    '<tr><td class="p-1.5 text-left font-bold text-slate-400">Nama Outlet</td><td class="p-1.5 text-right font-bold text-slate-800">' + escapeHtml(info.outlet || '-') + '</td></tr>' +
+                    '<tr><td class="p-1.5 text-left font-bold text-slate-400">CUST.CODE</td><td class="p-1.5 text-right font-bold text-slate-800">' + escapeHtml(info.custCode || '-') + '</td></tr>' +
+                    '<tr><td class="p-1.5 text-left font-bold text-slate-400">DSR</td><td class="p-1.5 text-right font-bold text-slate-800">' + escapeHtml(info.dsr || '-') + '</td></tr>' +
+                    '<tr><td class="p-1.5 text-left font-bold text-slate-400">Day Visit</td><td class="p-1.5 text-right font-bold text-slate-800">' + escapeHtml(info.dayVisit || '-') + '</td></tr>' +
+                    '<tr><td class="p-1.5 text-left font-bold text-slate-400">Jadwal</td><td class="p-1.5 text-right"><span class="cst-kunjungan-label">' + escapeHtml(info.label || '-') + '</span></td></tr>' +
+                    '</tbody></table></div>' +
+                    '<div class="text-[8.5px] text-slate-400 mt-1.5">Outlet ini belum memiliki data monitoring/target, sehingga detail lengkap pencapaian tidak tersedia.</div>' +
+                    '</div>';
+                const kjModal = document.getElementById('customModal');
+                if (kjModal) kjModal.style.display = 'flex';
+            } catch (e) {}
+        }
+
         // Fallback backend lama: getDashboardHariIni + getDashboardBerandaDetail
         // (keduanya tersedia di semua versi Code.gs) sehingga grafik mingguan,
         // KPI, dan Ringkasan Status Transaksi tetap dapat dimuat.
@@ -10390,8 +10564,8 @@ startAutoRefresh();
         }
 
         function getHomeRebuildImages(){return (Array.isArray(homeRebuildData)?homeRebuildData:[]).slice().sort(function(a,b){return Number(b&&b.rowNumber||0)-Number(a&&a.rowNumber||0);}).filter(function(x){return x&&String(x.gambar||'').trim()!=='';});}
-        function renderHomeRebuildBanner(data){homeRebuildData=Array.isArray(data)?data.slice():[];const list=getHomeRebuildImages(),section=document.getElementById('homeRebuildBanner'),track=document.getElementById('homeRebuildTrack'),dots=document.getElementById('homeRebuildDots');if(!section||!track||!dots)return;if(!list.length){section.classList.remove('show');track.innerHTML='';dots.innerHTML='';stopHomeRebuildAuto();return;}homeRebuildIndex=Math.max(0,Math.min(homeRebuildIndex,list.length-1));section.classList.add('show');track.innerHTML=list.map(function(x,i){return '<div class="home-rebuild-slide" data-i="'+i+'" onclick="openHomeRebuildImage(this.dataset.i)"><img src="'+escapeHtml(String(x.gambar||''))+'" alt="Pengumuman" draggable="false">'+(String(x.keterangan||'').trim()?'<div class="home-rebuild-caption">'+escapeHtml(String(x.keterangan||''))+'</div>':'')+'</div>';}).join('');updateHomeRebuildPosition();bindHomeRebuildSwipe();startHomeRebuildAuto();}
-        function updateHomeRebuildPosition(){const track=document.getElementById('homeRebuildTrack'),dots=document.getElementById('homeRebuildDots'),list=getHomeRebuildImages();if(!track||!list.length)return;homeRebuildIndex=(homeRebuildIndex+list.length)%list.length;track.style.transform='translate3d('+(-homeRebuildIndex*100)+'%,0,0)';if(dots)dots.innerHTML=list.map(function(_,i){return '<span class="home-rebuild-dot'+(i===homeRebuildIndex?' active':'')+'"></span>';}).join('');}
+        function renderHomeRebuildBanner(data){homeRebuildData=Array.isArray(data)?data.slice():[];const list=getHomeRebuildImages(),section=document.getElementById('homeRebuildBanner'),track=document.getElementById('homeRebuildTrack'),dots=document.getElementById('homeRebuildDots'),cap=document.getElementById('homeRebuildCaption');if(!section||!track||!dots)return;if(!list.length){section.classList.remove('show','single');track.innerHTML='';dots.innerHTML='';if(cap)cap.textContent='';stopHomeRebuildAuto();return;}homeRebuildIndex=Math.max(0,Math.min(homeRebuildIndex,list.length-1));section.classList.add('show');section.classList.toggle('single',list.length<2);/* Task 101: kartu banner - gambar di stage, keterangan jelas di bawah gambar */track.innerHTML=list.map(function(x,i){return '<div class="home-rebuild-slide" data-i="'+i+'" onclick="openHomeRebuildImage(this.dataset.i)"><img src="'+escapeHtml(String(x.gambar||''))+'" alt="Pengumuman" draggable="false"></div>';}).join('');updateHomeRebuildPosition();bindHomeRebuildSwipe();startHomeRebuildAuto();}
+        function updateHomeRebuildPosition(){const track=document.getElementById('homeRebuildTrack'),dots=document.getElementById('homeRebuildDots'),cap=document.getElementById('homeRebuildCaption'),list=getHomeRebuildImages();if(!track||!list.length)return;homeRebuildIndex=(homeRebuildIndex+list.length)%list.length;track.style.transform='translate3d('+(-homeRebuildIndex*100)+'%,0,0)';if(dots)dots.innerHTML=list.map(function(_,i){return '<span class="home-rebuild-dot'+(i===homeRebuildIndex?' active':'')+'"></span>';}).join('');/* Task 101: keterangan pengumuman aktif tampil jelas di bawah gambar */if(cap)cap.textContent=String(list[homeRebuildIndex]&&list[homeRebuildIndex].keterangan||'').trim();}
         function homeRebuildNext(e){if(e)e.stopPropagation();const l=getHomeRebuildImages();if(!l.length)return;homeRebuildIndex=(homeRebuildIndex+1)%l.length;updateHomeRebuildPosition();startHomeRebuildAuto();}function homeRebuildPrev(e){if(e)e.stopPropagation();const l=getHomeRebuildImages();if(!l.length)return;homeRebuildIndex=(homeRebuildIndex-1+l.length)%l.length;updateHomeRebuildPosition();startHomeRebuildAuto();}
         function startHomeRebuildAuto(){stopHomeRebuildAuto();if(getHomeRebuildImages().length<2)return;homeRebuildTimer=setInterval(function(){const t=document.getElementById('tabHome');if(!t||t.classList.contains('hidden'))return;homeRebuildNext();},5000);}function stopHomeRebuildAuto(){if(homeRebuildTimer){clearInterval(homeRebuildTimer);homeRebuildTimer=null;}}
         function bindHomeRebuildSwipe(){const v=document.getElementById('homeRebuildBanner');if(!v||v.dataset.swipeBound==='1')return;v.dataset.swipeBound='1';v.addEventListener('touchstart',function(e){const t=e.touches&&e.touches[0];if(t){homeRebuildTouchX=t.clientX;homeRebuildTouchY=t.clientY;}},{passive:true});v.addEventListener('touchend',function(e){const t=e.changedTouches&&e.changedTouches[0];if(!t)return;const dx=t.clientX-homeRebuildTouchX,dy=t.clientY-homeRebuildTouchY;if(Math.abs(dx)<45||Math.abs(dx)<Math.abs(dy))return;dx<0?homeRebuildNext():homeRebuildPrev();},{passive:true});}
@@ -10770,6 +10944,9 @@ startAutoRefresh();
             if (modal && modal.style.display === 'flex') return false; // modal terbuka -> retry
             __pencapaianDataStale = true; // Task 100: Pencapaian (termasuk actual semua sales) menunggu muat ulang penuh
             const refreshed = autoRefreshActiveTab(true);
+            // Task 102: saat Beranda aktif, segarkan daftar Kunjungan Bengkel Hari ini secara silent
+            // (bypass cache 5 menit) sehingga perubahan DAY VISIT / data lain langsung terlihat.
+            try { const _kjHome = document.getElementById('tabHome'); if (_kjHome && !_kjHome.classList.contains('hidden')) loadKunjunganHariIni(true); } catch (eKjHome) {}
             return refreshed !== false;
         }
         function __dataVerVisChg() { if (document.visibilityState === 'visible') __dataVerPoll(); }
@@ -11834,6 +12011,38 @@ function isAdminPengumuman() {
     return String(typeof currentUsernameInput !== 'undefined' ? currentUsernameInput : '').trim().toLowerCase() === 'admin';
 }
 
+/* Task 101: teks berjalan (pengumuman tanpa gambar) tampil di header utama,
+   berjalan dari kanan ke kiri. Dipanggil dari applyAppBootstrap,
+   checkActivePengumuman, refreshAllPages, dan renderAnnouncementPage. */
+function renderAnnouncementHeaderMarquee(data) {
+    var headerMarquee = document.getElementById('announcementHeaderMarquee');
+    if (!headerMarquee) return;
+    var list = Array.isArray(data) ? data.slice() : [];
+    /* Pengumuman terbaru (row paling akhir di sheet PENGUMUMAN) selalu tampil pertama. */
+    list.sort(function(a, b) {
+        return Number(b && b.rowNumber || 0) - Number(a && a.rowNumber || 0);
+    });
+    var textItems = list.filter(function(item) {
+        return item && String(item.gambar || '').trim() === '' && String(item.keterangan || '').trim() !== '';
+    });
+    if (textItems.length) {
+        var messages = textItems.map(function(item) {
+            return escapeHtml(String(item.keterangan || '').trim());
+        }).filter(Boolean);
+        var combined = messages.join(' &nbsp;&nbsp; &bull; &nbsp;&nbsp; ');
+        var repeated = combined + ' &nbsp;&nbsp; &bull; &nbsp;&nbsp; ' + combined;
+        headerMarquee.innerHTML =
+            '<div class="pengumuman-marquee-track">' +
+            '<span class="pengumuman-marquee-text">' + repeated + '</span>' +
+            '<span class="pengumuman-marquee-text" aria-hidden="true">' + repeated + '</span>' +
+            '</div>';
+        headerMarquee.classList.remove('hidden');
+    } else {
+        headerMarquee.innerHTML = '';
+        headerMarquee.classList.add('hidden');
+    }
+}
+
 function renderAnnouncementPage(data) {
     var box = document.getElementById('announcementContent');
     var headerMarquee = document.getElementById('announcementHeaderMarquee');
@@ -11862,25 +12071,8 @@ function renderAnnouncementPage(data) {
                '</div>';
     }).join('') + '</div>') : '';
 
-    /* Pengumuman tanpa gambar masuk ke HEADER dan berjalan dari kanan ke kiri. */
-    if (headerMarquee) {
-        if (textItems.length) {
-            var messages = textItems.map(function(item) {
-                return escapeHtml(String(item.keterangan || '').trim());
-            }).filter(Boolean);
-            var combined = messages.join(' &nbsp;&nbsp; • &nbsp;&nbsp; ');
-            var repeated = combined + ' &nbsp;&nbsp; • &nbsp;&nbsp; ' + combined;
-            headerMarquee.innerHTML =
-                '<div class="pengumuman-marquee-track">' +
-                '<span class="pengumuman-marquee-text">' + repeated + '</span>' +
-                '<span class="pengumuman-marquee-text" aria-hidden="true">' + repeated + '</span>' +
-                '</div>';
-            headerMarquee.classList.remove('hidden');
-        } else {
-            headerMarquee.innerHTML = '';
-            headerMarquee.classList.add('hidden');
-        }
-    }
+    /* Task 101: teks berjalan header via renderAnnouncementHeaderMarquee. */
+    if (headerMarquee) renderAnnouncementHeaderMarquee(list);
 }
 
 function openPengumumanImage(imageUrl) {
@@ -11948,6 +12140,7 @@ function checkActivePengumuman() {
     google.script.run.withSuccessHandler(function(res) {
         var data = res && res.success ? res.data : [];
         renderHomeRebuildBanner(data);
+        renderAnnouncementHeaderMarquee(data); /* Task 101: teks berjalan tampil di header */
         // Task 94: showAnnouncementPage dihapus - halaman pengumuman pasca-login tidak ditampilkan lagi.
     }).withFailureHandler(function(err) {
         console.warn('Gagal memuat pengumuman:', err && err.message ? err.message : err);
@@ -14198,6 +14391,8 @@ function handleTagihanLoaded(res) {
     tagihanApplyStatusOverrides(globalTagihanData);
     populateTagihanFilters();
     filterTagihan();
+    // Task 103: segarkan panel tagihan Step 2 bila sedang tampil.
+    try { refreshInputStep2TagihanFromGlobal(); } catch (eStep2) {}
 }
 
 // ===== Task 53: PRODUK BY OUTLET =====
@@ -14921,6 +15116,8 @@ function tagihanTerapkanStatusLokal(changes) {
         it.tanggalLunas = (st === 'LUNAS') ? tagihanTanggalHariIniStr() : '';
     });
     try { renderTagihanList(tagihanFilteredData || []); } catch (eLocal) {}
+    // Task 103: panel TAGIHAN BELUM LUNAS pada Step 2 Input Order ikut segar.
+    try { refreshInputStep2TagihanFromGlobal(); } catch (eStep2) {}
 }
 
 // Ubah status SATU tagihan lewat tombol — OPTIMISTIK (Task 61): tampilan
@@ -16584,6 +16781,32 @@ rect[fill="#059669"]{fill:#00a651!important}
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
 })();
 </script>
+<style id="cst-kunjungan-v1">
+/* Task 102 - Kunjungan Bengkel Hari ini (tampilan tabel seperti halaman Monitoring Outlet) */
+.cst-kunjungan-card{margin-bottom:14px}
+.cst-kunjungan-card .cst-card-head{flex-wrap:wrap}
+.cst-kunjungan-label{display:inline-flex;align-items:center;font-size:10px;font-weight:900;color:#047857;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.cst-kunjungan-count{font-size:11px;font-weight:700;color:#047857;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:999px;padding:3px 9px;white-space:nowrap}
+.cst-kunjungan-sub{padding:8px 16px 0;font-size:9px;font-weight:700;color:#64748b;line-height:1.5}
+.cst-kunjungan-tblwrap{margin:10px 14px 14px;border:1px solid #e2e8f0;border-radius:10px;max-height:300px;overflow:auto;-webkit-overflow-scrolling:touch}
+.cst-kunjungan-tblwrap::-webkit-scrollbar{width:8px;height:8px}
+.cst-kunjungan-tblwrap::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
+.cst-kunjungan-tblwrap::-webkit-scrollbar-track{background:#f1f5f9}
+.cst-kunjungan-table{width:100%;min-width:620px;border-collapse:collapse;font-size:11px}
+.cst-kunjungan-table thead tr{background:linear-gradient(180deg,#edf6f0,#e7f1eb)}
+.cst-kunjungan-table thead th{position:sticky;top:0;z-index:2;background:#e7f1eb;padding:9px 10px;color:#335d45;font-weight:900;text-align:center;white-space:nowrap;border-bottom:1px solid #d5e6db}
+.cst-kunjungan-table td{padding:9px 10px;border-top:1px solid #eef2f7;color:#334155;font-weight:600;text-align:center;vertical-align:middle;white-space:nowrap}
+.cst-kunjungan-table td.kj-outlet{text-align:left;white-space:normal;overflow-wrap:anywhere;word-break:normal;font-weight:800;color:#1e293b}
+.cst-kunjungan-table tbody tr:nth-child(even){background:#f8fafc}
+.cst-kunjungan-table tbody tr:hover{background:#eef9f2}
+.cst-kunjungan-empty{text-align:center;color:#94a3b8;font-size:10px;font-weight:600;padding:16px 10px}
+@media(max-width:640px){
+.cst-kunjungan-table{font-size:10px;min-width:560px}
+.cst-kunjungan-table thead th,.cst-kunjungan-table td{padding:7px 8px}
+.cst-kunjungan-tblwrap{margin:8px 8px 10px;max-height:260px}
+.cst-kunjungan-sub{padding:6px 12px 0;font-size:8px}
+}
+</style>
 <style id="cst-beranda-v1">
 /* Task 31 — Beranda sesuai mockup "Contoh Beranda" */
 #tabHome .cst-hero{position:relative;border-radius:18px;overflow:hidden;background:linear-gradient(100deg,#0d3b26 0%,#0a2f1e 55%,#072418 100%);box-shadow:0 10px 26px rgba(7,36,24,.22);min-height:150px;display:flex;align-items:stretch;margin-bottom:14px}
