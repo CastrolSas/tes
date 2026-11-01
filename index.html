@@ -14876,12 +14876,13 @@ function filterTagihan() {
         return true;
     });
     // BELUM LUNAS selalu ditampilkan paling atas; LUNAS tampil setelahnya.
+    // Task 105: dalam kelompok, urut berdasarkan umur nota terkecil -> terbesar.
     filtered.sort(function(a,b){
         const sa = String(a.statusTagihan || 'BELUM LUNAS').toUpperCase(), sb = String(b.statusTagihan || 'BELUM LUNAS').toUpperCase();
         const ba = (sa === 'LUNAS') ? 1 : 0, bb = (sb === 'LUNAS') ? 1 : 0;
         if (ba !== bb) return ba - bb;
         const ua = tagihanUsiaHari(a.tanggalNota), ub = tagihanUsiaHari(b.tanggalNota);
-        if (ub !== ua) return ub - ua;
+        if (ua !== ub) return ua - ub;
         return new Date(String(a.tanggal || '')).getTime() - new Date(String(b.tanggal || '')).getTime();
     });
     tagihanFilteredData = filtered;
