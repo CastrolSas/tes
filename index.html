@@ -2299,12 +2299,6 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-ser
   .input-step2-tagihan-scroll{max-height:120px}
   .input-step2-tagihan-row{padding:4px 7px;border-radius:9px}
 }
-.input-step2-tagihan-info{display:flex;align-items:center;justify-content:space-between;gap:6px;flex:1;min-width:0}
-.input-step2-tagihan-aksi{display:flex;align-items:center;gap:4px;flex-shrink:0}
-.input-step2-tagihan-aksi .tg-btn{padding:3px 8px;font-size:9px;border-radius:7px}
-@media(max-width:380px){
-  .input-step2-tagihan-aksi .tg-btn{padding:2.5px 6px;font-size:8.5px}
-}
 </style>
 <style id="castrol-step2-simple-meta">
 /* STEP 2 - customer/channel dibuat sangat sederhana, tanpa kartu/box */
@@ -5536,26 +5530,15 @@ startAutoRefresh();
                 const usia = tagihanUsiaHari(item);
                 const merah = usia >= TAGIHAN_UMUR_MERAH;
                 const idKey = String(item && item.id != null ? item.id : '');
-                const idJs = escapeHtml(idKey);
-                const stRow = String(item && item.statusTagihan != null ? item.statusTagihan : 'BELUM LUNAS').trim().toUpperCase();
-                const aktifLunas = stRow === 'LUNAS';
-                const aksi = (item && item.isCash) ? '' :
-                    '<span class="input-step2-tagihan-aksi" onclick="event.stopPropagation()">' +
-                        '<button type="button" onclick="ubahStatusTagihanSatuan(\'' + idJs + '\',\'LUNAS\')" class="tg-btn tg-btn-lunas' + (aktifLunas ? ' is-active' : '') + '" title="Tandai LUNAS">Lunas</button>' +
-                        '<button type="button" onclick="ubahStatusTagihanSatuan(\'' + idJs + '\',\'BELUM LUNAS\')" class="tg-btn tg-btn-belum' + (!aktifLunas ? ' is-active' : '') + '" title="Tandai BELUM LUNAS">Belum</button>' +
-                    '</span>';
-                return '<div class="input-step2-tagihan-row" role="button" tabindex="0" onclick="bukaInvoiceTagihan(\'' + idJs + '\')" onkeydown="inputStep2TagihanRowKey(event,\'' + idJs + '\')">' +
-                    '<span class="input-step2-tagihan-info">' +
-                        '<span class="min-w-0 text-left">' +
-                            '<span class="block text-[10px] text-slate-600">' + escapeHtml(tagihanFormatTanggalID(item && item.tanggalNota)) + ' \u00b7 ' + usia + ' hari</span>' +
-                        '</span>' +
-                        '<span class="shrink-0 text-right">' +
-                            '<span class="block font-extrabold text-[10px] ' + (merah ? 'text-red-600' : 'text-slate-700') + '">Rp ' + Number(item && item.nominal ? item.nominal : 0).toLocaleString('id-ID') + '</span>' +
-                            '<span class="block text-[8px] text-slate-400">' + escapeHtml(String(item && item.payment != null ? item.payment : '-')) + '</span>' +
-                        '</span>' +
+                return '<button type="button" class="input-step2-tagihan-row" onclick="bukaInvoiceTagihan(\'' + escapeHtml(idKey) + '\')">' +
+                    '<span class="min-w-0 text-left">' +
+                        '<span class="block text-[10px] text-slate-600">' + escapeHtml(tagihanFormatTanggalID(item && item.tanggalNota)) + ' \u00b7 ' + usia + ' hari</span>' +
                     '</span>' +
-                    aksi +
-                '</div>';
+                    '<span class="shrink-0 text-right">' +
+                        '<span class="block font-extrabold text-[10px] ' + (merah ? 'text-red-600' : 'text-slate-700') + '">Rp ' + Number(item && item.nominal ? item.nominal : 0).toLocaleString('id-ID') + '</span>' +
+                        '<span class="block text-[8px] text-slate-400">' + escapeHtml(String(item && item.payment != null ? item.payment : '-')) + '</span>' +
+                    '</span>' +
+                '</button>';
             }).join('');
             box.classList.remove('hidden');
         }
@@ -5596,12 +5579,6 @@ startAutoRefresh();
                 if (!outlet) return;
                 renderInputStep2Tagihan(outlet);
             } catch (eRef) {}
-        }
-        function inputStep2TagihanRowKey(e, id) {
-            if (e && (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar')) {
-                e.preventDefault();
-                bukaInvoiceTagihan(id);
-            }
         }
 
         function renderCashbackOptionsForInputChannel() {
