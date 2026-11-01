@@ -14856,6 +14856,20 @@ function populateTagihanFilters() {
     if (dsrWrap) dsrWrap.classList.toggle('hidden', !tagihanIsAdminScope());
 }
 
+// Task 106: komparator urutan tabel Tagihan dipisah agar bisa dipakai ulang.
+// Kelompok BELUM LUNAS selalu di atas, LUNAS paling bawah; di dalam kelompok
+// urut berdasarkan umur nota terkecil -> terbesar (Task 105).
+function tagihanSortData(arr) {
+    (arr || []).sort(function(a,b){
+        const sa = String(a.statusTagihan || 'BELUM LUNAS').toUpperCase(), sb = String(b.statusTagihan || 'BELUM LUNAS').toUpperCase();
+        const ba = (sa === 'LUNAS') ? 1 : 0, bb = (sb === 'LUNAS') ? 1 : 0;
+        if (ba !== bb) return ba - bb;
+        const ua = tagihanUsiaHari(a.tanggalNota), ub = tagihanUsiaHari(b.tanggalNota);
+        if (ua !== ub) return ua - ub;
+        return new Date(String(a.tanggal || '')).getTime() - new Date(String(b.tanggal || '')).getTime();
+    });
+}
+
 function filterTagihan() {
     const searchEl = document.getElementById('searchTagihanInput');
     const keyword = String(searchEl && searchEl.value || '').trim().toUpperCase();
@@ -14875,16 +14889,9 @@ function filterTagihan() {
         if (usiaF === 'muda' && usia >= TAGIHAN_UMUR_MERAH) return false;
         return true;
     });
-    // BELUM LUNAS selalu ditampilkan paling atas; LUNAS tampil setelahnya.
-    // Task 105: dalam kelompok, urut berdasarkan umur nota terkecil -> terbesar.
-    filtered.sort(function(a,b){
-        const sa = String(a.statusTagihan || 'BELUM LUNAS').toUpperCase(), sb = String(b.statusTagihan || 'BELUM LUNAS').toUpperCase();
-        const ba = (sa === 'LUNAS') ? 1 : 0, bb = (sb === 'LUNAS') ? 1 : 0;
-        if (ba !== bb) return ba - bb;
-        const ua = tagihanUsiaHari(a.tanggalNota), ub = tagihanUsiaHari(b.tanggalNota);
-        if (ua !== ub) return ua - ub;
-        return new Date(String(a.tanggal || '')).getTime() - new Date(String(b.tanggal || '')).getTime();
-    });
+    // Task 106: urutan dipakai ulang dari tagihanSortData() (BELUM LUNAS di atas,
+    // LUNAS paling bawah, umur nota terkecil -> terbesar dalam kelompok).
+    tagihanSortData(filtered);
     tagihanFilteredData = filtered;
     tagihanPage = 1;
     renderTagihanList(filtered);
@@ -15072,6 +15079,9 @@ function tagihanTerapkanStatusLokal(changes) {
         it.statusTagihan = st;
         it.tanggalLunas = (st === 'LUNAS') ? tagihanTanggalHariIniStr() : '';
     });
+    // Task 106: urutkan ulang tampilan sebelum render - tagihan yang baru
+    // ditandai LUNAS langsung turun ke paling bawah (pagination tidak di-reset).
+    try { tagihanSortData(tagihanFilteredData); } catch (eSortLocal) {}
     try { renderTagihanList(tagihanFilteredData || []); } catch (eLocal) {}
     // Task 103: panel TAGIHAN BELUM LUNAS pada Step 2 Input Order ikut segar.
     try { refreshInputStep2TagihanFromGlobal(); } catch (eStep2) {}
