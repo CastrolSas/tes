@@ -4177,8 +4177,6 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                         </div>
                     </div>
 
-                    <div id="tagihanSummary" class="flex flex-wrap items-center gap-1.5 text-[9px]"></div>
-
                     <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
                         <div class="flex items-center justify-between gap-2 mb-2">
                             <div>
@@ -14838,27 +14836,6 @@ function openProdukOutletDetail(outletName) {
         '</div>';
 }
 
-function renderTagihanSummary() {
-    const el = document.getElementById('tagihanSummary');
-    if (!el) return;
-    const items = globalTagihanData || [];
-    let totalNominal = 0, lunas = 0, lunasNominal = 0, belum = 0, belumNominal = 0, merah = 0;
-    items.forEach(function(it) {
-        const nominal = Number(it.nominal || 0);
-        totalNominal += nominal;
-        const st = String(it.statusTagihan || 'BELUM LUNAS').toUpperCase();
-        if (st === 'LUNAS') { lunas++; lunasNominal += nominal; } else { belum++; belumNominal += nominal; }
-        if (tagihanUsiaHari(it) >= TAGIHAN_UMUR_MERAH) merah++;
-    });
-    const rp = function(n) { return 'Rp ' + Number(n || 0).toLocaleString('id-ID'); };
-    const chip = 'inline-flex items-center gap-1 px-2 py-1 rounded-lg border bg-white font-bold';
-    el.innerHTML =
-        '<span class="' + chip + ' border-slate-200 text-slate-600">Total: <span class="text-slate-800">' + escapeHtml(rp(totalNominal)) + '</span></span>' +
-        '<span class="' + chip + ' border-amber-200 text-amber-700">Belum Lunas: ' + escapeHtml(rp(belumNominal)) + ' (' + belum + ')</span>' +
-        '<span class="' + chip + ' border-emerald-200 text-emerald-700">Lunas: ' + escapeHtml(rp(lunasNominal)) + ' (' + lunas + ')</span>' +
-        '<span class="' + chip + ' border-red-200 text-red-600">Usia ≥ 45 hari: ' + merah + ' tagihan</span>';
-}
-
 function populateTagihanFilters() {
     const fill = function(sel, values, label) {
         if (!sel) return;
@@ -14932,7 +14909,6 @@ function renderTagihanList(data) {
     if (!Array.isArray(data)) data = [];
     const countBadge = document.getElementById('tagihanCount');
     if (countBadge) countBadge.textContent = data.length + ' tagihan';
-    renderTagihanSummary();
     if (data.length === 0) {
         container.innerHTML = '<div class="text-slate-400 text-center py-10 bg-white rounded-2xl border border-slate-100 shadow-sm"><div class="text-3xl mb-2">🧾</div><p class="text-xs font-medium">Tidak ada tagihan.</p></div>';
         return;
