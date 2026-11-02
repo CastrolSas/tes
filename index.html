@@ -1516,7 +1516,7 @@ html,body{height:100%;}
     var isAppsScriptHost = host === 'script.google.com' || host === 'script.googleusercontent.com';
     if (isAppsScriptHost) return;
 
-    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5dkNkseL2AXyP4T3vRATCQEnRC3Ft5ho29iUObmj-Y3H-vRunigrQheYt3jzoBq-p/exec';
+    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxnCwj6qKqPrtZD4luXX5PPW1jlfQcVSzBPpo8HgCxnqFdydrQB0cDNXknFlteI0JIRUA/exec';
     var BRIDGE_URL = CASTROL_APPS_SCRIPT_URL + (CASTROL_APPS_SCRIPT_URL.indexOf('?') >= 0 ? '&' : '?') + 'bridge=1';
     // Task 67: URL deploy diekspos untuk fitur Generate Link Outlet.
     window.__CASTROL_DEPLOY_URL__ = CASTROL_APPS_SCRIPT_URL;
@@ -3825,6 +3825,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                         <section id="cstKunjunganCard" class="cst-card cst-kunjungan-card hidden" aria-label="Kunjungan bengkel hari ini">
                             <div class="cst-card-head"><span class="cst-card-ic" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.6v3.2M16 3.6v3.2M4.4 10.4h15.2M5.6 5.8h12.8a1.6 1.6 0 0 1 1.6 1.6v11.2a1.6 1.6 0 0 1-1.6 1.6H5.6a1.6 1.6 0 0 1-1.6-1.6V7.4a1.6 1.6 0 0 1 1.6-1.6Z"/></svg></span><h3 class="cst-card-title">Kunjungan Bengkel Hari ini</h3><span id="cstKunjunganLabel" class="cst-kunjungan-label"></span><span id="cstKunjunganCount" class="cst-kunjungan-count">0 bengkel</span></div>
                             <div id="cstKunjunganSub" class="cst-kunjungan-sub"></div>
+                            <div id="kjFilterBar" class="kj-filterbar" aria-label="Filter kunjungan per minggu dan hari"></div>
                             <div class="cst-kunjungan-tblwrap"><table class="cst-kunjungan-table"><thead><tr><th style="width:6%;">No</th><th style="width:32%;text-align:left;">Nama Outlet</th><th style="width:14%;">CUST.CODE</th><th style="width:16%;">DSR</th><th style="width:15%;">Day Visit</th><th style="width:17%;">Jadwal</th></tr></thead><tbody id="cstKunjunganBody"><tr><td colspan="6" class="cst-kunjungan-empty">Memuat...</td></tr></tbody></table></div>
                         </section>
                         <section class="cst-card cst-status-card" aria-label="Ringkasan status transaksi outlet">
@@ -10318,33 +10319,78 @@ startAutoRefresh();
         let globalKunjunganData = null;
         let kunjunganLoading = false;
         let kunjunganLegacyTried = false;
+        // Task 107: filter hari + minggu dengan pola set "1,3"/"2,4" bergantian per MINGGU.
+        // Default = hari terkini pada minggu ini. Label hari = nama hari + set, contoh
+        // "Senin2,4" (minggu ini), "Senin1,3" (minggu depan), lalu kembali ke 2,4.
+        let kunjunganView = { week: 0, day: 0 };
+        function _kjDayName_(n) { return ['', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'][Number(n)] || ''; }
+        function _kjTodayNum_() { const d = new Date(); return d.getDay() === 0 ? 7 : d.getDay(); }
+        function _kjItemsForView_(k, weekOff, dayNum) {
+            const setOf = String((weekOff === 1 ? (k.nextWeekSet || k.nextSetLabel) : (k.weekSet || k.setLabel)) || '');
+            let src = Array.isArray(k.all) ? k.all : (Array.isArray(k.items) ? k.items.map(function(it) {
+                return { outlet: it.outlet, custCode: it.custCode, dsr: it.dsr, channel: it.channel, dayVisit: it.dayVisit, days: Array.isArray(it.dayNums) ? it.dayNums : [], set: null };
+            }) : []);
+            const out = src.filter(function(it) {
+                const days = Array.isArray(it.days) ? it.days : [];
+                if (days.indexOf(dayNum) === -1) return false;
+                const st = String(it.set || '').trim();
+                if (st && setOf && st !== setOf) return false;
+                return true;
+            });
+            out.sort(function(a, b) {
+                return String(a.dsr).localeCompare(String(b.dsr), 'id', { numeric: true, sensitivity: 'base' }) ||
+                       String(a.outlet).localeCompare(String(b.outlet), 'id', { numeric: true, sensitivity: 'base' });
+            });
+            return { set: setOf, items: out };
+        }
+        function kunjunganPilihMinggu(w) { kunjunganView.week = (Number(w) === 1) ? 1 : 0; applyKunjunganHariIni(globalKunjunganData); }
+        function kunjunganPilihHari(d) { const n = Number(d); if (n >= 1 && n <= 7) { kunjunganView.day = n; applyKunjunganHariIni(globalKunjunganData); } }
         function applyKunjunganHariIni(k) {
             try {
                 const card = document.getElementById('cstKunjunganCard');
                 if (!card) return;
-                if (!k || !k.success || !Array.isArray(k.items)) { card.classList.add('hidden'); return; }
+                if (!k || !k.success || (!Array.isArray(k.items) && !Array.isArray(k.all))) { card.classList.add('hidden'); return; }
                 card.classList.remove('hidden');
                 globalKunjunganData = k;
+                if (!kunjunganView.day) kunjunganView.day = Number(k.dayNum) || _kjTodayNum_();
+                const view = _kjItemsForView_(k, kunjunganView.week, kunjunganView.day);
+                const dayLabel = _kjDayName_(kunjunganView.day) + view.set;
                 const lbl = document.getElementById('cstKunjunganLabel');
-                if (lbl) lbl.textContent = String(k.scheduleLabel || '');
+                if (lbl) lbl.textContent = dayLabel;
                 const sub = document.getElementById('cstKunjunganSub');
-                if (sub) sub.textContent = 'Pola bergantian mingguan \u2014 minggu ini: ' + String(k.setLabel || '-') + ' \u00b7 minggu depan: ' + String(k.nextSetLabel || '-') + ' \u00b7 minggu depannya lagi: ' + String(k.setLabel || '-') + '.';
+                if (sub) sub.textContent = 'Pola bergantian mingguan \u2014 minggu ini: ' + String(k.weekSet || k.setLabel || '-') + ' \u00b7 minggu depan: ' + String(k.nextWeekSet || k.nextSetLabel || '-') + ' \u00b7 minggu depannya lagi: ' + String(k.weekSet || k.setLabel || '-') + '.';
                 const cnt = document.getElementById('cstKunjunganCount');
-                if (cnt) cnt.textContent = (k.count || 0) + ' bengkel';
+                if (cnt) cnt.textContent = view.items.length + ' bengkel';
+                const bar = document.getElementById('kjFilterBar');
+                if (bar) {
+                    const setIni = String(k.weekSet || k.setLabel || '-');
+                    const setDep = String(k.nextWeekSet || k.nextSetLabel || '-');
+                    const viewSet = (kunjunganView.week === 1) ? setDep : setIni;
+                    let dayPills = '';
+                    for (let dn = 1; dn <= 7; dn++) {
+                        dayPills += '<button type="button" class="kj-pill' + (dn === kunjunganView.day ? ' is-active' : '') + '" onclick="kunjunganPilihHari(' + dn + ')" aria-pressed="' + (dn === kunjunganView.day) + '">' + _kjDayName_(dn) + viewSet + '</button>';
+                    }
+                    bar.innerHTML =
+                        '<div class="kj-filterrow kj-weekrow"><span class="kj-filterlab">Minggu</span>' +
+                        '<button type="button" class="kj-pill' + (kunjunganView.week === 0 ? ' is-active' : '') + '" onclick="kunjunganPilihMinggu(0)">Ini (' + setIni + ')</button>' +
+                        '<button type="button" class="kj-pill' + (kunjunganView.week === 1 ? ' is-active' : '') + '" onclick="kunjunganPilihMinggu(1)">Depan (' + setDep + ')</button>' +
+                        '</div>' +
+                        '<div class="kj-filterrow"><span class="kj-filterlab">Hari</span>' + dayPills + '</div>';
+                }
                 const body = document.getElementById('cstKunjunganBody');
                 if (!body) return;
-                const items = k.items;
-                if (!items.length) { body.innerHTML = '<tr><td colspan="6" class="cst-kunjungan-empty">Tidak ada kunjungan bengkel hari ini.</td></tr>'; return; }
+                const items = view.items;
+                if (!items.length) { body.innerHTML = '<tr><td colspan="6" class="cst-kunjungan-empty">Tidak ada jadwal kunjungan pada ' + escapeHtml(dayLabel) + '.</td></tr>'; return; }
                 let html = '';
                 items.forEach(function(item, idx) {
-                    const dataString = encodeURIComponent(JSON.stringify({ outlet: item.outlet || '', dsr: item.dsr || '', custCode: item.custCode || '', dayVisit: item.dayVisit || '', label: item.label || '' }));
+                    const dataString = encodeURIComponent(JSON.stringify({ outlet: item.outlet || '', dsr: item.dsr || '', custCode: item.custCode || '', dayVisit: item.dayVisit || '', label: dayLabel }));
                     html += '<tr class="' + (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60') + ' border-b border-slate-100 hover:bg-emerald-50/60 cursor-pointer transition" onclick="openKunjunganDetail(\'' + dataString + '\')" title="Ketuk untuk melihat detail outlet">' +
                         '<td>' + (idx + 1) + '</td>' +
                         '<td class="kj-outlet">' + escapeHtml(item.outlet || '-') + '</td>' +
                         '<td>' + escapeHtml(item.custCode || '-') + '</td>' +
                         '<td>' + escapeHtml(item.dsr || '-') + '</td>' +
                         '<td>' + escapeHtml(item.dayVisit || '-') + '</td>' +
-                        '<td><span class="cst-kunjungan-label">' + escapeHtml(item.label || '') + '</span></td>' +
+                        '<td><span class="cst-kunjungan-label">' + escapeHtml(dayLabel) + '</span></td>' +
                         '</tr>';
                 });
                 body.innerHTML = html;
@@ -16804,6 +16850,17 @@ rect[fill="#059669"]{fill:#00a651!important}
 .cst-kunjungan-table tbody tr:nth-child(even){background:#f8fafc}
 .cst-kunjungan-table tbody tr:hover{background:#eef9f2}
 .cst-kunjungan-empty{text-align:center;color:#94a3b8;font-size:10px;font-weight:600;padding:16px 10px}
+/* Task 107 - baris filter minggu (Ini/Depan) & hari (Senin2,4 dst) */
+.kj-filterbar{display:flex;flex-direction:column;gap:6px;padding:10px 16px 0}
+.kj-filterrow{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.kj-filterlab{font-size:8.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-right:2px;white-space:nowrap}
+.kj-pill{appearance:none;border:1px solid #e2e8f0;background:#fff;color:#475569;font-size:9.5px;font-weight:800;padding:4px 9px;border-radius:999px;cursor:pointer;transition:all .15s;line-height:1.2;white-space:nowrap;font-family:inherit}
+.kj-pill:hover{border-color:#a7f3d0;color:#047857;background:#f0fdf4}
+.kj-pill.is-active{background:#059669;border-color:#059669;color:#fff;box-shadow:0 1px 4px rgba(5,150,105,.35)}
+@media(max-width:640px){
+.kj-filterbar{padding:8px 12px 0;gap:5px}
+.kj-pill{font-size:8.5px;padding:3.5px 7px}
+}
 @media(max-width:640px){
 .cst-kunjungan-table{font-size:10px;min-width:560px}
 .cst-kunjungan-table thead th,.cst-kunjungan-table td{padding:7px 8px}
