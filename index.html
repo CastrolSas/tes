@@ -5310,6 +5310,7 @@ startAutoRefresh();
                     window._homeHariIniCache = null;
                     window._homeBerandaCache = null;
                     loadHomeRebuild(true);
+                    try { loadKunjunganHariIni(false); } catch (eKjFb) {} // Task 107b: kartu kunjungan tetap dimuat
                 } else {
                     window._homeHariIniCache = res.dashboardHariIni || {};
                     window._homeBerandaCache = res.dashboardBeranda || {};
@@ -5317,7 +5318,7 @@ startAutoRefresh();
                     homeLastQueryKey = String(currentUsernameInput||'') + '|' + String(currentUser||'') + '|' + selectedHomeDsr();
                     applyHomeHariIni(window._homeHariIniCache);
                     if (!homeHasCustomMonthYear()) applyHomeBeranda(window._homeBerandaCache || {});
-                    try { if (res.kunjungan) applyKunjunganHariIni(res.kunjungan); } catch (eKjBoot) {}
+                    try { applyKunjunganHariIni(res.kunjungan || null); } catch (eKjBoot) {} // Task 107b: selalu render kartu (pesan + coba lagi bila data gagal)
                     // Task 37: isi cache per-DSR dari data boot lalu prefetch senyap opsi sales.
                     try{ window._homeDsrCache=window._homeDsrCache||{}; window._homeDsrCache[homeLastQueryKey]={hi:window._homeHariIniCache,ber:window._homeBerandaCache,at:Date.now()}; }catch(e){}
                     _prefetchHomeDsrOptions(selectedHomeDsr());
@@ -10325,8 +10326,24 @@ startAutoRefresh();
         let kunjunganView = { week: 0, day: 0 };
         function _kjDayName_(n) { return ['', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'][Number(n)] || ''; }
         function _kjTodayNum_() { const d = new Date(); return d.getDay() === 0 ? 7 : d.getDay(); }
+        // Task 107b: aturan set mingguan dihitung juga di frontend (acuan Senin 27 Okt 2025 = "2,4")
+        // sehingga filter/pill tetap tampil benar meski data backend gagal atau versi lama.
+        function _kjWeekSetLocal_(weekOffset) {
+            var A = { y: 2025, m: 10, d: 27, set: '2,4' };
+            try {
+                var t = new Date();
+                t.setDate(t.getDate() + 7 * (Number(weekOffset) || 0));
+                var wd = t.getDay();
+                var mon = new Date(t.getFullYear(), t.getMonth(), t.getDate() - ((wd === 0) ? 6 : (wd - 1)));
+                var anc = new Date(A.y, A.m - 1, A.d);
+                var diff = Math.round((mon.getTime() - anc.getTime()) / 604800000);
+                return (((diff % 2) + 2) % 2 === 0) ? A.set : (A.set === '1,3' ? '2,4' : '1,3');
+            } catch (eKjW) { return A.set; }
+        }
         function _kjItemsForView_(k, weekOff, dayNum) {
-            const setOf = String((weekOff === 1 ? (k.nextWeekSet || k.nextSetLabel) : (k.weekSet || k.setLabel)) || '');
+            k = k || {};
+            let setOf = String((weekOff === 1 ? k.nextWeekSet : k.weekSet) || '');
+            if (!setOf) { try { setOf = _kjWeekSetLocal_(weekOff); } catch (eKjSet) { setOf = '2,4'; } }
             let src = Array.isArray(k.all) ? k.all : (Array.isArray(k.items) ? k.items.map(function(it) {
                 return { outlet: it.outlet, custCode: it.custCode, dsr: it.dsr, channel: it.channel, dayVisit: it.dayVisit, days: Array.isArray(it.dayNums) ? it.dayNums : [], set: null };
             }) : []);
@@ -10349,26 +10366,31 @@ startAutoRefresh();
             try {
                 const card = document.getElementById('cstKunjunganCard');
                 if (!card) return;
-                if (!k || !k.success || (!Array.isArray(k.items) && !Array.isArray(k.all))) { card.classList.add('hidden'); return; }
+                // Task 107b: kartu SELALU tampil di Beranda - bila data gagal dimuat tampilkan
+                // pesan + tombol coba lagi (tidak lagi disembunyikan total dari Beranda).
+                if (!k || typeof k !== 'object') k = {};
+                const kjDataOk = !!(k.success && (Array.isArray(k.items) || Array.isArray(k.all)));
                 card.classList.remove('hidden');
                 globalKunjunganData = k;
                 if (!kunjunganView.day) kunjunganView.day = Number(k.dayNum) || _kjTodayNum_();
+                const setIni0 = String(k.weekSet || '') || _kjWeekSetLocal_(0);
+                const setDep0 = String(k.nextWeekSet || '') || _kjWeekSetLocal_(1);
                 const view = _kjItemsForView_(k, kunjunganView.week, kunjunganView.day);
                 const dayLabel = _kjDayName_(kunjunganView.day) + view.set;
                 const lbl = document.getElementById('cstKunjunganLabel');
                 if (lbl) lbl.textContent = dayLabel;
                 const sub = document.getElementById('cstKunjunganSub');
-                if (sub) sub.textContent = 'Pola bergantian mingguan \u2014 minggu ini: ' + String(k.weekSet || k.setLabel || '-') + ' \u00b7 minggu depan: ' + String(k.nextWeekSet || k.nextSetLabel || '-') + ' \u00b7 minggu depannya lagi: ' + String(k.weekSet || k.setLabel || '-') + '.';
+                if (sub) sub.textContent = 'Pola bergantian mingguan \u2014 minggu ini: ' + setIni0 + ' \u00b7 minggu depan: ' + setDep0 + ' \u00b7 minggu depannya lagi: ' + setIni0 + '.';
                 const cnt = document.getElementById('cstKunjunganCount');
                 if (cnt) cnt.textContent = view.items.length + ' bengkel';
                 const bar = document.getElementById('kjFilterBar');
                 if (bar) {
-                    const setIni = String(k.weekSet || k.setLabel || '-');
-                    const setDep = String(k.nextWeekSet || k.nextSetLabel || '-');
-                    const viewSet = (kunjunganView.week === 1) ? setDep : setIni;
+                    const setIni = setIni0;
+                    const setDep = setDep0;
                     let dayPills = '';
                     for (let dn = 1; dn <= 7; dn++) {
-                        dayPills += '<button type="button" class="kj-pill' + (dn === kunjunganView.day ? ' is-active' : '') + '" onclick="kunjunganPilihHari(' + dn + ')" aria-pressed="' + (dn === kunjunganView.day) + '">' + _kjDayName_(dn) + viewSet + '</button>';
+                        const dSet = (kunjunganView.week === 1) ? setDep : setIni;
+                        dayPills += '<button type="button" class="kj-pill' + (dn === kunjunganView.day ? ' is-active' : '') + '" onclick="kunjunganPilihHari(' + dn + ')" aria-pressed="' + (dn === kunjunganView.day) + '">' + _kjDayName_(dn) + dSet + '</button>';
                     }
                     bar.innerHTML =
                         '<div class="kj-filterrow kj-weekrow"><span class="kj-filterlab">Minggu</span>' +
@@ -10380,7 +10402,17 @@ startAutoRefresh();
                 const body = document.getElementById('cstKunjunganBody');
                 if (!body) return;
                 const items = view.items;
-                if (!items.length) { body.innerHTML = '<tr><td colspan="6" class="cst-kunjungan-empty">Tidak ada jadwal kunjungan pada ' + escapeHtml(dayLabel) + '.</td></tr>'; return; }
+                if (!items.length) {
+                    let emptyMsg;
+                    if (kjDataOk) { emptyMsg = 'Tidak ada jadwal kunjungan pada ' + escapeHtml(dayLabel) + '.'; }
+                    else {
+                        const rsn = String(k && k.message || '').trim();
+                        emptyMsg = 'Data kunjungan belum tersedia' + (rsn ? ' (' + escapeHtml(rsn) + ')' : '') + '. Pastikan backend (Code.gs) versi terbaru sudah dideploy.';
+                    }
+                    const retryBtn = kjDataOk ? '' : ' <button type="button" class="kj-pill" onclick="loadKunjunganHariIni(true)">Coba lagi</button>';
+                    body.innerHTML = '<tr><td colspan="6" class="cst-kunjungan-empty">' + emptyMsg + retryBtn + '</td></tr>';
+                    return;
+                }
                 let html = '';
                 items.forEach(function(item, idx) {
                     const dataString = encodeURIComponent(JSON.stringify({ outlet: item.outlet || '', dsr: item.dsr || '', custCode: item.custCode || '', dayVisit: item.dayVisit || '', label: dayLabel }));
@@ -10402,7 +10434,7 @@ startAutoRefresh();
                 kunjunganLoading = true;
                 google.script.run
                     .withSuccessHandler(function(res) { kunjunganLoading = false; applyKunjunganHariIni(res); })
-                    .withFailureHandler(function() { kunjunganLoading = false; })
+                    .withFailureHandler(function() { kunjunganLoading = false; applyKunjunganHariIni(null); })
                     .getKunjunganBengkelHariIni(currentUser || '', currentUsernameInput || '', selectedHomeDsr() || '', !!forceReload);
             } catch (e) { kunjunganLoading = false; }
         }
