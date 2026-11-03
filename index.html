@@ -3823,9 +3823,8 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             </section>
                         </div>
                         <section id="cstKunjunganCard" class="cst-card cst-kunjungan-card" aria-label="Kunjungan bengkel hari ini">
-                            <div class="cst-card-head"><span class="cst-card-ic" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.6v3.2M16 3.6v3.2M4.4 10.4h15.2M5.6 5.8h12.8a1.6 1.6 0 0 1 1.6 1.6v11.2a1.6 1.6 0 0 1-1.6 1.6H5.6a1.6 1.6 0 0 1-1.6-1.6V7.4a1.6 1.6 0 0 1 1.6-1.6Z"/></svg></span><h3 class="cst-card-title">Kunjungan Bengkel Hari ini</h3><span id="cstKunjunganLabel" class="cst-kunjungan-label"></span><span id="cstKunjunganCount" class="cst-kunjungan-count">0 bengkel</span><span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v107d</span></div>
+                            <div class="cst-card-head"><span class="cst-card-ic" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.6v3.2M16 3.6v3.2M4.4 10.4h15.2M5.6 5.8h12.8a1.6 1.6 0 0 1 1.6 1.6v11.2a1.6 1.6 0 0 1-1.6 1.6H5.6a1.6 1.6 0 0 1-1.6-1.6V7.4a1.6 1.6 0 0 1 1.6-1.6Z"/></svg></span><h3 class="cst-card-title">Kunjungan Bengkel Hari ini</h3><span id="cstKunjunganLabel" class="cst-kunjungan-label"></span><span id="cstKunjunganCount" class="cst-kunjungan-count">0 bengkel</span><span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v107e</span></div>
                             <div id="cstKunjunganSub" class="cst-kunjungan-sub"></div>
-                            <div id="kjFilterBar" class="kj-filterbar" aria-label="Filter kunjungan per minggu dan hari"></div>
                             <div class="cst-kunjungan-tblwrap"><table class="cst-kunjungan-table"><thead><tr><th style="width:6%;">No</th><th style="width:32%;text-align:left;">Nama Outlet</th><th style="width:14%;">CUST.CODE</th><th style="width:16%;">DSR</th><th style="width:15%;">Day Visit</th><th style="width:17%;">Jadwal</th></tr></thead><tbody id="cstKunjunganBody"><tr><td colspan="6" class="cst-kunjungan-empty">Memuat...</td></tr></tbody></table></div>
                         </section>
                         <section class="cst-card cst-status-card" aria-label="Ringkasan status transaksi outlet">
@@ -10323,25 +10322,50 @@ startAutoRefresh();
         let kunjunganLoading = false;
         let kunjunganLegacyTried = false;
         let kjBuildProbeState = ''; // Task 107d: status probe stempel build backend ('' | 'probing' | teks hasil)
-        // Task 107: filter hari + minggu dengan pola set "1,3"/"2,4" bergantian per MINGGU.
-        // Default = hari terkini pada minggu ini. Label hari = nama hari + set, contoh
-        // "Senin2,4" (minggu ini), "Senin1,3" (minggu depan), lalu kembali ke 2,4.
-        let kunjunganView = { week: 0, day: 0 };
+        // Task 107: pola set "1,3"/"2,4" bergantian per MINGGU (acuan Senin 27 Okt 2025 = "2,4").
+        // Task 107e: PILL MINGGU & HARI DIHAPUS - kartu otomatis memakai HARI INI (dayNum WIB
+        // dari backend, fallback jam perangkat) dan set minggu berjalan, tanpa pilihan manual.
         function _kjDayName_(n) { return ['', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'][Number(n)] || ''; }
         function _kjTodayNum_() { const d = new Date(); return d.getDay() === 0 ? 7 : d.getDay(); }
         // Task 107b: aturan set mingguan dihitung juga di frontend (acuan Senin 27 Okt 2025 = "2,4")
-        // sehingga filter/pill tetap tampil benar meski data backend gagal atau versi lama.
-        function _kjWeekSetLocal_(weekOffset) {
+        // sehingga kartu tetap tampil benar meski data backend gagal atau versi lama.
+        function _kjSetForDateLocal_(dt) {
             var A = { y: 2025, m: 10, d: 27, set: '2,4' };
             try {
-                var t = new Date();
-                t.setDate(t.getDate() + 7 * (Number(weekOffset) || 0));
-                var wd = t.getDay();
-                var mon = new Date(t.getFullYear(), t.getMonth(), t.getDate() - ((wd === 0) ? 6 : (wd - 1)));
+                var wd = dt.getDay();
+                var mon = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() - ((wd === 0) ? 6 : (wd - 1)));
                 var anc = new Date(A.y, A.m - 1, A.d);
                 var diff = Math.round((mon.getTime() - anc.getTime()) / 604800000);
                 return (((diff % 2) + 2) % 2 === 0) ? A.set : (A.set === '1,3' ? '2,4' : '1,3');
             } catch (eKjW) { return A.set; }
+        }
+        function _kjWeekSetLocal_(weekOffset) {
+            var t = new Date();
+            try { t.setDate(t.getDate() + 7 * (Number(weekOffset) || 0)); } catch (eKjO) {}
+            return _kjSetForDateLocal_(t);
+        }
+        // Task 107e: hari kunjungan berikutnya dari data asli (pesan otomatis bila hari ini kosong).
+        function _kjNextVisit_(k) {
+            try {
+                k = k || {};
+                const src = Array.isArray(k.all) ? k.all : (Array.isArray(k.items) ? k.items.map(function(it) {
+                    return { days: Array.isArray(it.dayNums) ? it.dayNums : [], set: null };
+                }) : []);
+                for (let off = 0; off <= 13; off++) {
+                    const t = new Date(); t.setDate(t.getDate() + off);
+                    const dn = t.getDay() === 0 ? 7 : t.getDay();
+                    const st = _kjSetForDateLocal_(t);
+                    for (let i = 0; i < src.length; i++) {
+                        const it = src[i] || {};
+                        const days = Array.isArray(it.days) ? it.days : [];
+                        if (days.indexOf(dn) === -1) continue;
+                        const its = String(it.set || '').trim();
+                        if (its && its !== st) continue;
+                        const inSt = String(st).split(',').indexOf(String(dn)) !== -1; return { offset: off, label: (inSt ? _kjDayName_(dn) + st : _kjDayName_(dn)) };
+                    }
+                }
+            } catch (eKjNv) {}
+            return null;
         }
         function _kjItemsForView_(k, weekOff, dayNum) {
             k = k || {};
@@ -10363,8 +10387,6 @@ startAutoRefresh();
             });
             return { set: setOf, items: out };
         }
-        function kunjunganPilihMinggu(w) { kunjunganView.week = (Number(w) === 1) ? 1 : 0; applyKunjunganHariIni(globalKunjunganData); }
-        function kunjunganPilihHari(d) { const n = Number(d); if (n >= 1 && n <= 7) { kunjunganView.day = n; applyKunjunganHariIni(globalKunjunganData); } }
         function applyKunjunganHariIni(k) {
             try {
                 const card = document.getElementById('cstKunjunganCard');
@@ -10372,44 +10394,36 @@ startAutoRefresh();
                 // Task 107b: kartu SELALU tampil di Beranda - bila data gagal dimuat tampilkan
                 // pesan + tombol coba lagi (tidak lagi disembunyikan total dari Beranda).
                 if (!k || typeof k !== 'object') k = {};
-                try { console.log('[KJ v107d] apply success=' + !!k.success + ' items=' + (Array.isArray(k.items) ? k.items.length : 'n/a') + ' all=' + (Array.isArray(k.all) ? k.all.length : 'n/a') + ' msg=' + (k.message || '-')); } catch (eKjLog) {}
+                try { console.log('[KJ v107e] apply success=' + !!k.success + ' items=' + (Array.isArray(k.items) ? k.items.length : 'n/a') + ' all=' + (Array.isArray(k.all) ? k.all.length : 'n/a') + ' msg=' + (k.message || '-')); } catch (eKjLog) {}
                 const kjDataOk = !!(k.success && (Array.isArray(k.items) || Array.isArray(k.all)));
                 if (kjDataOk) kjBuildProbeState = ''; // Task 107d: reset status probe build backend saat data normal
                 card.classList.remove('hidden');
                 globalKunjunganData = k;
-                if (!kunjunganView.day) kunjunganView.day = Number(k.dayNum) || _kjTodayNum_();
+                // Task 107e: otomatis HARI INI + set minggu berjalan (tidak ada pilihan manual).
+                const kjToday = Number(k.dayNum) || _kjTodayNum_();
                 const setIni0 = String(k.weekSet || '') || _kjWeekSetLocal_(0);
                 const setDep0 = String(k.nextWeekSet || '') || _kjWeekSetLocal_(1);
-                const view = _kjItemsForView_(k, kunjunganView.week, kunjunganView.day);
-                const dayLabel = _kjDayName_(kunjunganView.day) + view.set;
+                const view = _kjItemsForView_(k, 0, kjToday);
+                // Task 107e: label = nama hari + set HANYA bila hari ini memang hari set (mis.
+                // "Selasa2,4"); selain itu nama hari saja (mis. "Jumat") agar tidak ada jadwal fiktif.
+                const kjInSet = String(view.set || '').split(',').indexOf(String(kjToday)) !== -1;
+                const dayLabel = ((kjInSet ? _kjDayName_(kjToday) + view.set : _kjDayName_(kjToday)) || '-');
                 const lbl = document.getElementById('cstKunjunganLabel');
                 if (lbl) lbl.textContent = dayLabel;
                 const sub = document.getElementById('cstKunjunganSub');
-                if (sub) sub.textContent = 'Pola bergantian mingguan \u2014 minggu ini: ' + setIni0 + ' \u00b7 minggu depan: ' + setDep0 + ' \u00b7 minggu depannya lagi: ' + setIni0 + '.';
+                if (sub) sub.textContent = 'Otomatis mengikuti hari ini (v107e) \u2014 hari ini: ' + dayLabel + ' \u00b7 set minggu ini: ' + setIni0 + ' \u00b7 minggu depan: ' + setDep0 + '.';
                 const cnt = document.getElementById('cstKunjunganCount');
                 if (cnt) cnt.textContent = view.items.length + ' bengkel';
-                const bar = document.getElementById('kjFilterBar');
-                if (bar) {
-                    const setIni = setIni0;
-                    const setDep = setDep0;
-                    let dayPills = '';
-                    for (let dn = 1; dn <= 7; dn++) {
-                        const dSet = (kunjunganView.week === 1) ? setDep : setIni;
-                        dayPills += '<button type="button" class="kj-pill' + (dn === kunjunganView.day ? ' is-active' : '') + '" onclick="kunjunganPilihHari(' + dn + ')" aria-pressed="' + (dn === kunjunganView.day) + '">' + _kjDayName_(dn) + dSet + '</button>';
-                    }
-                    bar.innerHTML =
-                        '<div class="kj-filterrow kj-weekrow"><span class="kj-filterlab">Minggu</span>' +
-                        '<button type="button" class="kj-pill' + (kunjunganView.week === 0 ? ' is-active' : '') + '" onclick="kunjunganPilihMinggu(0)">Ini (' + setIni + ')</button>' +
-                        '<button type="button" class="kj-pill' + (kunjunganView.week === 1 ? ' is-active' : '') + '" onclick="kunjunganPilihMinggu(1)">Depan (' + setDep + ')</button>' +
-                        '</div>' +
-                        '<div class="kj-filterrow"><span class="kj-filterlab">Hari</span>' + dayPills + '</div>';
-                }
                 const body = document.getElementById('cstKunjunganBody');
                 if (!body) return;
                 const items = view.items;
                 if (!items.length) {
                     let emptyMsg;
-                    if (kjDataOk) { emptyMsg = 'Tidak ada jadwal kunjungan pada ' + escapeHtml(dayLabel) + '.'; }
+                    if (kjDataOk) {
+                        emptyMsg = 'Tidak ada jadwal kunjungan pada ' + escapeHtml(dayLabel) + '.';
+                        const kjNext = _kjNextVisit_(k); // Task 107e: info otomatis kunjungan berikutnya
+                        if (kjNext && kjNext.offset > 0) emptyMsg += ' Kunjungan berikutnya: <b>' + escapeHtml(kjNext.label) + '</b>' + (kjNext.offset === 1 ? ' (besok)' : ' (' + kjNext.offset + ' hari lagi)') + '.';
+                    }
                     else {
                         const rsn = String(k && k.message || '').trim();
                         emptyMsg = 'Data kunjungan belum tersedia' + (rsn ? ' (' + escapeHtml(rsn) + ')' : '') + '. Pastikan backend (Code.gs) versi terbaru sudah dideploy.';
@@ -10441,12 +10455,12 @@ startAutoRefresh();
                 kunjunganLoading = true;
                 google.script.run
                     .withSuccessHandler(function(res) { kunjunganLoading = false; applyKunjunganHariIni(res); })
-                    .withFailureHandler(function(eKjFail) { kunjunganLoading = false; const kjMsg = (eKjFail && eKjFail.message) ? String(eKjFail.message) : String(eKjFail || 'galat tidak diketahui'); try { console.warn('[KJ v107d] loadKunjunganHariIni gagal:', kjMsg); } catch (eKjLog2) {} applyKunjunganHariIni({ success: false, message: kjMsg }); })
+                    .withFailureHandler(function(eKjFail) { kunjunganLoading = false; const kjMsg = (eKjFail && eKjFail.message) ? String(eKjFail.message) : String(eKjFail || 'galat tidak diketahui'); try { console.warn('[KJ v107e] loadKunjunganHariIni gagal:', kjMsg); } catch (eKjLog2) {} applyKunjunganHariIni({ success: false, message: kjMsg }); })
                     .getKunjunganBengkelHariIni(currentUser || '', currentUsernameInput || '', selectedHomeDsr() || '', !!forceReload);
             } catch (e) { kunjunganLoading = false; }
         }
         // Task 107d: cek stempel build backend (getBackendBuildStamp pada Code.gs) agar status
-        // deploy backend terlihat langsung di kartu: "v107d terdeteksi" = Code.gs baru;
+        // deploy backend terlihat langsung di kartu: "v107e terdeteksi" = Code.gs baru;
         // "tidak ditemukan" = Code.gs di editor / versi deploy masih lama.
         function probeKunjunganBackendBuild() {
             const elP = document.getElementById('kjBackendBuild');
