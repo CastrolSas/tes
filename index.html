@@ -1516,7 +1516,7 @@ html,body{height:100%;}
     var isAppsScriptHost = host === 'script.google.com' || host === 'script.googleusercontent.com';
     if (isAppsScriptHost) return;
 
-    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxnCwj6qKqPrtZD4luXX5PPW1jlfQcVSzBPpo8HgCxnqFdydrQB0cDNXknFlteI0JIRUA/exec';
+    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5dkNkseL2AXyP4T3vRATCQEnRC3Ft5ho29iUObmj-Y3H-vRunigrQheYt3jzoBq-p/exec';
     var BRIDGE_URL = CASTROL_APPS_SCRIPT_URL + (CASTROL_APPS_SCRIPT_URL.indexOf('?') >= 0 ? '&' : '?') + 'bridge=1';
     // Task 67: URL deploy diekspos untuk fitur Generate Link Outlet.
     window.__CASTROL_DEPLOY_URL__ = CASTROL_APPS_SCRIPT_URL;
@@ -3823,8 +3823,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             </section>
                         </div>
                         <section id="cstKunjunganCard" class="cst-card cst-kunjungan-card" aria-label="Kunjungan bengkel hari ini">
-                            <div class="cst-card-head"><span class="cst-card-ic" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.6v3.2M16 3.6v3.2M4.4 10.4h15.2M5.6 5.8h12.8a1.6 1.6 0 0 1 1.6 1.6v11.2a1.6 1.6 0 0 1-1.6 1.6H5.6a1.6 1.6 0 0 1-1.6-1.6V7.4a1.6 1.6 0 0 1 1.6-1.6Z"/></svg></span><h3 class="cst-card-title">Kunjungan Bengkel Hari ini</h3><span id="cstKunjunganLabel" class="cst-kunjungan-label"></span><span id="cstKunjunganCount" class="cst-kunjungan-count">0 bengkel</span><span id="kjQuarterChip" class="hidden" style="font-size:9px;font-weight:700;color:#0f766e;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:6px;padding:2px 6px;line-height:1;"></span><span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v107h</span></div>
-                            <div id="cstKunjunganSub" class="cst-kunjungan-sub"></div>
+                            <div class="cst-card-head"><span class="cst-card-ic" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.6v3.2M16 3.6v3.2M4.4 10.4h15.2M5.6 5.8h12.8a1.6 1.6 0 0 1 1.6 1.6v11.2a1.6 1.6 0 0 1-1.6 1.6H5.6a1.6 1.6 0 0 1-1.6-1.6V7.4a1.6 1.6 0 0 1 1.6-1.6Z"/></svg></span><h3 class="cst-card-title">Kunjungan Bengkel Hari ini</h3><span id="cstKunjunganLabel" class="cst-kunjungan-label"></span><span id="cstKunjunganCount" class="cst-kunjungan-count">0 bengkel</span><span id="kjQuarterChip" class="hidden" style="font-size:9px;font-weight:700;color:#0f766e;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:6px;padding:2px 6px;line-height:1;"></span><span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v107i</span></div>
                             <div class="relative mx-3.5 mt-2 mb-1"><span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></span><input type="text" id="kjSearchInput" oninput="filterKunjunganTable()" placeholder="Cari nama outlet..." class="w-full pl-9 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition"></div>
                             <div class="cst-kunjungan-tblwrap"><table class="w-full text-left border-collapse text-[11px]" style="min-width:1080px;table-layout:fixed;"><thead><tr class="bg-slate-100 text-slate-700 border-b border-slate-200"><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;">Status</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:9%;">DSR</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:19%;">Nama Outlet</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:9%;">CUST.CODE</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;">Target</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;">Actual</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;">Gap</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Ach.</th><th id="kjThM1" class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;">Bulan 1</th><th id="kjThM2" class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;">Bulan 2</th><th id="kjThM3" class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;">Bulan 3</th></tr></thead><tbody id="cstKunjunganBody"><tr><td colspan="11" class="cst-kunjungan-empty">Memuat...</td></tr></tbody></table></div>
                         </section>
@@ -10501,23 +10500,19 @@ startAutoRefresh();
                 // Task 107b: kartu SELALU tampil di Beranda - bila data gagal dimuat tampilkan
                 // pesan + tombol coba lagi (tidak lagi disembunyikan total dari Beranda).
                 if (!k || typeof k !== 'object') k = {};
-                try { console.log('[KJ v107h] apply success=' + !!k.success + ' items=' + (Array.isArray(k.items) ? k.items.length : 'n/a') + ' all=' + (Array.isArray(k.all) ? k.all.length : 'n/a') + ' msg=' + (k.message || '-')); } catch (eKjLog) {}
+                try { console.log('[KJ v107i] apply success=' + !!k.success + ' items=' + (Array.isArray(k.items) ? k.items.length : 'n/a') + ' all=' + (Array.isArray(k.all) ? k.all.length : 'n/a') + ' msg=' + (k.message || '-')); } catch (eKjLog) {}
                 const kjDataOk = !!(k.success && (Array.isArray(k.items) || Array.isArray(k.all)));
                 if (kjDataOk) kjBuildProbeState = ''; // Task 107d: reset status probe build backend saat data normal
                 card.classList.remove('hidden');
                 globalKunjunganData = k;
                 // Task 107e: otomatis HARI INI + set minggu berjalan (tidak ada pilihan manual).
                 const kjToday = Number(k.dayNum) || _kjTodayNum_();
-                const setIni0 = String(k.weekSet || '') || _kjWeekSetLocal_(0);
-                const setDep0 = String(k.nextWeekSet || '') || _kjWeekSetLocal_(1);
                 const view = _kjItemsForView_(k, 0, kjToday);
                 // Task 107f: label SELALU nama hari + set minggu berjalan (mis. "Selasa1,3",
                 // "Jumat2,4") - konsisten dgn kolom DAY VISIT sheet & label dari backend.
                 const dayLabel = ((_kjDayName_(kjToday) + view.set) || '-');
                 const lbl = document.getElementById('cstKunjunganLabel');
                 if (lbl) lbl.textContent = dayLabel;
-                const sub = document.getElementById('cstKunjunganSub');
-                if (sub) sub.textContent = 'Otomatis mengikuti hari ini (v107h) \u2014 hari ini: ' + dayLabel + ' \u00b7 set minggu ini: ' + setIni0 + ' \u00b7 minggu depan: ' + setDep0 + '.';
                 const cnt = document.getElementById('cstKunjunganCount');
                 if (cnt) cnt.textContent = view.items.length + ' bengkel';
                 const body = document.getElementById('cstKunjunganBody');
@@ -10558,7 +10553,7 @@ startAutoRefresh();
                 kunjunganLoading = true;
                 google.script.run
                     .withSuccessHandler(function(res) { kunjunganLoading = false; applyKunjunganHariIni(res); })
-                    .withFailureHandler(function(eKjFail) { kunjunganLoading = false; const kjMsg = (eKjFail && eKjFail.message) ? String(eKjFail.message) : String(eKjFail || 'galat tidak diketahui'); try { console.warn('[KJ v107h] loadKunjunganHariIni gagal:', kjMsg); } catch (eKjLog2) {} applyKunjunganHariIni({ success: false, message: kjMsg }); })
+                    .withFailureHandler(function(eKjFail) { kunjunganLoading = false; const kjMsg = (eKjFail && eKjFail.message) ? String(eKjFail.message) : String(eKjFail || 'galat tidak diketahui'); try { console.warn('[KJ v107i] loadKunjunganHariIni gagal:', kjMsg); } catch (eKjLog2) {} applyKunjunganHariIni({ success: false, message: kjMsg }); })
                     .getKunjunganBengkelHariIni(currentUser || '', currentUsernameInput || '', selectedHomeDsr() || '', !!forceReload);
             } catch (e) { kunjunganLoading = false; }
         }
