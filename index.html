@@ -4447,7 +4447,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v111</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v112</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -5449,6 +5449,8 @@ startAutoRefresh();
                 select.append(new Option(o.outlet, o.outlet));
             });
             refreshSelect2('#inputOutlet');
+            // Task 112: auto-select outlet pending dari List NOO TVD (anti-race reload).
+            if (typeof noobyTVDApplyPendingOutlet === 'function') { try { noobyTVDApplyPendingOutlet(); } catch (eNoobyPending) {} }
         }
         function loadOutletForSales(sales, usernameInput) {
             if (usernameInput && usernameInput.toLowerCase() === 'admin') {
@@ -5485,6 +5487,8 @@ startAutoRefresh();
                 $('#inputChannel').val('');
             }
             refreshSelect2('#inputOutlet');
+            // Task 112: auto-select outlet pending dari List NOO TVD (anti-race reload).
+            if (typeof noobyTVDApplyPendingOutlet === 'function') { try { noobyTVDApplyPendingOutlet(); } catch (eNoobyPending2) {} }
         }
 
         function onInputSalesFilterChange() {
@@ -12269,6 +12273,8 @@ if(tab==='tagihan')loadTagihan(false, true);
  * Task 110: simpan customer mengisi CUST.CODE di sheet OUTLET by TVD; APPROVE menghapus barisnya.
  * Task 111: klik baris selalu verifikasi ulang ke server (checkNoobyTVDOutletReady);
  *   tab List NOO TVD selalu refresh senyap saat dibuka agar badge terdaftar segar.
+ * Task 112: auto-select outlet di Input Order tahan reload dropdown (pending +
+ *   re-apply di handleSalesOutletsLoaded / renderInputOutletOptions).
  * ========================================================== */
 let globalNoobyTVDData = { headers: [], rows: [] };
 let noobyTVDLoading = false;
@@ -12296,7 +12302,7 @@ function loadNoobyTVD(forceReload, silentRefresh) {
                 globalNoobyTVDData = { headers: Array.isArray(res.headers) ? res.headers : [], rows: Array.isArray(res.rows) ? res.rows : [] };
                 noobyTVDLoaded = true;
                 filterNoobyTVD();
-                try { console.log('[NOO v111] List NOO TVD dimuat: ' + globalNoobyTVDData.rows.length + ' baris, tampil ' + _noobyTVDUserRows().length + ' utk user login, sembunyi approve ' + (res && res.hiddenApproved ? res.hiddenApproved : 0) + ', terdaftar ' + globalNoobyTVDData.rows.filter(function(it) { return it && it.ready; }).length); } catch (eLog) {}
+                try { console.log('[NOO v112] List NOO TVD dimuat: ' + globalNoobyTVDData.rows.length + ' baris, tampil ' + _noobyTVDUserRows().length + ' utk user login, sembunyi approve ' + (res && res.hiddenApproved ? res.hiddenApproved : 0) + ', terdaftar ' + globalNoobyTVDData.rows.filter(function(it) { return it && it.ready; }).length); } catch (eLog) {}
             } else {
                 if (body) body.innerHTML = '<tr><td colspan="30" class="text-red-500 text-center py-8">' + _noobyTVDEscape(res && res.message ? res.message : 'Gagal memuat data NOO TVD.') + '</td></tr>';
             }
@@ -12468,7 +12474,7 @@ function openNoobyTVDCustomer(rowNumber) {
     const goDirectInput = function(info) {
         let od = outletDir;
         if (info && info.custName) od = String(info.custName).trim();
-        try { console.log('[NOO v111] outlet terdaftar (CUST.CODE ' + String((info && info.custCode) || row.custCode || '') + '), langsung ke Input Order: ' + od); } catch (eDir) {}
+        try { console.log('[NOO v112] outlet terdaftar (CUST.CODE ' + String((info && info.custCode) || row.custCode || '') + '), langsung ke Input Order: ' + od); } catch (eDir) {}
         noobyTVDGotoInputOrder(od, dsrDir);
     };
     // Task 110: jika CUST.CODE sudah sama di sheet OUTLET & sheet OUTLET by TVD
@@ -12493,7 +12499,7 @@ function openNoobyTVDCustomer(rowNumber) {
             })
             .withFailureHandler(function(errReady) {
                 showLoading(false);
-                try { console.warn('[NOO v111] cek terdaftar gagal, buka form Tambah Customer: ' + (errReady && errReady.message ? errReady.message : errReady)); } catch (eChk) {}
+                try { console.warn('[NOO v112] cek terdaftar gagal, buka form Tambah Customer: ' + (errReady && errReady.message ? errReady.message : errReady)); } catch (eChk) {}
                 _noobyTVDOpenCustomerFormAfterCheck(row);
             })
             .checkNoobyTVDOutletReady(outletDir);
@@ -12519,7 +12525,7 @@ function _noobyTVDOpenCustomerFormAfterCheck(row) {
 
 function _noobyTVDOpenCustomerForm(row) {
     const prefill = _noobyTVDBuildPrefill(row);
-    try { console.log('[NOO v111] buka form Tambah Customer dari baris NOO ' + row.rowNumber); } catch (eLog2) {}
+    try { console.log('[NOO v112] buka form Tambah Customer dari baris NOO ' + row.rowNumber); } catch (eLog2) {}
     openTambahCustomerForm(0, prefill, true);
 }
 
@@ -12529,7 +12535,7 @@ function noobyTVDGotoInputOrder(outletName, salesName) {
     outletName = String(outletName == null ? '' : outletName).trim();
     salesName = String(salesName == null ? '' : salesName).trim();
     const isAdminLogin = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
-    try { console.log('[NOO v111] lanjut ke Input Order, outlet=' + outletName + ', sales=' + salesName); } catch (eLog3) {}
+    try { console.log('[NOO v112] lanjut ke Input Order, outlet=' + outletName + ', sales=' + salesName); } catch (eLog3) {}
     if (isAdminLogin && salesName) {
         const fs = document.getElementById('filterInputSales');
         if (fs) {
@@ -12542,32 +12548,73 @@ function noobyTVDGotoInputOrder(outletName, salesName) {
             if (typeof refreshSelect2 === 'function') { try { refreshSelect2('#filterInputSales'); } catch (eRf) {} }
         }
     }
+    // Task 112: daftarkan target auto-select. Diterapkan ulang setiap kali daftar
+    // outlet selesai dimuat, karena muat ulang dropdown bisa mengosongkan pilihan
+    // yang sudah dibuat poll sebelumnya (penyebab outlet tidak terisi otomatis).
+    window._noobyTVDOutletPending = outletName ? {
+        outlet: outletName,
+        expires: Date.now() + 90000
+    } : null;
     loadOutletForSales(currentUser, currentUsernameInput);
     switchTab('input');
     noobyTVDPollSelectOutlet(outletName, 0);
 }
 
-function noobyTVDPollSelectOutlet(outletName, tries) {
-    if (!outletName) return;
-    if (Number(tries || 0) > 40) {
-        console.warn('[NOO v111] outlet belum muncul di dropdown Input Order (timeout):', outletName);
-        return;
-    }
+function _noobyTVDNormOutletOpt(v) {
+    return String(v == null ? '' : v).replace(/\s+/g, ' ').trim().toUpperCase();
+}
+
+// Task 112: terapkan auto-select outlet pending ke dropdown Input Order.
+// Pencocokan tahan beda spasi/kapital, mencocokkan value ATAU teks option.
+// Pending TIDAK dihapus saat berhasil -> bila dropdown dimuat ulang (response
+// getOutletsBySales/getAllOutlets datang belakangan dan mengosongkan select),
+// pilihan otomatis diterapkan kembali oleh hook di handler load outlet.
+function noobyTVDApplyPendingOutlet() {
+    const pending = window._noobyTVDOutletPending;
+    if (!pending || !String(pending.outlet || '').trim()) return false;
+    if (Date.now() > Number(pending.expires || 0)) { window._noobyTVDOutletPending = null; return false; }
     const sel = document.getElementById('inputOutlet');
-    if (!sel) return;
-    // Task 110: pencocokan nama outlet tahan beda spasi ganda/kapitalisasi.
-    const target = String(outletName || '').trim().replace(/\s+/g, ' ').toUpperCase();
+    if (!sel) return false;
+    const target = _noobyTVDNormOutletOpt(pending.outlet);
     let foundVal = '';
     for (let i = 0; i < sel.options.length; i++) {
-        if (String(sel.options[i].value || '').trim().replace(/\s+/g, ' ').toUpperCase() === target) { foundVal = sel.options[i].value; break; }
+        const ov = _noobyTVDNormOutletOpt(sel.options[i].value);
+        const ot = _noobyTVDNormOutletOpt(sel.options[i].text);
+        if ((ov && ov === target) || (ot && ot === target)) { foundVal = sel.options[i].value || sel.options[i].text; break; }
     }
-    if (foundVal) {
+    if (!foundVal) return false;
+    if (String(sel.value || '') === String(foundVal)) return true; // sudah terpilih
+    window._noobyTVDSuppressOutletChange = true;
+    try {
         sel.value = foundVal;
         if (typeof refreshSelect2 === 'function') { try { refreshSelect2('#inputOutlet'); } catch (eRf2) {} }
         if (typeof onOutletChange === 'function') { try { onOutletChange(); } catch (eOc) {} }
+        try { console.log('[NOO v112] outlet terisi otomatis di Input Order: ' + pending.outlet); } catch (eLog4) {}
+    } finally {
+        setTimeout(function() { window._noobyTVDSuppressOutletChange = false; }, 0);
+    }
+    return true;
+}
+
+function noobyTVDPollSelectOutlet(outletName, tries) {
+    if (!outletName) return;
+    const pending = window._noobyTVDOutletPending;
+    if (!pending || Date.now() > Number(pending.expires || 0)) { window._noobyTVDOutletPending = null; return; }
+    if (noobyTVDApplyPendingOutlet()) return; // pending tetap aktif utk re-apply saat dropdown dimuat ulang
+    if (Number(tries || 0) > 360) {
+        console.warn('[NOO v112] outlet belum muncul di dropdown Input Order (timeout):', outletName);
         return;
     }
     setTimeout(function() { noobyTVDPollSelectOutlet(outletName, Number(tries || 0) + 1); }, 250);
+}
+
+// Task 112: pilihan manual user membatalkan auto-select. refreshSelect2 memicu
+// event change secara programmatic saat apply -> ditahan lewat flag suppress.
+if (window.jQuery) {
+    window.jQuery(document).off('change.noobyTvdAuto').on('change.noobyTvdAuto', '#inputOutlet', function() {
+        if (window._noobyTVDSuppressOutletChange) return;
+        window._noobyTVDOutletPending = null;
+    });
 }
 </script>
 
