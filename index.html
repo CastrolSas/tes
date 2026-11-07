@@ -4444,11 +4444,10 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                 <div id="tabNoobyTVD" class="tab-content hidden space-y-3">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-200 pb-2">
                         <div>
-                            <h2 class="text-base font-bold text-slate-800">List Outlet NOO by TVD</h2>
-                            <p class="text-[10px] text-slate-400 mt-0.5"></p>
+                            <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v109c</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v110</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -12199,6 +12198,7 @@ if(tab==='tagihan')loadTagihan(false, true);
                     if (window._noobyTVDPendingRedirect) {
                         // Task 109: dari List NOO TVD -> simpan customer -> lanjut ke Input Order.
                         window._noobyTVDPendingRedirect = false;
+                        noobyTVDLoaded = false; // Task 110: muat ulang List NOO TVD (baris kini terdaftar)
                         const _nooOut = idxOutlet >= 0 ? String(values[idxOutlet] == null ? '' : values[idxOutlet]).trim() : '';
                         const _nooSal = idxDsr >= 0 ? String(values[idxDsr] == null ? '' : values[idxDsr]).trim() : '';
                         loadTambahCustomer(true, true);
@@ -12265,6 +12265,8 @@ if(tab==='tagihan')loadTagihan(false, true);
  * Task 109b: data difilter berdasarkan user login (admin melihat semua baris).
  * Task 109c: kolom tabel hanya OUTLET (NO | OUTLET).
  * Task 109c: outlet yang sudah punya transaksi APPROVE (sheet INPUT) disembunyikan oleh backend.
+ * Task 110: baris dengan CUST.CODE sama di sheet OUTLET & OUTLET by TVD -> klik langsung ke Input Order.
+ * Task 110: simpan customer mengisi CUST.CODE di sheet OUTLET by TVD; APPROVE menghapus barisnya.
  * ========================================================== */
 let globalNoobyTVDData = { headers: [], rows: [] };
 let noobyTVDLoading = false;
@@ -12292,7 +12294,7 @@ function loadNoobyTVD(forceReload, silentRefresh) {
                 globalNoobyTVDData = { headers: Array.isArray(res.headers) ? res.headers : [], rows: Array.isArray(res.rows) ? res.rows : [] };
                 noobyTVDLoaded = true;
                 filterNoobyTVD();
-                try { console.log('[NOO v109c] List NOO TVD dimuat: ' + globalNoobyTVDData.rows.length + ' baris, tampil ' + _noobyTVDUserRows().length + ' utk user login, sembunyi approve ' + (res && res.hiddenApproved ? res.hiddenApproved : 0)); } catch (eLog) {}
+                try { console.log('[NOO v110] List NOO TVD dimuat: ' + globalNoobyTVDData.rows.length + ' baris, tampil ' + _noobyTVDUserRows().length + ' utk user login, sembunyi approve ' + (res && res.hiddenApproved ? res.hiddenApproved : 0) + ', terdaftar ' + globalNoobyTVDData.rows.filter(function(it) { return it && it.ready; }).length); } catch (eLog) {}
             } else {
                 if (body) body.innerHTML = '<tr><td colspan="30" class="text-red-500 text-center py-8">' + _noobyTVDEscape(res && res.message ? res.message : 'Gagal memuat data NOO TVD.') + '</td></tr>';
             }
@@ -12378,11 +12380,18 @@ function renderNoobyTVDTable(rows) {
     body.innerHTML = rows.map(function(item, rowIndex) {
         const values = item.values || [];
         const rn = Number(item.rowNumber);
-        return '<tr data-noo-row="' + rn + '" tabindex="0" role="button" onclick="openNoobyTVDCustomer(' + rn + ')" onkeydown="if(event.key===&quot;Enter&quot; || event.key===&quot; &quot;){event.preventDefault();openNoobyTVDCustomer(' + rn + ')}" class="border-b border-slate-100 hover:bg-emerald-50/50 focus:bg-emerald-50 transition cursor-pointer" title="Klik untuk menambahkan customer dari data NOO ini">' +
+        const isReady = !!item.ready;
+        const rowTitle = isReady
+            ? 'Customer sudah terdaftar - klik untuk langsung ke Input Order'
+            : 'Klik untuk menambahkan customer dari data NOO ini';
+        return '<tr data-noo-row="' + rn + '" tabindex="0" role="button" onclick="openNoobyTVDCustomer(' + rn + ')" onkeydown="if(event.key===&quot;Enter&quot; || event.key===&quot; &quot;){event.preventDefault();openNoobyTVDCustomer(' + rn + ')}" class="border-b border-slate-100 hover:bg-emerald-50/50 focus:bg-emerald-50 transition cursor-pointer" title="' + rowTitle + '">' +
             '<td class="p-2.5 align-top text-slate-400 whitespace-nowrap">' + (rowIndex + 1) + '</td>' +
             cols.map(function(c) {
                 const rawVal = c.idx < values.length && values[c.idx] != null ? values[c.idx] : '';
-                return '<td class="p-2.5 align-top text-slate-700">' + _noobyTVDEscape(rawVal) + '</td>';
+                const badge = (isReady && c.label === 'OUTLET')
+                    ? ' <span class="inline-block align-middle ml-1 px-1.5 py-0.5 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 text-[8px] font-bold whitespace-nowrap">&#10003; terdaftar</span>'
+                    : '';
+                return '<td class="p-2.5 align-top text-slate-700">' + _noobyTVDEscape(rawVal) + badge + '</td>';
             }).join('') +
         '</tr>';
     }).join('');
@@ -12447,6 +12456,22 @@ function openNoobyTVDCustomer(rowNumber) {
         showModal('Gagal', 'Data NOO tidak ditemukan. Silakan refresh halaman.');
         return;
     }
+    // Task 110: jika CUST.CODE sudah sama di sheet OUTLET & sheet OUTLET by TVD
+    // (baris ditandai ready oleh backend), langsung ke Input Order tanpa form
+    // Tambah Customer.
+    if (row.ready) {
+        const nooHeaders = globalNoobyTVDData.headers || [];
+        const nooVals = row.values || [];
+        const oiDir = _noobyTVDFindCol(nooHeaders, ['OUTLET', 'NAMA OUTLET', 'NAMA TOKO', 'TOKO']);
+        const diDir = _noobyTVDFindCol(nooHeaders, ['DSR', 'SALES', 'NAMA SALES']);
+        let outletDir = String(oiDir >= 0 && oiDir < nooVals.length && nooVals[oiDir] != null ? nooVals[oiDir] : '').trim();
+        let dsrDir = String(diDir >= 0 && diDir < nooVals.length && nooVals[diDir] != null ? nooVals[diDir] : '').trim();
+        if (row.custName) outletDir = String(row.custName).trim();
+        if (!dsrDir && !_noobyTVDIsAdminView()) dsrDir = String(currentUser || '').trim();
+        try { console.log('[NOO v110] outlet terdaftar (CUST.CODE ' + String(row.custCode || '') + '), langsung ke Input Order: ' + outletDir); } catch (eDir) {}
+        noobyTVDGotoInputOrder(outletDir, dsrDir);
+        return;
+    }
     if (!(globalTambahCustomerData.headers || []).length || !_noobyTVDMasterReady()) {
         showLoading(true);
         if (!(globalTambahCustomerData.headers || []).length) loadTambahCustomer(true, true);
@@ -12462,7 +12487,7 @@ function openNoobyTVDCustomer(rowNumber) {
 
 function _noobyTVDOpenCustomerForm(row) {
     const prefill = _noobyTVDBuildPrefill(row);
-    try { console.log('[NOO v109c] buka form Tambah Customer dari baris NOO ' + row.rowNumber); } catch (eLog2) {}
+    try { console.log('[NOO v110] buka form Tambah Customer dari baris NOO ' + row.rowNumber); } catch (eLog2) {}
     openTambahCustomerForm(0, prefill, true);
 }
 
@@ -12472,7 +12497,7 @@ function noobyTVDGotoInputOrder(outletName, salesName) {
     outletName = String(outletName == null ? '' : outletName).trim();
     salesName = String(salesName == null ? '' : salesName).trim();
     const isAdminLogin = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
-    try { console.log('[NOO v109c] lanjut ke Input Order, outlet=' + outletName + ', sales=' + salesName); } catch (eLog3) {}
+    try { console.log('[NOO v110] lanjut ke Input Order, outlet=' + outletName + ', sales=' + salesName); } catch (eLog3) {}
     if (isAdminLogin && salesName) {
         const fs = document.getElementById('filterInputSales');
         if (fs) {
@@ -12493,15 +12518,16 @@ function noobyTVDGotoInputOrder(outletName, salesName) {
 function noobyTVDPollSelectOutlet(outletName, tries) {
     if (!outletName) return;
     if (Number(tries || 0) > 40) {
-        console.warn('[NOO v109c] outlet belum muncul di dropdown Input Order (timeout):', outletName);
+        console.warn('[NOO v110] outlet belum muncul di dropdown Input Order (timeout):', outletName);
         return;
     }
     const sel = document.getElementById('inputOutlet');
     if (!sel) return;
-    const target = outletName.toUpperCase();
+    // Task 110: pencocokan nama outlet tahan beda spasi ganda/kapitalisasi.
+    const target = String(outletName || '').trim().replace(/\s+/g, ' ').toUpperCase();
     let foundVal = '';
     for (let i = 0; i < sel.options.length; i++) {
-        if (String(sel.options[i].value || '').trim().toUpperCase() === target) { foundVal = sel.options[i].value; break; }
+        if (String(sel.options[i].value || '').trim().replace(/\s+/g, ' ').toUpperCase() === target) { foundVal = sel.options[i].value; break; }
     }
     if (foundVal) {
         sel.value = foundVal;
