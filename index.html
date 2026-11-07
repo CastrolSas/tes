@@ -4445,10 +4445,10 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-200 pb-2">
                         <div>
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
-                            <p class="text-[10px] text-slate-400 mt-0.5">Data sheet NOO by TVD difilter berdasarkan user login. Klik baris untuk menambahkan customer, setelah disimpan lanjut ke Input Order.</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Data sheet NOO by TVD difilter berdasarkan user login. Outlet yang sudah punya transaksi berstatus Approve otomatis disembunyikan. Klik baris untuk menambahkan customer, setelah disimpan lanjut ke Input Order.</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v109b</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v109c</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -4463,7 +4463,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
 
                     <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                         <div class="overflow-x-auto" style="-webkit-overflow-scrolling:touch;">
-                            <table id="tableNoobyTVD" class="w-full text-left border-collapse text-[10px]" style="min-width:640px;">
+                            <table id="tableNoobyTVD" class="w-full text-left border-collapse text-[10px]" style="min-width:480px;">
                                 <thead id="noobyTVDHead"></thead>
                                 <tbody id="noobyTVDBody">
                                     <tr><td colspan="2" class="text-slate-400 text-center py-8">Klik menu List NOO TVD untuk memuat data.</td></tr>
@@ -12263,6 +12263,8 @@ if(tab==='tagihan')loadTagihan(false, true);
  * dan outlet baru langsung dipilih di dropdown.
  * Task 109b: layout kolom NO | DSR | CODE TVD | OUTLET | CUST.CODE, tanpa kolom AKSI.
  * Task 109b: data difilter berdasarkan user login (admin melihat semua baris).
+ * Task 109c: kolom tabel hanya OUTLET (NO | OUTLET).
+ * Task 109c: outlet yang sudah punya transaksi APPROVE (sheet INPUT) disembunyikan oleh backend.
  * ========================================================== */
 let globalNoobyTVDData = { headers: [], rows: [] };
 let noobyTVDLoading = false;
@@ -12290,7 +12292,7 @@ function loadNoobyTVD(forceReload, silentRefresh) {
                 globalNoobyTVDData = { headers: Array.isArray(res.headers) ? res.headers : [], rows: Array.isArray(res.rows) ? res.rows : [] };
                 noobyTVDLoaded = true;
                 filterNoobyTVD();
-                try { console.log('[NOO v109b] List NOO TVD dimuat: ' + globalNoobyTVDData.rows.length + ' baris, tampil ' + _noobyTVDUserRows().length + ' utk user login'); } catch (eLog) {}
+                try { console.log('[NOO v109c] List NOO TVD dimuat: ' + globalNoobyTVDData.rows.length + ' baris, tampil ' + _noobyTVDUserRows().length + ' utk user login, sembunyi approve ' + (res && res.hiddenApproved ? res.hiddenApproved : 0)); } catch (eLog) {}
             } else {
                 if (body) body.innerHTML = '<tr><td colspan="30" class="text-red-500 text-center py-8">' + _noobyTVDEscape(res && res.message ? res.message : 'Gagal memuat data NOO TVD.') + '</td></tr>';
             }
@@ -12323,14 +12325,11 @@ function _noobyTVDIsAdminView() {
     return String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
 }
 
-// Task 109b: layout kolom tetap: NO | DSR | CODE TVD | OUTLET | CUST.CODE (tanpa kolom AKSI).
+// Task 109c: layout kolom hanya OUTLET (tampilan: NO | OUTLET). Kolom lain tetap dipakai untuk prefill form.
 function _noobyTVDDisplayCols() {
     const headers = globalNoobyTVDData.headers || [];
     const defs = [
-        { label: 'DSR', aliases: ['DSR', 'SALES', 'NAMA SALES'] },
-        { label: 'CODE TVD', aliases: ['CODE TVD', 'KODE TVD', 'TVD CODE'] },
-        { label: 'OUTLET', aliases: ['OUTLET', 'NAMA OUTLET', 'NAMA TOKO', 'TOKO', 'NAMA NOO'] },
-        { label: 'CUST.CODE', aliases: ['CUST.CODE', 'CUST CODE', 'CUSTCODE', 'KODE CUST', 'CODE CUST', 'CUSTOMER CODE', 'KODE CUSTOMER'] }
+        { label: 'OUTLET', aliases: ['OUTLET', 'NAMA OUTLET', 'NAMA TOKO', 'TOKO', 'NAMA NOO'] }
     ];
     const cols = [];
     for (let d = 0; d < defs.length; d++) {
@@ -12463,7 +12462,7 @@ function openNoobyTVDCustomer(rowNumber) {
 
 function _noobyTVDOpenCustomerForm(row) {
     const prefill = _noobyTVDBuildPrefill(row);
-    try { console.log('[NOO v109b] buka form Tambah Customer dari baris NOO ' + row.rowNumber); } catch (eLog2) {}
+    try { console.log('[NOO v109c] buka form Tambah Customer dari baris NOO ' + row.rowNumber); } catch (eLog2) {}
     openTambahCustomerForm(0, prefill, true);
 }
 
@@ -12473,7 +12472,7 @@ function noobyTVDGotoInputOrder(outletName, salesName) {
     outletName = String(outletName == null ? '' : outletName).trim();
     salesName = String(salesName == null ? '' : salesName).trim();
     const isAdminLogin = String(currentUsernameInput || '').trim().toLowerCase() === 'admin';
-    try { console.log('[NOO v109b] lanjut ke Input Order, outlet=' + outletName + ', sales=' + salesName); } catch (eLog3) {}
+    try { console.log('[NOO v109c] lanjut ke Input Order, outlet=' + outletName + ', sales=' + salesName); } catch (eLog3) {}
     if (isAdminLogin && salesName) {
         const fs = document.getElementById('filterInputSales');
         if (fs) {
@@ -12494,7 +12493,7 @@ function noobyTVDGotoInputOrder(outletName, salesName) {
 function noobyTVDPollSelectOutlet(outletName, tries) {
     if (!outletName) return;
     if (Number(tries || 0) > 40) {
-        console.warn('[NOO v109b] outlet belum muncul di dropdown Input Order (timeout):', outletName);
+        console.warn('[NOO v109c] outlet belum muncul di dropdown Input Order (timeout):', outletName);
         return;
     }
     const sel = document.getElementById('inputOutlet');
