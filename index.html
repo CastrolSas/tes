@@ -1516,7 +1516,7 @@ html,body{height:100%;}
     var isAppsScriptHost = host === 'script.google.com' || host === 'script.googleusercontent.com';
     if (isAppsScriptHost) return;
 
-    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5dkNkseL2AXyP4T3vRATCQEnRC3Ft5ho29iUObmj-Y3H-vRunigrQheYt3jzoBq-p/exec';
+    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxnCwj6qKqPrtZD4luXX5PPW1jlfQcVSzBPpo8HgCxnqFdydrQB0cDNXknFlteI0JIRUA/exec';
     var BRIDGE_URL = CASTROL_APPS_SCRIPT_URL + (CASTROL_APPS_SCRIPT_URL.indexOf('?') >= 0 ? '&' : '?') + 'bridge=1';
     // Task 67: URL deploy diekspos untuk fitur Generate Link Outlet.
     window.__CASTROL_DEPLOY_URL__ = CASTROL_APPS_SCRIPT_URL;
@@ -4173,7 +4173,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
                         <div class="flex items-center gap-2">
                             <h2 class="text-base font-bold text-slate-800">Tagihan</h2>
-                            <span id="tagihanCount" class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">0 tagihan</span>
+                            <span id="tagihanCount" class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">0 tagihan</span><span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v108b</span>
                         </div>
                     </div>
 
@@ -14285,12 +14285,12 @@ function doneBulkStatusApproval() {
 <script id="tagihan-page-v1">
 /* MENU TAGIHAN - usia nota dihitung dari tanggal order + 3 hari.
    Tampilan TABEL saja. Kolom: Outlet | Tanggal Order | Usia Nota | Nominal.
-   Transaksi CASH otomatis LUNAS tanpa tombol. Status diubah lewat TOMBOL timbul
-   per baris (ukuran tetap di mobile) atau centang massal (select all) lalu
-   Tandai Lunas / Tandai Belum Lunas. Klik baris membuka INVOICE (rincian order,
-   total dus, total value). Usia nota >= 45 hari tampil MERAH; usia BEKU pada
-   tanggal penerapan LUNAS. Disimpan SINKRON via updateStatusTagihanSync
-   (sales hanya untuk tagihan miliknya). */
+   Task 108b: transaksi CASH otomatis LUNAS (tanpa tombol); tagihan non-CASH
+   diubah USER lewat TOMBOL timbul per baris (ukuran tetap di mobile) atau
+   centang massal (select all) lalu Tandai Lunas / Tandai Belum Lunas. Klik
+   baris membuka INVOICE (rincian order, total dus, total value). Usia nota
+   >= 45 hari tampil MERAH; usia BEKU pada tanggal penerapan LUNAS. Disimpan
+   SINKRON via updateStatusTagihanSync (sales hanya untuk tagihan miliknya). */
 (function tagihanPageCssInject() {
     if (document.getElementById('tagihanPageCss')) return;
     const st = document.createElement('style');
@@ -14582,6 +14582,7 @@ function loadTagihan(forceReload, silentRefresh) {
 }
 
 function handleTagihanLoaded(res) {
+    try { console.log('[TG v108b] tagihan dimuat: ' + (Array.isArray(res && res.data) ? res.data.length : 0) + ' baris (CASH otomatis LUNAS)'); } catch (eTgLog) {}
     globalTagihanData = (res && Array.isArray(res.data)) ? res.data : [];
     appLocalCacheSet(tagihanCacheKey(), globalTagihanData);
     // Task 84: paksa status pilihan user ke data segar sebelum di-render.
