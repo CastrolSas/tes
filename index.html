@@ -4447,7 +4447,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v116</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v117</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -4457,6 +4457,14 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">⌕</span>
                             <input type="text" id="searchNoobyTVD" oninput="filterNoobyTVD()" placeholder="Cari di semua kolom NOO TVD..."
                                    class="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition">
+                        </div>
+                        <!-- Task 117: Filter DSR (hanya tampil utk login admin) di atas kolom tabel -->
+                        <div id="noobyTVDDsrFilterWrap" class="hidden mt-2.5 flex items-center gap-2">
+                            <label for="noobyTVDDsrFilter" class="text-[10px] font-extrabold text-slate-600 whitespace-nowrap">Filter DSR</label>
+                            <select id="noobyTVDDsrFilter" onchange="filterNoobyTVD()" class="flex-1 min-w-0 py-2 px-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition">
+                                <option value="">Semua DSR</option>
+                            </select>
+                            <button type="button" onclick="resetNoobyTVDDsrFilter()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 text-[10px] font-bold transition">Reset</button>
                         </div>
                     </div>
 
@@ -12315,6 +12323,7 @@ function loadNoobyTVD(forceReload, silentRefresh) {
             if (res && res.success) {
                 globalNoobyTVDData = { headers: Array.isArray(res.headers) ? res.headers : [], rows: Array.isArray(res.rows) ? res.rows : [] };
                 noobyTVDLoaded = true;
+                _noobyTVDBuildDsrFilter(); // Task 117: isi dropdown Filter DSR (admin)
                 filterNoobyTVD();
                 try { console.log('[NOO v113] List NOO TVD dimuat: ' + globalNoobyTVDData.rows.length + ' baris, tampil ' + _noobyTVDUserRows().length + ' utk user login, sembunyi approve ' + (res && res.hiddenApproved ? res.hiddenApproved : 0) + ', terdaftar ' + globalNoobyTVDData.rows.filter(function(it) { return it && it.ready; }).length); } catch (eLog) {}
             } else {
@@ -12352,9 +12361,15 @@ function _noobyTVDIsAdminView() {
 // Task 109c: layout kolom hanya OUTLET (tampilan: NO | OUTLET). Kolom lain tetap dipakai untuk prefill form.
 function _noobyTVDDisplayCols() {
     const headers = globalNoobyTVDData.headers || [];
-    const defs = [
-        { label: 'OUTLET', aliases: ['OUTLET', 'NAMA OUTLET', 'NAMA TOKO', 'TOKO', 'NAMA NOO'] }
-    ];
+    // Task 117: utk login admin, tampilkan kolom DSR sebelum OUTLET. Non-admin tetap OUTLET saja.
+    const defs = _noobyTVDIsAdminView()
+        ? [
+            { label: 'DSR', aliases: ['DSR', 'SALES', 'NAMA SALES', 'NAMA SALES/DSR'] },
+            { label: 'OUTLET', aliases: ['OUTLET', 'NAMA OUTLET', 'NAMA TOKO', 'TOKO', 'NAMA NOO'] }
+        ]
+        : [
+            { label: 'OUTLET', aliases: ['OUTLET', 'NAMA OUTLET', 'NAMA TOKO', 'TOKO', 'NAMA NOO'] }
+        ];
     const cols = [];
     for (let d = 0; d < defs.length; d++) {
         const idx = _noobyTVDFindCol(headers, defs[d].aliases);
@@ -12418,10 +12433,67 @@ function renderNoobyTVDTable(rows) {
     if (count) count.textContent = rows.length.toLocaleString('id-ID') + ' data NOO';
 }
 
+// Task 117: indeks kolom DSR pada data NOO TVD (untuk filter admin).
+function _noobyTVDDsrColIdx() {
+    const headers = globalNoobyTVDData.headers || [];
+    return _noobyTVDFindCol(headers, ['DSR', 'SALES', 'NAMA SALES', 'NAMA SALES/DSR']);
+}
+
+// Task 117: isi dropdown Filter DSR (hanya tampil utk login admin) dari nilai unik kolom DSR.
+function _noobyTVDBuildDsrFilter() {
+    const wrap = document.getElementById('noobyTVDDsrFilterWrap');
+    const sel = document.getElementById('noobyTVDDsrFilter');
+    if (!wrap || !sel) return;
+    const show = _noobyTVDIsAdminView() && _noobyTVDDsrColIdx() >= 0;
+    wrap.classList.toggle('hidden', !show);
+    if (!show) { sel.value = ''; return; }
+    const di = _noobyTVDDsrColIdx();
+    const seen = {};
+    const vals = [];
+    (globalNoobyTVDData.rows || []).forEach(function(item) {
+        const vr = item.values || [];
+        const v = String(di < vr.length && vr[di] != null ? vr[di] : '').trim();
+        if (!v) return;
+        const key = v.toUpperCase();
+        if (seen[key]) return;
+        seen[key] = true;
+        vals.push(v);
+    });
+    vals.sort(function(a, b) { return a.localeCompare(b); });
+    const old = String(sel.value || '').toUpperCase();
+    sel.innerHTML = '<option value="">Semua DSR</option>' + vals.map(function(v) {
+        return '<option value="' + _noobyTVDEscape(v) + '">' + _noobyTVDEscape(v) + '</option>';
+    }).join('');
+    if (old) {
+        for (let oi = 0; oi < sel.options.length; oi++) {
+            if (String(sel.options[oi].value).toUpperCase() === old) { sel.value = sel.options[oi].value; break; }
+        }
+    }
+}
+
+// Task 117: reset Filter DSR ke "Semua DSR".
+function resetNoobyTVDDsrFilter() {
+    const sel = document.getElementById('noobyTVDDsrFilter');
+    if (sel) sel.value = '';
+    filterNoobyTVD();
+}
+
 function filterNoobyTVD() {
     const input = document.getElementById('searchNoobyTVD');
     const q = String(input && input.value ? input.value : '').toLowerCase().trim();
-    const baseRows = _noobyTVDUserRows();
+    // Task 117: terapkan Filter DSR (dropdown di atas tabel) sebelum pencarian teks.
+    // Task 117b: hanya utk view admin - non-admin tidak pernah difilter DSR.
+    const dsrSel = document.getElementById('noobyTVDDsrFilter');
+    const dsrQ = _noobyTVDIsAdminView() && dsrSel ? String(dsrSel.value || '').trim().toUpperCase() : '';
+    const dsrIdx = dsrQ ? _noobyTVDDsrColIdx() : -1;
+    let baseRows = _noobyTVDUserRows();
+    if (dsrQ && dsrIdx >= 0) {
+        baseRows = baseRows.filter(function(item) {
+            const vr = item.values || [];
+            const dv = String(dsrIdx < vr.length && vr[dsrIdx] != null ? vr[dsrIdx] : '').trim().toUpperCase();
+            return dv === dsrQ;
+        });
+    }
     if (!q) { renderNoobyTVDTable(baseRows); return; }
     const filtered = baseRows.filter(function(item) {
         return (item.values || []).some(function(v) {
