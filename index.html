@@ -3756,6 +3756,12 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                     <label class="castrol-auth-label" for="regSalesName">Nama Sales / DSR</label>
                     <select id="regSalesName" required class="castrol-auth-input searchable-select"></select>
                 </div>
+                <!-- Task 118: pilihan Area saat daftar akun -->
+                <div>
+                    <label class="castrol-auth-label" for="regArea">Area</label>
+                    <select id="regArea" required class="castrol-auth-input"></select>
+                    <input type="text" id="regAreaText" class="castrol-auth-input hidden" placeholder="Ketik area" autocomplete="off">
+                </div>
                 <div>
                     <label class="castrol-auth-label" for="regUser">Username</label>
                     <input type="text" id="regUser" name="username" required autocomplete="username" class="castrol-auth-input" placeholder="Pilih username">
@@ -4447,7 +4453,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v117</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v118</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -5177,6 +5183,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             const tanggalInput = document.getElementById('inputTanggal');
             if (tanggalInput && !tanggalInput.value) { var _dNow = new Date(); tanggalInput.value = _dNow.getFullYear() + '-' + String(_dNow.getMonth() + 1).padStart(2, '0') + '-' + String(_dNow.getDate()).padStart(2, '0'); }
             loadSalesOptionsForRegister();
+            loadAreaOptionsForRegister(); // Task 118
             const restored = restoreAuthState();
             showLoading(!restored);
             // Produk/Cashback tidak lagi dimuat saat halaman pertama dibuka.
@@ -5292,14 +5299,52 @@ startAutoRefresh();
             }).getListSalesOptions();
         }
 
+        // Task 118: muat opsi Area utk pendaftaran (master sheet "AREA", fallback kolom AREA sheet ACCOUNT).
+        function loadAreaOptionsForRegister() {
+            google.script.run.withSuccessHandler(function(areaList) {
+                const sel = document.getElementById('regArea');
+                const txt = document.getElementById('regAreaText');
+                if (!sel || !txt) return;
+                const vals = Array.isArray(areaList) ? areaList : [];
+                if (!vals.length) {
+                    // Master AREA masih kosong: izinkan ketik manual agar pendaftaran tidak terblokir.
+                    sel.classList.add('hidden');
+                    sel.required = false;
+                    txt.classList.remove('hidden');
+                    txt.required = true;
+                    return;
+                }
+                sel.classList.remove('hidden');
+                sel.required = true;
+                txt.classList.add('hidden');
+                txt.required = false;
+                sel.innerHTML = '<option value="">-- Pilih Area --</option>' + vals.map(function(v) {
+                    return '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>';
+                }).join('');
+            }).withFailureHandler(function() {
+                const sel2 = document.getElementById('regArea');
+                const txt2 = document.getElementById('regAreaText');
+                if (sel2 && txt2) { sel2.classList.add('hidden'); sel2.required = false; txt2.classList.remove('hidden'); txt2.required = true; }
+            }).getAreaOptions();
+        }
+
+        // Task 118: nilai Area terpilih (select atau input manual).
+        function _regAreaValue() {
+            const sel = document.getElementById('regArea');
+            const txt = document.getElementById('regAreaText');
+            if (sel && !sel.classList.contains('hidden')) return String(sel.value || '').trim();
+            return String((txt && txt.value) || '').trim();
+        }
+
         function handleRegister(e) {
             e.preventDefault();
             showLoading(true);
+            const areaVal = _regAreaValue(); // Task 118: Area wajib dipilih
             google.script.run.withSuccessHandler(function(res) {
                 showLoading(false);
                 showModal("Informasi", res.message);
                 if (res.success) toggleAuthMode('login');
-            }).prosesRegister($('#regSalesName').val(), document.getElementById('regUser').value, document.getElementById('regPass').value);
+            }).prosesRegister($('#regSalesName').val(), document.getElementById('regUser').value, document.getElementById('regPass').value, areaVal);
         }
 
         function startAppDataLoading() {
