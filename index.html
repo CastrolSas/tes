@@ -4251,6 +4251,10 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                                 <option value="powerBrand">Power Brand</option>
                                 <option value="noo">NOO/Reaktivasi</option>
                             </select>
+                            <label for="pencapaianAreaFilter" id="pencapaianAreaFilterLabel" class="hidden text-[9px] font-bold text-slate-500">Area</label>
+                            <select id="pencapaianAreaFilter" onchange="onPencapaianAreaChange()" class="hidden bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="">Semua Area</option>
+                            </select>
                             <label for="pencapaianPeriodSelect" class="text-[9px] font-bold text-slate-500">Periode</label>
                             <select id="pencapaianSalesFilter" onchange="loadPencapaianSales()" class="hidden bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                 <option value="">Semua Sales</option>
@@ -4453,7 +4457,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v121</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v122</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -4921,7 +4925,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             } catch(e) { return false; }
         }
         function restoreFastTabCaches() {
-            const usernameKey = String(currentUsernameInput||'').toUpperCase();
+            const usernameKey = sessionCacheUserKey(); // Task 122: isolasi cache antar akun admin (alias)
             const riwayat = appLocalCacheGet('RIWAYAT_' + usernameKey);
             if (Array.isArray(riwayat)) globalRiwayatData = riwayat;
             const pricelist = appLocalCacheGet('PRICELIST_' + usernameKey);
@@ -4930,7 +4934,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             if (mon && typeof mon === 'object') rawMonitoringDataObject = mon;
             const kontrak = appLocalCacheGet('KONTRAK_' + String(currentUsernameInput||'').toUpperCase());
             if (Array.isArray(kontrak)) globalOutletKontrakData = kontrak;
-            const penc = appLocalCacheGet('PENCAPAIAN_' + String(currentUsernameInput||'').toUpperCase());
+            const penc = appLocalCacheGet('PENCAPAIAN_' + sessionCacheUserKey());
             if (penc && typeof penc === 'object') Object.assign(pencapaianCache, penc);
         }
 
@@ -6425,14 +6429,14 @@ startAutoRefresh();
             // Server tetap diperbarui di belakang layar tanpa mengganggu tampilan.
             if (!forceReload && hasCached) {
                 renderMonitoringList();
-                const monitoringCacheKey = 'MONITORING_V9_' + String(currentUsernameInput||'').toUpperCase();
+                const monitoringCacheKey = 'MONITORING_V9_' + sessionCacheUserKey();
                 if (appLocalCacheIsFresh(monitoringCacheKey, 60000)) return;
                 if (monitoringLoading) return;
                 monitoringLoading = true;
                 google.script.run.withSuccessHandler(function(dataObj) {
                     monitoringLoading = false;
                     rawMonitoringDataObject = dataObj || {};
-                    appLocalCacheSet('MONITORING_V9_' + String(currentUsernameInput||'').toUpperCase(), rawMonitoringDataObject);
+                    appLocalCacheSet('MONITORING_V9_' + sessionCacheUserKey(), rawMonitoringDataObject);
                     let quarters = Object.keys(rawMonitoringDataObject).sort(function(a,b){
                         function quarterKey(v){
                             const m=String(v||'').match(/Q\s*([1-4])\s*(\d{4})/i);
@@ -6449,7 +6453,7 @@ startAutoRefresh();
                 }).withFailureHandler(function(err) {
                     monitoringLoading = false;
                     console.warn('Refresh Monitoring gagal:', err && err.message ? err.message : err);
-                }).getMonitoringOutletData(currentUser, currentUsernameInput);
+                }).getMonitoringOutletData(currentUser, currentUsernameInput, window._adminAlias || ''); // Task 122
                 return;
             }
 
@@ -6464,7 +6468,7 @@ startAutoRefresh();
                 monitoringLoading = false;
                 if (!silentRefresh) showLoading(false);
                 rawMonitoringDataObject = dataObj || {};
-                appLocalCacheSet('MONITORING_V9_' + String(currentUsernameInput||'').toUpperCase(), rawMonitoringDataObject);
+                appLocalCacheSet('MONITORING_V9_' + sessionCacheUserKey(), rawMonitoringDataObject);
                 let quarters = Object.keys(rawMonitoringDataObject).sort(function(a,b){
                     function quarterKey(v){
                         const m=String(v||'').match(/Q\s*([1-4])\s*(\d{4})/i);
@@ -6483,7 +6487,7 @@ startAutoRefresh();
                 monitoringLoading = false;
                 if (!silentRefresh) showLoading(false);
                 if (container) container.innerHTML = '<tr><td colspan="11" class="text-red-500 text-center py-6 text-xs">Gagal memuat monitoring: ' + escapeHtml(err && err.message ? err.message : 'Terjadi kesalahan.') + '</td></tr>';
-            }).getMonitoringOutletData(currentUser, currentUsernameInput);
+            }).getMonitoringOutletData(currentUser, currentUsernameInput, window._adminAlias || ''); // Task 122
         }
 
         function filterMonitoring() {
@@ -6744,7 +6748,7 @@ startAutoRefresh();
                         if (html) hist.insertAdjacentHTML('beforebegin', html);
                     })
                     .withFailureHandler(function() {})
-                    .getOutletKontrakData_BWS(currentUser || 'Admin', currentUsernameInput || 'admin');
+                    .getOutletKontrakData_BWS(currentUser || 'Admin', currentUsernameInput || 'admin', window._adminAlias || ''); // Task 122
             } catch (eAny) {}
         }
 
@@ -7671,7 +7675,7 @@ startAutoRefresh();
                 outletBWSLoading = false;
                 if (!silentRefresh) showLoading(false);
                 tbody.innerHTML = '<tr><td colspan="20" class="text-red-500 text-center py-8">' + escapeHtml(err && err.message ? err.message : 'Terjadi kesalahan server.') + '</td></tr>';
-            }).getDataOutletBWSAdmin(currentUsernameInput, currentUser);
+            }).getDataOutletBWSAdmin(currentUsernameInput, currentUser, window._adminAlias || ''); // Task 122
         }
 
         function filterOutletBWSAdmin() {
@@ -8145,10 +8149,13 @@ startAutoRefresh();
             const yearBadge = document.getElementById('outletKontrakYear');
             if (!tbody) return;
             const hasCached = Array.isArray(globalOutletKontrakData) && globalOutletKontrakData.length > 0;
-            if (!forceReload && hasCached) { renderOutletKontrakTable(globalOutletKontrakData); return; }
+            // Task 122: cache segar 60 dtk -> tampil instan; selain itu render cache
+            // lalu tetap segarkan senyap dari server (cache lama tidak dipakai selamanya).
+            const kontrakCacheKey = 'KONTRAK_' + sessionCacheUserKey();
+            if (!forceReload && hasCached && appLocalCacheIsFresh(kontrakCacheKey, 60000)) { renderOutletKontrakTable(globalOutletKontrakData); return; }
             if (kontrakLoading) return;
             kontrakLoading = true;
-            if (forceReload && hasCached) renderOutletKontrakTable(globalOutletKontrakData);
+            if (hasCached) renderOutletKontrakTable(globalOutletKontrakData);
             if (!silentRefresh) {
                 if (!hasCached) tbody.innerHTML = '<tr><td colspan="7" class="text-slate-400 text-center py-6">Mengambil data...</td></tr>';
                 showLoading(true);
@@ -8158,14 +8165,14 @@ startAutoRefresh();
                 if (!silentRefresh) showLoading(false);
                 if (!res || !res.success) { tbody.innerHTML = `<tr><td colspan="7" class="text-red-500 text-center py-6">${(res && res.error) || 'Gagal memuat data.'}</td></tr>`; return; }
                 globalOutletKontrakData = res.data || [];
-                appLocalCacheSet('KONTRAK_' + String(currentUsernameInput||'').toUpperCase(), globalOutletKontrakData);
+                appLocalCacheSet('KONTRAK_' + sessionCacheUserKey(), globalOutletKontrakData);
                 if (yearBadge) yearBadge.textContent = 'Tahun ' + (res.year || new Date().getFullYear());
                 filterOutletKontrak();
             }).withFailureHandler(function(err) {
                 kontrakLoading = false;
                 if (!silentRefresh) showLoading(false);
                 tbody.innerHTML = `<tr><td colspan="7" class="text-red-500 text-center py-6">${escapeHtml(err && err.message ? err.message : 'Terjadi kesalahan.')}</td></tr>`;
-            }).getOutletKontrakData_BWS(currentUser || 'Admin', currentUsernameInput || 'admin');
+            }).getOutletKontrakData_BWS(currentUser || 'Admin', currentUsernameInput || 'admin', window._adminAlias || ''); // Task 122
         }
 
         function filterOutletKontrak() {
@@ -8582,7 +8589,7 @@ startAutoRefresh();
                 product: 'Produk Fokus', powerbrand: 'Power Brand', noo: 'NOO/Reaktivasi', 'noo/reaktivasi': 'NOO/Reaktivasi', 'noo/reaktifasi': 'NOO/Reaktivasi'
             };
             const title = titleMap[String(category || '').toLowerCase()] || category;
-            const cacheKey = String(currentUsernameInput || '').toLowerCase() + '|' +
+            const cacheKey = pencapaianUserKeyLow() + '|' +
                 String(sales || '').toUpperCase() + '|' + String(selectedPeriod || '') + '|' +
                 String(category || '').toLowerCase();
 
@@ -8733,7 +8740,7 @@ startAutoRefresh();
                     if (detailBody) detailBody.innerHTML =
                         '<div class="text-center text-xs text-red-500 py-10">Gagal memuat detail: ' +
                         escapeHtml(err && err.message ? err.message : 'Terjadi kesalahan.') + '</div>';
-                }).getPencapaianSalesDetail(sales, currentUsernameInput, selectedPeriod, category, window._adminAlias || ''); // Task 121
+                }).getPencapaianSalesDetail(sales, currentUsernameInput, selectedPeriod, category, window._adminAlias || '', pencapaianAreaOverride()); // Task 121/123
             }
 
             const monthFilter = document.getElementById('pencapaianDetailMonthFilter');
@@ -8754,6 +8761,49 @@ startAutoRefresh();
             return uname === 'admin' || salesName === '';
         }
 
+        // Task 122: kunci cache lokal per sesi akun (alias admin) agar akun admin
+        // berbeda (AREA kosong vs AREA terisi) tidak saling memakai cache browser.
+        function sessionCacheUserKey() {
+            return String(window._adminAlias || currentUsernameInput || '').trim().toUpperCase();
+        }
+        // Task 123: override area utk halaman Sales - hanya akun admin dgn kolom AREA kosong.
+        function pencapaianAreaOverride() {
+            if (!canViewAllPencapaianSales()) return '';
+            if (String(window._adminArea || '').trim() !== '') return '';
+            const sel = document.getElementById('pencapaianAreaFilter');
+            return sel ? String(sel.value || '').trim().toUpperCase() : '';
+        }
+        function pencapaianUserKeyLow() {
+            const a = pencapaianAreaOverride();
+            return (currentUsernameInput || 'admin').toLowerCase() + (a ? '@area:' + a.toLowerCase() : '');
+        }
+        // Task 123: dropdown Filter Area (halaman Sales) - tampil hanya bila kolom AREA akun kosong.
+        function loadPencapaianAreaFilter() {
+            const sel = document.getElementById('pencapaianAreaFilter');
+            if (!sel) return;
+            const lbl = document.getElementById('pencapaianAreaFilterLabel');
+            const show = canViewAllPencapaianSales() && String(window._adminArea || '').trim() === '';
+            sel.classList.toggle('hidden', !show);
+            if (lbl) lbl.classList.toggle('hidden', !show);
+            if (!show) { sel.value = ''; return; }
+            const current = sel.value || '';
+            google.script.run.withSuccessHandler(function(list) {
+                const areas = Array.isArray(list) ? list : [];
+                sel.innerHTML = '<option value="">Semua Area</option>' +
+                    areas.map(function(a) { return '<option value="' + escapeHtml(a) + '">' + escapeHtml(a) + '</option>'; }).join('');
+                if (areas.indexOf(current) !== -1) sel.value = current;
+            }).withFailureHandler(function() {
+                sel.innerHTML = '<option value="">Semua Area</option>';
+            }).getAreaOptions();
+        }
+        // Task 123: handler perubahan Filter Area - opsi Filter Sales mengikuti Area terpilih.
+        function onPencapaianAreaChange() {
+            const salesSel = document.getElementById('pencapaianSalesFilter');
+            if (salesSel) salesSel.value = '';
+            loadPencapaianSalesFilter();
+            loadPencapaianSales(true, true);
+        }
+
         function getCurrentPencapaianSalesFilterValue() {
             const f = document.getElementById('pencapaianSalesFilter');
             return canViewAllPencapaianSales() && f && f.value ? f.value : '';
@@ -8764,7 +8814,7 @@ startAutoRefresh();
             pencapaianSelectedCategory = sel && sel.value ? sel.value : 'value';
             const periodSelect = document.getElementById('pencapaianPeriodSelect');
             const selectedPeriod = periodSelect && periodSelect.value ? periodSelect.value : '';
-            const cacheKey = (currentUsernameInput || 'admin').toLowerCase() + '|' + getCurrentPencapaianSalesFilterValue() + '|' + selectedPeriod;
+            const cacheKey = pencapaianUserKeyLow() + '|' + getCurrentPencapaianSalesFilterValue() + '|' + selectedPeriod;
             const cached = pencapaianCache[cacheKey];
             if (cached && Array.isArray(cached.data)) {
                 renderPencapaianSales(cached.data);
@@ -8785,6 +8835,7 @@ startAutoRefresh();
         function loadPencapaianSalesFilter() {
             const select = document.getElementById('pencapaianSalesFilter');
             if (!select) return;
+            loadPencapaianAreaFilter(); // Task 123: sinkron tampilan & opsi Filter Area
             if (!canViewAllPencapaianSales()) {
                 select.classList.add('hidden');
                 return;
@@ -8802,19 +8853,19 @@ startAutoRefresh();
                 _prefetchAllPencapaianSalesPeriods(null);
             }).withFailureHandler(function() {
                 select.innerHTML = '<option value="">Semua Sales</option>';
-            }).getListSalesOptions('', currentUser, currentUsernameInput); // Task 121: opsi sales dibatasi area
+            }).getListSalesOptions('', currentUser, currentUsernameInput, pencapaianAreaOverride()); // Task 121/123: opsi sales dibatasi area
         }
 
         function prefetchPencapaianDetailData(sales, period) {
             if (!sales || !period) return;
             const cats = ['value','volume','active','product','powerbrand','noo'];
             cats.forEach(function(category, index) {
-                const key = String(currentUsernameInput||'').toLowerCase()+'|'+String(sales||'').toUpperCase()+'|'+String(period||'')+'|'+category;
+                const key = pencapaianUserKeyLow()+'|'+String(sales||'').toUpperCase()+'|'+String(period||'')+'|'+category;
                 if (pencapaianDetailCache[key]) return;
                 setTimeout(function(){
                     google.script.run.withSuccessHandler(function(res){
                         pencapaianDetailCache[key] = res || {};
-                    }).withFailureHandler(function(){}).getPencapaianSalesDetail(sales, currentUsernameInput, period, category, window._adminAlias || ''); // Task 121
+                    }).withFailureHandler(function(){}).getPencapaianSalesDetail(sales, currentUsernameInput, period, category, window._adminAlias || '', pencapaianAreaOverride()); // Task 121/123
                 }, index * 80);
             });
         }
@@ -8832,7 +8883,7 @@ startAutoRefresh();
             if (pencapaianPersistTimer) return;
             pencapaianPersistTimer = setTimeout(function() {
                 pencapaianPersistTimer = null;
-                try { appLocalCacheSet('PENCAPAIAN_' + String(currentUsernameInput||'').toUpperCase(), pencapaianCache); } catch(e) {}
+                try { appLocalCacheSet('PENCAPAIAN_' + sessionCacheUserKey(), pencapaianCache); } catch(e) {}
             }, 1200);
         }
         // Task 42: daftar periode yang dikenal dari entri cache mana pun.
@@ -8853,7 +8904,7 @@ startAutoRefresh();
                 const periods = Array.isArray(batchRes.periods) ? batchRes.periods : [];
                 const results = batchRes.results || {};
                 if (!periods.length) return false;
-                const userLow = (currentUsernameInput || 'admin').toLowerCase();
+                const userLow = pencapaianUserKeyLow(); // Task 123
                 let merged = 0;
                 periods.forEach(function(p) {
                     const r = results[p.value];
@@ -8877,7 +8928,7 @@ startAutoRefresh();
         // belum tersedia pada Code.gs yang terpasang). Tetap berjalan di latar belakang.
         function _legacyPrefetchOwnerPeriods(keySales, requestOwner, periods) {
             try {
-                const userLow = (currentUsernameInput || 'admin').toLowerCase();
+                const userLow = pencapaianUserKeyLow(); // Task 123
                 let chain = Promise.resolve();
                 periods.forEach(function(p) {
                     const key = userLow + '|' + String(keySales || '') + '|' + p.value;
@@ -8890,7 +8941,7 @@ startAutoRefresh();
                                     schedulePencapaianPersist();
                                 }
                                 resolve();
-                            }).withFailureHandler(function(){ resolve(); }).getPencapaianSales(requestOwner, currentUsernameInput, p.value, false, window._adminAlias || ''); // Task 121
+                            }).withFailureHandler(function(){ resolve(); }).getPencapaianSales(requestOwner, currentUsernameInput, p.value, false, window._adminAlias || '', pencapaianAreaOverride()); // Task 121/123
                         });
                     });
                 });
@@ -8902,7 +8953,7 @@ startAutoRefresh();
         function _prefetchPencapaianOwnerAllPeriods(keySales, requestOwner, forceRefresh) {
             const ownerKey = String(keySales || '');
             try {
-                const userLow = (currentUsernameInput || 'admin').toLowerCase();
+                const userLow = pencapaianUserKeyLow(); // Task 123
                 const periods = pencapaianPeriodsKnownFromCache();
                 if (!periods.length) return;
                 const missing = periods.filter(function(p){ return !pencapaianCache[userLow + '|' + ownerKey + '|' + p.value]; });
@@ -8926,7 +8977,7 @@ startAutoRefresh();
                     pencapaianBatchInFlight_[ownerKey] = false;
                     pencapaianBatchFailCount_[ownerKey] = (pencapaianBatchFailCount_[ownerKey] || 0) + 1;
                     _legacyPrefetchOwnerPeriods(ownerKey, requestOwner, periods);
-                }).getPencapaianSalesAllPeriods(requestOwner, currentUsernameInput, forceRefresh === true, window._adminAlias || ''); // Task 121
+                }).getPencapaianSalesAllPeriods(requestOwner, currentUsernameInput, forceRefresh === true, window._adminAlias || '', pencapaianAreaOverride()); // Task 121/123
             } catch(e) { pencapaianBatchInFlight_[ownerKey] = false; }
         }
         // Prefetch semua periode pencapaian secara senyap agar pergantian filter
@@ -8955,7 +9006,7 @@ startAutoRefresh();
                     .filter(function(v){ return v && v !== ''; })) : []; // Task 100: + kombinasi Semua Sales
                 const periods = pencapaianPeriodsKnownFromCache();
                 if (!salesList.length || !periods.length) return;
-                const userLow = (currentUsernameInput || 'admin').toLowerCase();
+                const userLow = pencapaianUserKeyLow(); // Task 123
                 const jobs = salesList.slice();
                 let i = 0, active = 0;
                 (function pump() {
@@ -8984,7 +9035,7 @@ startAutoRefresh();
                             _legacyPrefetchOwnerPeriods(s, s, periods);
                             active--;
                             pump();
-                        }).getPencapaianSalesAllPeriods(s, currentUsernameInput, forceServerRefresh === true, window._adminAlias || ''); // Task 121
+                        }).getPencapaianSalesAllPeriods(s, currentUsernameInput, forceServerRefresh === true, window._adminAlias || '', pencapaianAreaOverride()); // Task 121/123
                     }
                 })();
             } catch(e) {}
@@ -8997,7 +9048,7 @@ startAutoRefresh();
             try { pencapaianDetailCache = {}; } catch (ePd) {}
             try { Object.keys(pencapaianBatchInFlight_).forEach(function (k) { delete pencapaianBatchInFlight_[k]; }); } catch (eBi) {}
             try { Object.keys(pencapaianBatchFailCount_).forEach(function (k) { delete pencapaianBatchFailCount_[k]; }); } catch (eBf) {}
-            try { appLocalCacheSet('PENCAPAIAN_' + String(currentUsernameInput || '').toUpperCase(), pencapaianCache); } catch (ePs) {}
+            try { appLocalCacheSet('PENCAPAIAN_' + sessionCacheUserKey(), pencapaianCache); } catch (ePs) {}
             try { __pencapaianDataStale = false; } catch (eFl) {}
         }
         function loadPencapaianSales(forceReloadPeriods, silentRefresh, resetBrowserCache) {
@@ -9011,7 +9062,7 @@ startAutoRefresh();
             const canViewAll = canViewAllPencapaianSales();
             const selectedPeriod = periodSelect && periodSelect.value ? periodSelect.value : '';
             const selectedSales = canViewAll && salesFilter && salesFilter.value ? salesFilter.value : '';
-            const cacheKey = (currentUsernameInput || 'admin').toLowerCase() + '|' + selectedSales + '|' + selectedPeriod;
+            const cacheKey = pencapaianUserKeyLow() + '|' + selectedSales + '|' + selectedPeriod;
             // Task 42: tampilan awal (belum ada periode terpilih) selalu memakai periode
             // berjalan (mis. 2026 Q4), meskipun cache berasal dari sesi sebelumnya.
             let pencCacheHitKey = cacheKey;
@@ -9019,7 +9070,7 @@ startAutoRefresh();
                 const cachedRes0 = pencapaianCache[cacheKey];
                 const curQ = pencapaianCurrentQuarterKeyClient();
                 if (cachedRes0 && cachedRes0.selectedPeriod && curQ && cachedRes0.selectedPeriod !== curQ) {
-                    const altKey = (currentUsernameInput || 'admin').toLowerCase() + '|' + selectedSales + '|' + curQ;
+                    const altKey = pencapaianUserKeyLow() + '|' + selectedSales + '|' + curQ;
                     const altRes = pencapaianCache[altKey];
                     if (altRes && Array.isArray(altRes.data) && altRes.data.length) {
                         pencCacheHitKey = altKey;
@@ -9068,7 +9119,7 @@ startAutoRefresh();
                 pencapaianLoading = false;
                 if (!silentRefresh) showLoading(false);
                 pencapaianCache[cacheKey] = res || {};
-                try { appLocalCacheSet('PENCAPAIAN_' + String(currentUsernameInput||'').toUpperCase(), pencapaianCache); } catch(e) {}
+                try { appLocalCacheSet('PENCAPAIAN_' + sessionCacheUserKey(), pencapaianCache); } catch(e) {}
                 _prefetchAllPencapaianPeriods(res, forceReloadPeriods === true);
                 _prefetchAllPencapaianSalesPeriods(res, forceReloadPeriods === true);
                 const periods = Array.isArray(res && res.periods) ? res.periods : [];
@@ -9087,7 +9138,7 @@ startAutoRefresh();
                 if (!silentRefresh) showLoading(false);
                 if (loading) loading.classList.add('hidden');
                 if (!hadCache && container) container.innerHTML = '<div class="bg-white border border-red-200 rounded-2xl p-6 text-center text-xs text-red-500">Gagal memuat pencapaian: ' + escapeHtml(err && err.message ? err.message : 'Terjadi kesalahan.') + '</div>';
-            }).getPencapaianSales(canViewAll ? selectedSales : currentUser, currentUsernameInput, selectedPeriod, forceReloadPeriods === true, window._adminAlias || ''); // Task 121
+            }).getPencapaianSales(canViewAll ? selectedSales : currentUser, currentUsernameInput, selectedPeriod, forceReloadPeriods === true, window._adminAlias || '', pencapaianAreaOverride()); // Task 121/123
         }
 
         function formatPricelistDate(value) {
@@ -10534,7 +10585,7 @@ startAutoRefresh();
                 if (kjMonTried || kjMonLoading) { if (thenApply) thenApply(); return; }
                 kjMonTried = true; kjMonLoading = true;
                 try {
-                    const monLoc = appLocalCacheGet('MONITORING_V9_' + String(currentUsernameInput || '').toUpperCase());
+                    const monLoc = appLocalCacheGet('MONITORING_V9_' + sessionCacheUserKey());
                     if (monLoc && typeof monLoc === 'object' && Object.keys(monLoc).length) {
                         rawMonitoringDataObject = monLoc; kjMonLoading = false;
                         if (thenApply) thenApply(); return;
@@ -10543,11 +10594,11 @@ startAutoRefresh();
                 google.script.run
                     .withSuccessHandler(function(dataObj) {
                         kjMonLoading = false;
-                        try { rawMonitoringDataObject = dataObj || {}; appLocalCacheSet('MONITORING_V9_' + String(currentUsernameInput || '').toUpperCase(), rawMonitoringDataObject); } catch (eStore) {}
+                        try { rawMonitoringDataObject = dataObj || {}; appLocalCacheSet('MONITORING_V9_' + sessionCacheUserKey(), rawMonitoringDataObject); } catch (eStore) {}
                         if (thenApply) thenApply();
                     })
                     .withFailureHandler(function() { kjMonLoading = false; if (thenApply) thenApply(); })
-                    .getMonitoringOutletData(currentUser || '', currentUsernameInput || '');
+                    .getMonitoringOutletData(currentUser || '', currentUsernameInput || '', window._adminAlias || ''); // Task 122
             } catch (eEns) { kjMonLoading = false; if (thenApply) thenApply(); }
         }
         function filterKunjunganTable() {
@@ -10728,7 +10779,7 @@ startAutoRefresh();
                         _openKunjunganDetailFromMonitoring(info);
                     })
                     .withFailureHandler(function() { showLoading(false); _openKunjunganDetailFallback(info); })
-                    .getMonitoringOutletData(currentUser || '', currentUsernameInput || '');
+                    .getMonitoringOutletData(currentUser || '', currentUsernameInput || '', window._adminAlias || ''); // Task 122
             } catch (e) { _openKunjunganDetailFallback(info); }
         }
         function _openKunjunganDetailFromMonitoring(info) {
@@ -11557,7 +11608,7 @@ if(tab==='tagihan')loadTagihan(false, true);
         // (modal Account maupun pemanggil lama).
         function doLogout() {
             clearAuthState();
-            currentUser = ""; currentUsernameInput = ""; shoppingCart = []; globalRiwayatData = []; rawMonitoringDataObject = {}; globalOutletKontrakData = []; pencapaianCache = {}; pencapaianDetailCache = {}; globalPricelistData = []; globalTambahCustomerData = { headers: [], rows: [] }; globalTambahCustomerFormMaster = { headers: [], dayVisits: [], channels: [], dsrs: [], today: '', salesName: '', isAdmin: false, newCustCode: '' }; tambahCustomerLoaded = false; globalNoobyTVDData = { headers: [], rows: [] }; noobyTVDLoaded = false; window._noobyTVDPendingRedirect = false;
+            currentUser = ""; currentUsernameInput = ""; shoppingCart = []; globalRiwayatData = []; rawMonitoringDataObject = {}; globalOutletKontrakData = []; globalOutletBWSData = { headers: [], rows: [] }; outletBWSFormMaster = { sales: [], outletMap: {} }; pencapaianCache = {}; pencapaianDetailCache = {}; globalPricelistData = []; globalTambahCustomerData = { headers: [], rows: [] }; globalTambahCustomerFormMaster = { headers: [], dayVisits: [], channels: [], dsrs: [], today: '', salesName: '', isAdmin: false, newCustCode: '' }; tambahCustomerLoaded = false; globalNoobyTVDData = { headers: [], rows: [] }; noobyTVDLoaded = false; window._noobyTVDPendingRedirect = false;
             announcementDismissedThisSession = false;
             closeAnnouncementPage(true);
             document.getElementById('mainPage').classList.add('hidden');
