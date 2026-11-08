@@ -3753,22 +3753,23 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
     <div class="castrol-auth-body">
         <div class="castrol-auth-card">
             <form onsubmit="handleRegister(event)" class="space-y-3">
-                <!-- Task 125: tiap grup field dibungkus kotak putih ber-border -->
-                <div class="castrol-auth-field">
+                <!-- Task 126: kotak putih Task 125 dihilangkan khusus halaman Daftar Akun;
+                     field kembali polos dgn border normal (halaman Login tetap pakai kotak) -->
+                <div>
                     <label class="castrol-auth-label" for="regSalesName">Nama Sales / DSR</label>
                     <select id="regSalesName" required class="castrol-auth-input searchable-select"></select>
                 </div>
                 <!-- Task 118: pilihan Area saat daftar akun -->
-                <div class="castrol-auth-field">
+                <div>
                     <label class="castrol-auth-label" for="regArea">Area</label>
                     <select id="regArea" required class="castrol-auth-input"></select>
                     <input type="text" id="regAreaText" class="castrol-auth-input hidden" placeholder="Ketik area" autocomplete="off">
                 </div>
-                <div class="castrol-auth-field">
+                <div>
                     <label class="castrol-auth-label" for="regUser">Username</label>
                     <input type="text" id="regUser" name="username" required autocomplete="username" class="castrol-auth-input" placeholder="Pilih username">
                 </div>
-                <div class="castrol-auth-field">
+                <div>
                     <label class="castrol-auth-label" for="regPass">Password</label>
                     <input type="password" id="regPass" name="password" required autocomplete="new-password" class="castrol-auth-input" placeholder="Buat password">
                 </div>
@@ -4459,7 +4460,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v124</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v125</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
