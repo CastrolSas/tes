@@ -4447,7 +4447,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v113</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v116</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -12410,9 +12410,7 @@ function renderNoobyTVDTable(rows) {
             '<td class="p-2.5 align-top text-slate-400 whitespace-nowrap">' + (rowIndex + 1) + '</td>' +
             cols.map(function(c) {
                 const rawVal = c.idx < values.length && values[c.idx] != null ? values[c.idx] : '';
-                const badge = (isReady && c.label === 'OUTLET')
-                    ? ' <span class="inline-block align-middle ml-1 px-1.5 py-0.5 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 text-[8px] font-bold whitespace-nowrap">&#10003; terdaftar</span>'
-                    : '';
+                const badge = ''; // Task 116: badge terdaftar dihilangkan (fungsi klik/routing tidak berubah)
                 return '<td class="p-2.5 align-top text-slate-700">' + _noobyTVDEscape(rawVal) + badge + '</td>';
             }).join('') +
         '</tr>';
