@@ -4457,7 +4457,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v122</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v123</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -7825,7 +7825,7 @@ startAutoRefresh();
             }).withFailureHandler(function(err) {
                 outletBWSFormMasterLoading = false;
                 showModal('Error Sistem', err && err.message ? err.message : 'Master Sales/Outlet gagal dimuat.');
-            }).getBWSFormMasterAdmin(currentUsernameInput, currentUser); // Task 121: master dibatasi area
+            }).getBWSFormMasterAdmin(currentUsernameInput, currentUser, window._adminAlias || ''); // Task 121/124: master dibatasi area akun sendiri
         }
 
         function _bwsHeaderNormClient(value) {
