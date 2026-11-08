@@ -4453,7 +4453,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v118</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v120</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -5092,7 +5092,8 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             try {
                 localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
                     username: currentUsernameInput || "",
-                    sales: currentUser || ""
+                    sales: currentUser || "",
+                    adminAlias: window._adminAlias || "" // Task 119
                 }));
             } catch (e) {
                 console.warn("Gagal menyimpan sesi lokal:", e);
@@ -5102,6 +5103,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
         function clearAuthState() {
             try { localStorage.removeItem(AUTH_STORAGE_KEY); }
             catch (e) { console.warn("Gagal menghapus sesi lokal:", e); }
+            window._adminAlias = ''; // Task 119
         }
 
         function applyRoleVisibility() {
@@ -5143,6 +5145,9 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
 
                 currentUsernameInput = String(state.username).trim();
                 currentUser = String(state.sales).trim();
+                // Task 119: akun Nama kosong (alias admin) dipulihkan sbg identitas admin.
+                window._adminAlias = String(state.adminAlias || '').trim();
+                if (window._adminAlias) currentUsernameInput = 'admin';
 
                 document.getElementById('loginPage').classList.add('hidden');
                 document.getElementById('registerPage').classList.add('hidden');
@@ -5443,6 +5448,9 @@ startAutoRefresh();
                 }
                 if (res.success) {
                     currentUser = res.sales;
+                    // Task 119: akun dgn Nama (kolom A) kosong di sheet ACCOUNT -> identitas admin.
+                    window._adminAlias = (res && res.adminAccount && res.adminAlias) ? String(res.adminAlias).trim() : '';
+                    if (window._adminAlias) currentUsernameInput = 'admin';
                     document.getElementById('loginPage').classList.add('hidden');
                     document.getElementById('registerPage').classList.add('hidden');
                     document.getElementById('mainPage').classList.remove('hidden');
@@ -5517,7 +5525,7 @@ startAutoRefresh();
             if (usernameInput && usernameInput.toLowerCase() === 'admin') {
                 google.script.run.withSuccessHandler(function(outlets) {
                     handleAllOutletsLoaded(outlets);
-                }).getAllOutlets();
+                }).getAllOutlets(currentUsernameInput, sales); // Task 120: scope area utk admin Nama-kosong
             } else {
                 google.script.run.withSuccessHandler(function(outlets) {
                     handleSalesOutletsLoaded(outlets);
@@ -11492,7 +11500,7 @@ if(tab==='tagihan')loadTagihan(false, true);
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-600 mb-1">Username</label>
-                        <input id="editAccountUsername" type="text" value="${escapeHtml(currentUsernameInput || '')}" autocomplete="username"
+                        <input id="editAccountUsername" type="text" value="${escapeHtml((window._adminAlias || currentUsernameInput) || '')}" autocomplete="username"
                                class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     </div>
                     <div>
@@ -11513,12 +11521,20 @@ if(tab==='tagihan')loadTagihan(false, true);
                 const newUsername = (document.getElementById('editAccountUsername').value || '').trim();
                 const newPassword = document.getElementById('editAccountPassword').value || '';
                 if (!newUsername) { showModal('Peringatan','Username tidak boleh kosong.'); return; }
+                // Task 119: alias admin (Nama kosong di sheet ACCOUNT) mengedit baris akun aslinya.
+                const realAccUser = String(window._adminAlias || currentUsernameInput || '').trim();
                 showLoading(true);
                 google.script.run.withSuccessHandler(function(res) {
                     showLoading(false);
                     if (res && res.success) {
-                        currentUsernameInput = res.username || newUsername.toLowerCase();
-                        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({username: currentUsernameInput, sales: currentUser}));
+                        // Task 119: identitas alias admin tetap "admin" agar struktur admin dipertahankan.
+                        if (window._adminAlias) {
+                            window._adminAlias = String(res.username || newUsername).trim().toLowerCase();
+                            currentUsernameInput = 'admin';
+                        } else {
+                            currentUsernameInput = res.username || newUsername.toLowerCase();
+                        }
+                        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({username: currentUsernameInput, sales: currentUser, adminAlias: window._adminAlias || ""}));
                         document.getElementById('userBadge').textContent = (currentUsernameInput.toLowerCase() === 'admin') ? 'Admin' : currentUser;
                         loadOutletForSales(currentUser, currentUsernameInput);
                         loadRiwayat();
@@ -11529,7 +11545,7 @@ if(tab==='tagihan')loadTagihan(false, true);
                 }).withFailureHandler(function(err) {
                     showLoading(false);
                     showModal('Error Sistem', err && err.message ? err.message : 'Terjadi kesalahan.');
-                }).updateAccount(currentUsernameInput, currentUsernameInput, newPassword, newUsername);
+                }).updateAccount(realAccUser, realAccUser, newPassword, newUsername);
             };
         }
 
@@ -12379,7 +12395,7 @@ function loadNoobyTVD(forceReload, silentRefresh) {
             noobyTVDLoading = false;
             if (body) body.innerHTML = '<tr><td colspan="30" class="text-red-500 text-center py-8">' + _noobyTVDEscape(err && err.message ? err.message : 'Terjadi kesalahan saat memuat data NOO TVD.') + '</td></tr>';
         })
-        .getNoobyTVDList(currentUsernameInput);
+        .getNoobyTVDList(currentUsernameInput, currentUser); // Task 120: scope area
 }
 
 // Task 109b: normalisasi nama header (hapus spasi/simbol) untuk pencocokan kolom.
