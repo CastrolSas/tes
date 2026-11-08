@@ -3718,11 +3718,12 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
     <div class="castrol-auth-body">
         <div class="castrol-auth-card">
             <form onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
+                <!-- Task 125: tiap grup field dibungkus kotak putih ber-border -->
+                <div class="castrol-auth-field">
                     <label class="castrol-auth-label" for="loginUser">Username</label>
                     <input type="text" id="loginUser" name="username" required autocomplete="username" class="castrol-auth-input" placeholder="Masukkan username">
                 </div>
-                <div>
+                <div class="castrol-auth-field">
                     <label class="castrol-auth-label" for="loginPass">Password</label>
                     <input type="password" id="loginPass" name="password" required autocomplete="current-password" class="castrol-auth-input" placeholder="Masukkan password">
                 </div>
@@ -3752,21 +3753,22 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
     <div class="castrol-auth-body">
         <div class="castrol-auth-card">
             <form onsubmit="handleRegister(event)" class="space-y-3">
-                <div>
+                <!-- Task 125: tiap grup field dibungkus kotak putih ber-border -->
+                <div class="castrol-auth-field">
                     <label class="castrol-auth-label" for="regSalesName">Nama Sales / DSR</label>
                     <select id="regSalesName" required class="castrol-auth-input searchable-select"></select>
                 </div>
                 <!-- Task 118: pilihan Area saat daftar akun -->
-                <div>
+                <div class="castrol-auth-field">
                     <label class="castrol-auth-label" for="regArea">Area</label>
                     <select id="regArea" required class="castrol-auth-input"></select>
                     <input type="text" id="regAreaText" class="castrol-auth-input hidden" placeholder="Ketik area" autocomplete="off">
                 </div>
-                <div>
+                <div class="castrol-auth-field">
                     <label class="castrol-auth-label" for="regUser">Username</label>
                     <input type="text" id="regUser" name="username" required autocomplete="username" class="castrol-auth-input" placeholder="Pilih username">
                 </div>
-                <div>
+                <div class="castrol-auth-field">
                     <label class="castrol-auth-label" for="regPass">Password</label>
                     <input type="password" id="regPass" name="password" required autocomplete="new-password" class="castrol-auth-input" placeholder="Buat password">
                 </div>
@@ -4457,7 +4459,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v123</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v124</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -17310,6 +17312,24 @@ body:has(#registerPage:not(.hidden)) #leftNav{display:none!important;}
 select.castrol-auth-input{height:auto;}
 .castrol-auth-input::placeholder{color:#9ab0a4;}
 .castrol-auth-input:focus{border-color:#00a651;box-shadow:0 0 0 3px rgba(0,166,81,.14);}
+/* Task 125: field box bersih - grup label+input dibungkus kotak putih ber-border */
+.castrol-auth-field{
+  background:#fff;
+  border:1.5px solid #e3ebe6;
+  border-radius:14px;
+  padding:9px 13px 10px;
+  box-shadow:0 1px 3px rgba(16,36,27,.05);
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.castrol-auth-field:focus-within{border-color:#00a651;box-shadow:0 0 0 3px rgba(0,166,81,.10);}
+.castrol-auth-field .castrol-auth-label{margin-bottom:2px;font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;color:#64806f;}
+.castrol-auth-field .castrol-auth-input{border:0;height:34px;padding:6px 1px;border-radius:0;background:transparent;}
+.castrol-auth-field .castrol-auth-input:focus{box-shadow:none;}
+.castrol-auth-field .select2-container{display:block;}
+.castrol-auth-field .select2-container .select2-selection--single{height:32px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;}
+.castrol-auth-field .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:32px!important;padding-left:1px!important;font-size:14px!important;color:#10241b!important;}
+.castrol-auth-field .select2-container--default .select2-selection--single .select2-selection__arrow{height:32px!important;}
+.castrol-auth-field .select2-container--default.select2-container--focus .select2-selection--single{outline:none!important;}
 .castrol-auth-forgot{margin-top:-4px;text-align:right;}
 .castrol-auth-forgot a{font-size:12px;font-weight:600;color:#047857;text-decoration:none;}
 .castrol-auth-forgot a:hover{text-decoration:underline;}
