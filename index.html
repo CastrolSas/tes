@@ -2982,11 +2982,12 @@ body{background:
   box-shadow:0 0 0 4px rgba(0,127,79,.08)!important;
 }
 
-/* Login / auth surfaces */
+/* Login / auth surfaces.
+   Task 127: selector #loginPage form & #registerPage form dihapus dari sumber
+   shadow - shadow lama inilah yg tampak sbg "blok putih" menempel di kotak
+   isian pada halaman Daftar Akun. Form kini dibersihkan di rule bawah. */
 #loginPage .login-card,
-#registerPage .login-card,
-#loginPage form,
-#registerPage form{
+#registerPage .login-card{
   border-color:var(--cp-line)!important;
   box-shadow:0 24px 70px rgba(15,43,34,.10)!important;
 }
@@ -3755,15 +3756,20 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             <form onsubmit="handleRegister(event)" class="space-y-3">
                 <!-- Task 126: kotak putih Task 125 dihilangkan khusus halaman Daftar Akun;
                      field kembali polos dgn border normal (halaman Login tetap pakai kotak) -->
-                <div>
+                <div id="regSalesField">
                     <label class="castrol-auth-label" for="regSalesName">Nama Sales / DSR</label>
                     <select id="regSalesName" required class="castrol-auth-input searchable-select"></select>
+                    <!-- Task 127: ketik manual bila nama tidak ada di daftar -->
+                    <input type="text" id="regSalesNameText" class="castrol-auth-input hidden castrol-auth-manual-input" placeholder="Ketik nama sales" autocomplete="off">
+                    <button type="button" id="regSalesManualLink" class="castrol-auth-manual-link">Tidak ada di daftar? Ketik manual</button>
                 </div>
                 <!-- Task 118: pilihan Area saat daftar akun -->
-                <div>
+                <div id="regAreaField">
                     <label class="castrol-auth-label" for="regArea">Area</label>
                     <select id="regArea" required class="castrol-auth-input"></select>
-                    <input type="text" id="regAreaText" class="castrol-auth-input hidden" placeholder="Ketik area" autocomplete="off">
+                    <!-- Task 127: ketik manual bila area tidak ada di daftar (pakai regAreaText Task 118) -->
+                    <input type="text" id="regAreaText" class="castrol-auth-input hidden castrol-auth-manual-input" placeholder="Ketik area" autocomplete="off">
+                    <button type="button" id="regAreaManualLink" class="castrol-auth-manual-link">Tidak ada di daftar? Ketik manual</button>
                 </div>
                 <div>
                     <label class="castrol-auth-label" for="regUser">Username</label>
@@ -4460,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v125</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v126</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -5199,6 +5205,8 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             if (tanggalInput && !tanggalInput.value) { var _dNow = new Date(); tanggalInput.value = _dNow.getFullYear() + '-' + String(_dNow.getMonth() + 1).padStart(2, '0') + '-' + String(_dNow.getDate()).padStart(2, '0'); }
             loadSalesOptionsForRegister();
             loadAreaOptionsForRegister(); // Task 118
+            _setupRegManualToggle('regSalesManualLink', 'regSalesField', 'regSalesName', 'regSalesNameText'); // Task 127
+            _setupRegManualToggle('regAreaManualLink', 'regAreaField', 'regArea', 'regAreaText'); // Task 127
             const restored = restoreAuthState();
             showLoading(!restored);
             // Produk/Cashback tidak lagi dimuat saat halaman pertama dibuka.
@@ -5310,7 +5318,7 @@ startAutoRefresh();
                 salesList.forEach(s => {
                     select.append(new Option(s, s));
                 });
-                refreshSelect2('#inputOutlet');
+                refreshSelect2('#regSalesName'); // Task 127: refresh select register (sebelumnya salah #inputOutlet)
             }).getListSalesOptions();
         }
 
@@ -5345,10 +5353,41 @@ startAutoRefresh();
 
         // Task 118: nilai Area terpilih (select atau input manual).
         function _regAreaValue() {
-            const sel = document.getElementById('regArea');
+            const wrap = document.getElementById('regAreaField'); // Task 127: hormati mode ketik-manual
             const txt = document.getElementById('regAreaText');
+            if (wrap && wrap.classList.contains('castrol-auth-manual-mode')) return String((txt && txt.value) || '').trim();
+            const sel = document.getElementById('regArea');
             if (sel && !sel.classList.contains('hidden')) return String(sel.value || '').trim();
             return String((txt && txt.value) || '').trim();
+        }
+
+        // Task 127: nilai Nama Sales terpilih (select atau ketik manual).
+        function _regSalesValue() {
+            const wrap = document.getElementById('regSalesField');
+            const txt = document.getElementById('regSalesNameText');
+            if (wrap && wrap.classList.contains('castrol-auth-manual-mode')) return String((txt && txt.value) || '').trim();
+            const sel = document.getElementById('regSalesName');
+            return String((sel && sel.value) || '').trim();
+        }
+
+        // Task 127: toggle select <-> ketik manual utk pilihan di halaman Daftar Akun.
+        function _setupRegManualToggle(linkId, wrapId, selectId, textId) {
+            const link = document.getElementById(linkId);
+            if (!link) return;
+            link.addEventListener('click', function() {
+                const wrap = document.getElementById(wrapId);
+                const sel = document.getElementById(selectId);
+                const txt = document.getElementById(textId);
+                if (!wrap || !sel || !txt) return;
+                const toManual = !wrap.classList.contains('castrol-auth-manual-mode');
+                if (!toManual && sel.options.length <= 1) return; // daftar masih kosong: tetap mode manual
+                wrap.classList.toggle('castrol-auth-manual-mode', toManual);
+                sel.required = !toManual;
+                txt.required = toManual;
+                if (toManual) { sel.value = ''; } else { txt.value = ''; }
+                try { if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) window.jQuery(sel).trigger("change"); } catch (eTg) {}
+                link.textContent = toManual ? 'Pilih dari daftar' : 'Tidak ada di daftar? Ketik manual';
+            });
         }
 
         function handleRegister(e) {
@@ -5359,7 +5398,7 @@ startAutoRefresh();
                 showLoading(false);
                 showModal("Informasi", res.message);
                 if (res.success) toggleAuthMode('login');
-            }).prosesRegister($('#regSalesName').val(), document.getElementById('regUser').value, document.getElementById('regPass').value, areaVal);
+            }).prosesRegister(_regSalesValue(), document.getElementById('regUser').value, document.getElementById('regPass').value, areaVal); // Task 127: dukung ketik manual
         }
 
         function startAppDataLoading() {
@@ -13354,8 +13393,11 @@ button{ -webkit-tap-highlight-color:transparent }
 }
 
 /* ---------- LOGIN / REGISTER ---------- */
-/* Rapikan area form login: hilangkan bingkai/shadow bagian dalam, outer card tetap. */
-#loginPage form{
+/* Rapikan area form login: hilangkan bingkai/shadow bagian dalam, outer card tetap.
+   Task 127: #registerPage form ikut dibersihkan (shadow lama = blok putih di
+   balik kotak isian pada halaman Daftar Akun). */
+#loginPage form,
+#registerPage form{
   border:none!important;
   box-shadow:none!important;
   background:transparent!important;
@@ -17331,6 +17373,18 @@ select.castrol-auth-input{height:auto;}
 .castrol-auth-field .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:32px!important;padding-left:1px!important;font-size:14px!important;color:#10241b!important;}
 .castrol-auth-field .select2-container--default .select2-selection--single .select2-selection__arrow{height:32px!important;}
 .castrol-auth-field .select2-container--default.select2-container--focus .select2-selection--single{outline:none!important;}
+/* Task 127: mode ketik-manual utk pilihan Nama Sales & Area (halaman Daftar Akun).
+   Wrapper diberi class castrol-auth-manual-mode -> select/select2 disembunyikan,
+   input teks ditampilkan. */
+.castrol-auth-manual-mode select{display:none!important;}
+.castrol-auth-manual-mode .select2-container{display:none!important;}
+.castrol-auth-manual-mode .castrol-auth-manual-input{display:block!important;}
+.castrol-auth-manual-link{
+  display:inline-block;margin-top:6px;
+  background:none;border:0;padding:0;cursor:pointer;
+  color:#047857;font-weight:700;font-size:11px;letter-spacing:.2px;
+}
+.castrol-auth-manual-link:hover{text-decoration:underline;}
 .castrol-auth-forgot{margin-top:-4px;text-align:right;}
 .castrol-auth-forgot a{font-size:12px;font-weight:600;color:#047857;text-decoration:none;}
 .castrol-auth-forgot a:hover{text-decoration:underline;}
