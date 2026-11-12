@@ -868,7 +868,6 @@
                         <!-- Task 73: tampilan sama dengan DETAIL OUTLET KONTRAK di portal sales -->
                         <div class="op-card" style="padding:16px;">
                             <p class="op-section-title">Outlet Kontrak</p>
-                            <p class="op-section-sub">Detail kontrak BWS outlet Anda beserta point trip tahun berjalan.</p>
                             <div id="pencKontrak" class="mt-3 space-y-4"></div>
                         </div>
                     </div>
@@ -890,6 +889,7 @@
     var riwayatRows = [];
     var riwayatLoading = false;
     var pencapaianLoading = false;
+    var __outletPencStale = false; // Task 100: perubahan data tertunda saat load masih berjalan
     var submitInFlight = false;
     var pencData = null;         // Task 74: respons outletPortalPencapaian (quarters + months + byYear/years)
     var pencAchInit = false;     // Task 74/75: filter tahun/kuartal Pencapaian sudah diinisialisasi (pindahan dari Riwayat)
@@ -1153,11 +1153,19 @@
         if (modal && modal.style.display === 'flex') return false; // modal terbuka -> retry nanti
         var tab = __outletActiveTabName();
         if (tab === 'riwayat') { loadRiwayat(false); return true; }
-        if (tab === 'pencapaian') { loadPencapaian(false); return true; }
+        // Task 100: Pencapaian selalu force (bypass cache server) + silent setiap ada
+        // perubahan data -> angka target/actual langsung terbaru tanpa loading overlay.
+        // Bila load masih berjalan, ditandai stale lalu diambil ulang otomatis.
+        if (tab === 'pencapaian') {
+            if (pencapaianLoading) __outletPencStale = true;
+            else loadPencapaian(true, true);
+            return true;
+        }
         if (tab === 'input') {
             // Jangan ganggu saat outlet sedang menyusun order (keranjang berisi).
             if (shoppingCart && shoppingCart.length) return true;
-            loadPencapaian(false); // segarkan kartu Target & Pencapaian di halaman Input
+            if (pencapaianLoading) __outletPencStale = true; // Task 100
+            else loadPencapaian(true, true); // Task 100: force + silent
             return true;
         }
         return true;
@@ -1731,17 +1739,21 @@
     }
 
     // ---------- Pencapaian (TANPA tabel/card — tampilan langsung) ----------
-    function loadPencapaian(force) {
+    function loadPencapaian(force, silentRefresh) {
         if (!profile || pencapaianLoading) return Promise.resolve();
         pencapaianLoading = true;
-        if (force) showLoading(true);
+        var showOv = !!force && !silentRefresh; // Task 100: silent = tanpa overlay loading
+        if (showOv) showLoading(true);
         return gsRun('outletPortalPencapaian', [profile.custCode, !!force]).then(function (res) {
             pencapaianLoading = false;
-            showLoading(false);
+            if (showOv) showLoading(false);
             pencData = (res && res.success) ? res : null;
             renderPencapaian(res && res.success ? res : null);
             renderInputAch();
             renderPencAch();
+            // Task 100: bila ada perubahan data masuk saat load masih berjalan, ambil
+            // ulang sekali lagi (force + silent) agar halaman selalu data terbaru.
+            if (__outletPencStale) { __outletPencStale = false; loadPencapaian(true, true); }
         });
     }
 
@@ -1958,11 +1970,9 @@
         var bwsWrap = $('pencBwsWrap');
         if (bws && Array.isArray(bws.contracts) && bws.contracts.length) {
             bwsWrap.classList.remove('hidden');
-            // Task 73: tampilan identik dengan DETAIL OUTLET KONTRAK pada portal sales
-            // (tampilkanDetailOutletKontrak): hero gradasi, grid Target/Actual/Gap/Point,
-            // progress "Pencapaian Volume Kontrak", tabel Point Trip per kategori.
-            var profName = profile ? (profile.outlet || '-') : '-';
-            var profChan = profile ? (profile.channel || '') : '';
+            // Task 73: tampilan identik dengan DETAIL OUTLET KONTRAK pada portal sales.
+            // Task 132: hero gradasi "Outlet Kontrak" dihapus sesuai permintaan — kartu langsung
+            // menampilkan grid Target/Actual/Gap/Point, progress, dan tabel Point Trip.
             var blocks = bws.contracts.map(function (c) {
                 var pct = Number(c.percentage) || 0;
                 var gap = Number(c.gap) || 0;
@@ -1986,12 +1996,6 @@
                     trip = '<div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 text-[10px] text-slate-400 text-center">Belum ada Point Trip untuk tahun berjalan.</div>';
                 }
                 return '<div class="rounded-xl border border-slate-200 overflow-hidden bg-white">' +
-                    '<div class="bg-gradient-to-r from-slate-900 to-emerald-900 text-white p-3">' +
-                    '<div class="text-[9px] uppercase tracking-wider text-emerald-300 font-bold">Outlet Kontrak</div>' +
-                    '<div class="text-sm font-bold mt-1">' + esc(profName) + '</div>' +
-                    '<div class="text-[9px] text-slate-300 mt-1">' + esc(c.start || '-') + ' s/d ' + esc(c.end || '-') +
-                    (profChan ? ' • Channel ' + esc(profChan) : '') + '</div>' +
-                    '</div>' +
                     '<div class="p-3 space-y-3">' +
                     '<div class="grid grid-cols-2 gap-2">' +
                     '<div class="rounded-xl border border-slate-200 p-2.5 bg-white"><div class="text-[9px] text-slate-400">Target</div>' +
