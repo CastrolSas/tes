@@ -4466,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v126</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v127</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -9299,6 +9299,56 @@ startAutoRefresh();
             const pack=Number(raw);
             return pack>0?pack:1;
         }
+        // Task 128: nama dasar produk - buang kata "CTM" utk mencocokkan pasangan varian.
+        function _hnBaseProdukName_(name) {
+            return String(name==null?'':name).replace(/\s*\bCTM\b\s*/gi,' ').replace(/\s+/g,' ').trim().toUpperCase();
+        }
+        // Task 128: hitung ulang satu baris keranjang dari parts (varian asli + varian CTM).
+        // Baris gabungan: semua total dijumlahkan; harga unit =
+        // (Total nett varian asli + Total nett varian CTM) / total qty kedua varian (pcs).
+        function recalcHargaNettCartItem(item) {
+            const hasParts=!!(item.parts&&item.parts.length);
+            const parts=hasParts?item.parts:[{key:item.key,qty:item.qty,unit:item.unit,extraPerPcs:item.extraPerPcs}];
+            let subtotalGross=0,totalDisc=0,totalCashback=0,totalExtra=0,nettSubtotal=0,totalPcs=0,qtySum=0;
+            let firstUnit=parts[0].unit,sameUnit=true,firstCtx=null,firstPack=1;
+            parts.forEach(function(part){
+                const prod=hargaNettData.find(function(x){return String(x.kode||x.produk||'')===part.key;});
+                if(!prod)return;
+                const ctx=getHargaNettInvoiceContext(prod);
+                const pk=parseHargaNettPack(prod);
+                const pPcs=Math.max(0,part.unit==='PCS'?part.qty:part.qty*pk);
+                const discPercent=ctx.isCtm?0:ctx.discPercent;
+                const grossPcs=ctx.isCtm?ctx.base:Math.max(0,ctx.base-ctx.base*discPercent/100);
+                part.totalPcs=pPcs;part.pack=pk;
+                part.subtotalGross=ctx.base*pPcs;
+                part.totalDisc=(ctx.base-grossPcs)*pPcs;
+                part.cashbackPerPcs=ctx.cashbackPerPcs;
+                part.totalCashback=ctx.cashbackPerPcs*pPcs;
+                part.totalExtra=Math.max(0,Number(part.extraPerPcs)||0)*pPcs;
+                part.nettSubtotal=Math.max(0,part.subtotalGross-part.totalDisc-part.totalCashback-part.totalExtra);
+                subtotalGross+=part.subtotalGross;totalDisc+=part.totalDisc;totalCashback+=part.totalCashback;totalExtra+=part.totalExtra;nettSubtotal+=part.nettSubtotal;totalPcs+=pPcs;qtySum+=Number(part.qty)||0;
+                if(part.unit!==firstUnit)sameUnit=false;
+                if(!firstCtx){firstCtx=ctx;firstPack=pk;}
+            });
+            if(!firstCtx)return; // master produk belum termuat: biarkan nilai existing
+            item.subtotalGross=subtotalGross;
+            item.totalDisc=totalDisc;
+            item.totalCashback=totalCashback;
+            item.totalExtra=totalExtra;
+            item.nettSubtotal=nettSubtotal;
+            item.totalPcs=totalPcs;
+            if(hasParts){
+                item.unit=sameUnit?firstUnit:'PCS';
+                item.qty=sameUnit?qtySum:totalPcs;
+                item.price=totalPcs>0?(nettSubtotal/totalPcs):firstCtx.base; // rumus Task 128
+                item.isCtm=false; // baris campuran asli+CTM: memakai penanda gabungan
+                item.cashbackPerPcs=totalPcs>0?(totalCashback/totalPcs):0;
+            } else {
+                item.pack=firstPack;item.liter=firstCtx.liter;item.price=firstCtx.base;
+                item.discPercent=firstCtx.isCtm?0:firstCtx.discPercent;
+                item.cashbackPerPcs=firstCtx.cashbackPerPcs;item.isCtm=firstCtx.isCtm;
+            }
+        }
         function renderHargaNettInvoice(rows,campaign,quarter,discPercent) {
             const select=document.getElementById('hnProductSelect');
             if(select){
@@ -9312,21 +9362,8 @@ startAutoRefresh();
             renderHargaNettInvoiceCart();
         }
         function recalculateHargaNettInvoiceCart() {
-            hargaNettInvoiceCart.forEach(function(item){
-                const prod=hargaNettData.find(function(x){return String(x.kode||x.produk||'')===item.key;});
-                if(!prod)return;
-                const ctx=getHargaNettInvoiceContext(prod);
-                const pack=parseHargaNettPack(prod);
-                const totalPcs=item.unit==='PCS'?item.qty:item.qty*pack;
-                const discPercent=ctx.isCtm?0:ctx.discPercent;
-                const grossPcs=ctx.isCtm?ctx.base:Math.max(0,ctx.base-ctx.base*discPercent/100);
-                item.pack=pack;item.totalPcs=totalPcs;item.liter=ctx.liter;item.price=ctx.base;
-                item.isCtm=ctx.isCtm;item.subtotalGross=ctx.base*totalPcs;
-                item.totalDisc=(ctx.base-grossPcs)*totalPcs;
-                item.cashbackPerPcs=ctx.cashbackPerPcs;item.totalCashback=ctx.cashbackPerPcs*totalPcs;
-                item.totalExtra=Math.max(0,Number(item.extraPerPcs)||0)*totalPcs;
-                item.nettSubtotal=Math.max(0,item.subtotalGross-item.totalDisc-item.totalCashback-item.totalExtra);
-            });
+            // Task 128: tiap baris dihitung dari parts (varian asli + varian CTM digabung jadi satu).
+            hargaNettInvoiceCart.forEach(function(item){ recalcHargaNettCartItem(item); });
         }
         function getHargaNettInvoiceSelectedProduct() {
             const key=String((document.getElementById('hnProductSelect')||{}).value||'');
@@ -9360,7 +9397,24 @@ startAutoRefresh();
             const totalCashback=ctx.cashbackPerPcs*totalPcs;
             const totalExtra=extraPerPcs*totalPcs;
             const nettSubtotal=Math.max(0,subtotalGross-totalDisc-totalCashback-totalExtra);
-            hargaNettInvoiceCart.push({key:String(prod.kode||prod.produk||''),produk:prod.produk,unit:unit,qty:qty,totalPcs:totalPcs,pack:pack,liter:ctx.liter,price:ctx.base,discPercent:discPercent,subtotalGross:subtotalGross,totalDisc:totalDisc,cashbackPerPcs:ctx.cashbackPerPcs,totalCashback:totalCashback,extraPerPcs:extraPerPcs,totalExtra:totalExtra,nettSubtotal:nettSubtotal,isCtm:ctx.isCtm});
+            // Task 128: bila ada pasangan varian (produk sama, pembeda CTM) di keranjang, jadikan satu baris.
+            const newItem={key:String(prod.kode||prod.produk||''),produk:prod.produk,unit:unit,qty:qty,totalPcs:totalPcs,pack:pack,liter:ctx.liter,price:ctx.base,discPercent:discPercent,subtotalGross:subtotalGross,totalDisc:totalDisc,cashbackPerPcs:ctx.cashbackPerPcs,totalCashback:totalCashback,extraPerPcs:extraPerPcs,totalExtra:totalExtra,nettSubtotal:nettSubtotal,isCtm:ctx.isCtm,parts:[{key:String(prod.kode||prod.produk||''),qty:qty,unit:unit,extraPerPcs:extraPerPcs}]};
+            const baseName=_hnBaseProdukName_(newItem.produk);
+            let didMerge=false;
+            if(baseName){
+                for(let mi=0;mi<hargaNettInvoiceCart.length;mi++){
+                    const it=hargaNettInvoiceCart[mi];
+                    if(_hnBaseProdukName_(it.produk)!==baseName)continue;
+                    const alreadyMerged=!!(it.parts&&it.parts.length>1);
+                    if(!alreadyMerged&&!!it.isCtm===!!newItem.isCtm)continue; // varian harus berbeda (CTM vs non-CTM)
+                    if(!it.parts)it.parts=[{key:it.key,qty:it.qty,unit:it.unit,extraPerPcs:it.extraPerPcs}];
+                    if(it.isCtm&&!newItem.isCtm){it.produk=newItem.produk;it.key=newItem.key;} // nama baris mengikuti Produk Asli
+                    it.parts.push({key:newItem.key,qty:newItem.qty,unit:newItem.unit,extraPerPcs:newItem.extraPerPcs});
+                    recalcHargaNettCartItem(it);
+                    didMerge=true;break;
+                }
+            }
+            if(!didMerge)hargaNettInvoiceCart.push(newItem);
             renderHargaNettInvoiceCart();
             document.getElementById('hnExtra').value='0';
         }
@@ -9383,7 +9437,8 @@ startAutoRefresh();
                 gross+=item.subtotalGross;disc+=item.totalDisc;cashback+=item.totalCashback;extra+=item.totalExtra;net+=item.nettSubtotal;
                 const qtyLabel=item.unit==='PCS'?item.qty+' Pcs':item.qty+' Dus ('+item.totalPcs+' Pcs)';
                 const star=item.isCtm?' <span style="color:#eab308;font-weight:700">★</span>':'';
-                return '<tr class="border-b border-slate-100 last:border-0"><td class="p-2 font-semibold text-slate-700">'+escapeHtml(item.produk)+star+'</td><td class="p-2 text-center">'+escapeHtml(qtyLabel)+'</td><td class="p-2 text-right whitespace-nowrap">'+formatHargaNett(item.price)+'</td><td class="p-2 text-right whitespace-nowrap">'+formatHargaNett(item.subtotalGross)+'</td><td class="p-2 text-right whitespace-nowrap text-red-600">-'+formatHargaNett(item.totalDisc)+'</td><td class="p-2 text-right whitespace-nowrap text-emerald-700">-'+formatHargaNett(item.totalCashback)+'</td><td class="p-2 text-right whitespace-nowrap text-blue-700">-'+formatHargaNett(item.totalExtra)+'</td><td class="p-2 text-right whitespace-nowrap font-extrabold">'+formatHargaNett(item.nettSubtotal)+'</td><td class="p-2 text-center"><button type="button" onclick="removeHargaNettInvoiceItem('+index+')" class="text-red-500 font-bold px-1" aria-label="Hapus item">×</button></td></tr>';
+                const mergeTag=(item.parts&&item.parts.length>1)?' <span style="color:#0f766e;font-weight:700;font-size:9px">(digabung CTM)</span>':'';
+                return '<tr class="border-b border-slate-100 last:border-0"><td class="p-2 font-semibold text-slate-700">'+escapeHtml(item.produk)+star+mergeTag+'</td><td class="p-2 text-center">'+escapeHtml(qtyLabel)+'</td><td class="p-2 text-right whitespace-nowrap">'+formatHargaNett(item.price)+'</td><td class="p-2 text-right whitespace-nowrap">'+formatHargaNett(item.subtotalGross)+'</td><td class="p-2 text-right whitespace-nowrap text-red-600">-'+formatHargaNett(item.totalDisc)+'</td><td class="p-2 text-right whitespace-nowrap text-emerald-700">-'+formatHargaNett(item.totalCashback)+'</td><td class="p-2 text-right whitespace-nowrap text-blue-700">-'+formatHargaNett(item.totalExtra)+'</td><td class="p-2 text-right whitespace-nowrap font-extrabold">'+formatHargaNett(item.nettSubtotal)+'</td><td class="p-2 text-center"><button type="button" onclick="removeHargaNettInvoiceItem('+index+')" class="text-red-500 font-bold px-1" aria-label="Hapus item">×</button></td></tr>';
             }).join('');
             const bonus=Math.max(0,Number((document.getElementById('hnBonus')||{}).value||0));
             const set=function(id,value){const el=document.getElementById(id);if(el)el.textContent=value;};
@@ -9401,7 +9456,7 @@ startAutoRefresh();
             const rows=hargaNettInvoiceCart.map(function(item,index){
                 gross+=item.subtotalGross;disc+=item.totalDisc;cashback+=item.totalCashback;extra+=item.totalExtra;net+=item.nettSubtotal;
                 const qtyLabel=item.unit==='PCS'?item.qty+' Pcs':item.qty+' Dus ('+item.totalPcs+' Pcs)';
-                return '<tr><td class="num">'+String(index+1).padStart(2,'0')+'</td><td><div class="product">'+escapeHtml(item.produk)+(item.isCtm?' <span class="star">★ CTM</span>':'')+'</div><div class="muted">'+escapeHtml(item.key||'')+'</div></td><td class="center">'+escapeHtml(qtyLabel)+'</td><td class="right">'+formatHargaNett(item.price)+'</td><td class="right">'+formatHargaNett(item.subtotalGross)+'</td><td class="right negative">'+(item.totalDisc?'-':'')+formatHargaNett(item.totalDisc)+'</td><td class="right cashback">'+(item.totalCashback?'-':'')+formatHargaNett(item.totalCashback)+'</td><td class="right strong">'+formatHargaNett(item.nettSubtotal)+'</td></tr>';
+                return '<tr><td class="num">'+String(index+1).padStart(2,'0')+'</td><td><div class="product">'+escapeHtml(item.produk)+(item.isCtm?' <span class="star">★ CTM</span>':'')+((item.parts&&item.parts.length>1)?' <span class="star">digabung CTM</span>':'')+'</div><div class="muted">'+escapeHtml(item.parts&&item.parts.length>1?item.parts.map(function(pt){return String(pt.key||'');}).join(' + '):(item.key||''))+'</div></td><td class="center">'+escapeHtml(qtyLabel)+'</td><td class="right">'+formatHargaNett(item.price)+'</td><td class="right">'+formatHargaNett(item.subtotalGross)+'</td><td class="right negative">'+(item.totalDisc?'-':'')+formatHargaNett(item.totalDisc)+'</td><td class="right cashback">'+(item.totalCashback?'-':'')+formatHargaNett(item.totalCashback)+'</td><td class="right strong">'+formatHargaNett(item.nettSubtotal)+'</td></tr>';
             }).join('');
             const bonus=Math.max(0,Number((document.getElementById('hnBonus')||{}).value||0));
             const grand=Math.max(0,net-bonus);
