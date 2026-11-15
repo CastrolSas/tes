@@ -1516,7 +1516,7 @@ html,body{height:100%;}
     var isAppsScriptHost = host === 'script.google.com' || host === 'script.googleusercontent.com';
     if (isAppsScriptHost) return;
 
-    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5dkNkseL2AXyP4T3vRATCQEnRC3Ft5ho29iUObmj-Y3H-vRunigrQheYt3jzoBq-p/exec';
+    var CASTROL_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxnCwj6qKqPrtZD4luXX5PPW1jlfQcVSzBPpo8HgCxnqFdydrQB0cDNXknFlteI0JIRUA/exec';
     var BRIDGE_URL = CASTROL_APPS_SCRIPT_URL + (CASTROL_APPS_SCRIPT_URL.indexOf('?') >= 0 ? '&' : '?') + 'bridge=1';
     // Task 67: URL deploy diekspos untuk fitur Generate Link Outlet.
     window.__CASTROL_DEPLOY_URL__ = CASTROL_APPS_SCRIPT_URL;
@@ -4466,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v132</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v134</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -6763,11 +6763,48 @@ startAutoRefresh();
                             '<td class="p-2 text-right text-slate-600">' + formatNumberID(row.karton, 2) + ' <span class="text-[8px] text-slate-400">' + divText + '</span></td>' +
                             '<td class="p-2 text-right font-bold text-indigo-700">' + formatNumberID(row.point, 2) + '</td></tr>';
                     }).join('');
+                    // Task 136: baris TOTAL Point Trip Tahun Berjalan.
+                    let tVol136 = 0, tKar136 = 0;
+                    item.pointByCategory.forEach(function(r136) { tVol136 += Number(r136.volume) || 0; tKar136 += Number(r136.karton) || 0; });
+                    const totalRow136 = '<tr class="bg-slate-50 border-t-2 border-slate-200">' +
+                        '<td class="p-2 font-bold text-slate-700">Total</td>' +
+                        '<td class="p-2 text-right font-bold text-slate-700">' + formatNumberID(tVol136, 1) + '</td>' +
+                        '<td class="p-2 text-right font-bold text-slate-700">' + formatNumberID(tKar136, 2) + '</td>' +
+                        '<td class="p-2 text-right font-extrabold text-indigo-700">' + formatNumberID(item.totalPoint, 2) + '</td></tr>';
+                    // Task 136: Gap Point Trip + Tiket yang Diperoleh. Target Point dibaca
+                    // dari kolom E dan Target Power Fam dari kolom F (DATA OUTLET BWS,
+                    // dihitung backend). Tiket: kedua target wajib terpenuhi; bila outlet
+                    // sudah mendapatkan 1 tiket atau lebih, target berlaku kelipatan per target.
+                    const tp136 = Number(item.targetPoint) || 0;
+                    const pft136 = Number(item.targetPowerFam) || 0;
+                    const pfa136 = Number(item.actualPowerFam) || 0;
+                    const gapP136 = item.gapPointTrip == null ? NaN : Number(item.gapPointTrip);
+                    const gapKnown136 = tp136 > 0 && !isNaN(gapP136);
+                    const gapMet136 = gapKnown136 && gapP136 >= 0;
+                    const tiketOk136 = tp136 > 0 && pft136 > 0;
+                    const tiketVal136 = tiketOk136 ? (String(Number(item.totalTiket) || 0) + ' Tiket') : '-';
+                    let catatan136;
+                    if (tp136 <= 0 && pft136 <= 0) {
+                        catatan136 = 'Target Point (kolom E) dan Target Power Fam (kolom F) belum diisi pada DATA OUTLET BWS.';
+                    } else if (tp136 <= 0) {
+                        catatan136 = 'Target Point (kolom E) belum diisi - tiket belum dapat dihitung.';
+                    } else if (pft136 <= 0) {
+                        catatan136 = 'Target Power Fam (kolom F) belum diisi - tiket belum dapat dihitung.';
+                    } else {
+                        catatan136 = 'Syarat tiket: Point mencapai Target Point DAN Power Fam mencapai Target Power Fam; tiket ke-n mengikuti kelipatan per target (Power Fam ' + formatNumberID(pfa136, 1) + ' / ' + formatNumberID(pft136, 1) + ' dus).';
+                    }
                     trip = '<div class="mt-2 border border-slate-200 rounded-xl overflow-hidden">' +
                         '<div class="px-3 py-2 bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-700">Point Trip Tahun Berjalan</div>' +
                         '<div class="overflow-x-auto"><table class="w-full text-[10px]"><thead><tr class="bg-white border-b border-slate-200 text-slate-500">' +
                         '<th class="p-2 text-left font-bold">Kategori</th><th class="p-2 text-right font-bold">Volume</th><th class="p-2 text-right font-bold">Karton</th><th class="p-2 text-right font-bold">Point</th>' +
-                        '</tr></thead><tbody>' + trows + '</tbody></table></div></div>';
+                        '</tr></thead><tbody>' + trows + totalRow136 + '</tbody></table></div>' +
+                        '<div class="px-3 py-2.5 border-t border-slate-200 bg-white grid grid-cols-3 gap-2">' +
+                        '<div class="rounded-lg border border-slate-200 p-2 bg-slate-50"><div class="text-[8px] font-semibold text-slate-400">Target Point Trip</div><div class="text-[11px] font-bold text-slate-800">' + (tp136 > 0 ? formatNumberID(tp136, 2) : '-') + '</div></div>' +
+                        '<div class="rounded-lg border p-2 ' + (gapKnown136 ? (gapMet136 ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50') : 'border-slate-200 bg-slate-50') + '"><div class="text-[8px] font-semibold ' + (gapKnown136 ? (gapMet136 ? 'text-emerald-600' : 'text-red-500') : 'text-slate-400') + '">Gap Point Trip</div><div class="text-[11px] font-bold ' + (gapKnown136 ? (gapMet136 ? 'text-emerald-700' : 'text-red-600') : 'text-slate-500') + '">' + (gapKnown136 ? formatNumberID(gapP136, 2) : '-') + '</div></div>' +
+                        '<div class="rounded-lg border border-amber-200 p-2 bg-amber-50"><div class="text-[8px] font-semibold text-amber-600">Tiket yang Diperoleh</div><div class="text-[11px] font-extrabold text-amber-800">' + tiketVal136 + '</div></div>' +
+                        '</div>' +
+                        '<div class="px-3 pb-2.5 text-[8.5px] leading-snug text-slate-400">' + catatan136 + '</div>' +
+                        '</div></div>';
                 }
                 return '<div class="mt-2 rounded-xl border border-slate-200 overflow-hidden">' +
                     // Task 134: kartu header gradient (label periode) dihapus;
@@ -8384,10 +8421,52 @@ startAutoRefresh();
                     `;
                 });
 
+                // Task 136: baris TOTAL + Gap Point Trip + Tiket yang Diperoleh
+                // (Target Point kolom E, Target Power Fam kolom F DATA OUTLET BWS).
+                const tVolK136 = item.pointByCategory.reduce(function(a136, r136) { return a136 + (Number(r136.volume) || 0); }, 0);
+                const tKarK136 = item.pointByCategory.reduce(function(a136, r136) { return a136 + (Number(r136.karton) || 0); }, 0);
+                const tpK136 = Number(item.targetPoint) || 0;
+                const pftK136 = Number(item.targetPowerFam) || 0;
+                const pfaK136 = Number(item.actualPowerFam) || 0;
+                const gapK136 = item.gapPointTrip == null ? NaN : Number(item.gapPointTrip);
+                const gapKnownK136 = tpK136 > 0 && !isNaN(gapK136);
+                const gapMetK136 = gapKnownK136 && gapK136 >= 0;
+                const tiketOkK136 = tpK136 > 0 && pftK136 > 0;
+                let catatanK136;
+                if (tpK136 <= 0 && pftK136 <= 0) {
+                    catatanK136 = 'Target Point (kolom E) dan Target Power Fam (kolom F) belum diisi pada DATA OUTLET BWS.';
+                } else if (tpK136 <= 0) {
+                    catatanK136 = 'Target Point (kolom E) belum diisi - tiket belum dapat dihitung.';
+                } else if (pftK136 <= 0) {
+                    catatanK136 = 'Target Power Fam (kolom F) belum diisi - tiket belum dapat dihitung.';
+                } else {
+                    catatanK136 = 'Syarat tiket: Point mencapai Target Point DAN Power Fam mencapai Target Power Fam; tiket ke-n mengikuti kelipatan per target (Power Fam ' + formatNumberID(pfaK136, 1) + ' / ' + formatNumberID(pftK136, 1) + ' dus).';
+                }
                 categoryHtml += `
+                                <tr class="bg-slate-50 border-t-2 border-slate-200">
+                                    <td class="p-2 font-bold text-slate-700">Total</td>
+                                    <td class="p-2 text-right font-bold text-slate-700">${formatNumberID(tVolK136, 1)}</td>
+                                    <td class="p-2 text-right font-bold text-slate-700">${formatNumberID(tKarK136, 2)}</td>
+                                    <td class="p-2 text-right font-extrabold text-indigo-700">${formatNumberID(item.totalPoint, 2)}</td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
+                        <div class="px-3 py-3 border-t border-slate-200 bg-white grid grid-cols-3 gap-2">
+                            <div class="rounded-lg border border-slate-200 p-2 bg-slate-50">
+                                <div class="text-[9px] font-semibold text-slate-400">Target Point Trip</div>
+                                <div class="text-sm font-bold text-slate-800">${tpK136 > 0 ? formatNumberID(tpK136, 2) : '-'}</div>
+                            </div>
+                            <div class="rounded-lg border p-2 ${gapKnownK136 ? (gapMetK136 ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50') : 'border-slate-200 bg-slate-50'}">
+                                <div class="text-[9px] font-semibold ${gapKnownK136 ? (gapMetK136 ? 'text-emerald-600' : 'text-red-500') : 'text-slate-400'}">Gap Point Trip</div>
+                                <div class="text-sm font-bold ${gapKnownK136 ? (gapMetK136 ? 'text-emerald-700' : 'text-red-600') : 'text-slate-500'}">${gapKnownK136 ? formatNumberID(gapK136, 2) : '-'}</div>
+                            </div>
+                            <div class="rounded-lg border border-amber-200 p-2 bg-amber-50">
+                                <div class="text-[9px] font-semibold text-amber-600">Tiket yang Diperoleh</div>
+                                <div class="text-sm font-extrabold text-amber-800">${tiketOkK136 ? String(Number(item.totalTiket) || 0) + ' Tiket' : '-'}</div>
+                            </div>
+                        </div>
+                        <div class="px-3 pb-3 text-[9px] leading-snug text-slate-400">${catatanK136}</div>
                     </div>
                 `;
             } else {
