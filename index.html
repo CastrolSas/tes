@@ -4466,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v140</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v141</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -6774,8 +6774,9 @@ startAutoRefresh();
                         '<td class="p-2 text-right font-bold text-slate-700">' + formatNumberID(tVol136, 1) + '</td>' +
                         '<td class="p-2 text-right font-bold text-slate-700">' + formatNumberID(tKar136, 2) + '</td>' +
                         '<td class="p-2 text-right font-extrabold text-indigo-700">' + formatNumberID(item.totalPoint, 2) + '</td></tr>';
-                    // Task 141: Target per Tiket dibaca dari kolom E (Target Point,
-                    // DATA OUTLET BWS, dihitung backend). Tiket diperoleh = Total Point
+                    // Task 141/143: Target per Tiket dibaca dari kolom Target Point
+                    // (DATA OUTLET BWS, dihitung backend; bila kolom/baris tidak ada
+                    // di sheet, DEFAULT 1.800). Tiket diperoleh = Total Point
                     // keseluruhan / Target per Tiket; Target Tiket = kelipatan Target
                     // per Tiket berikutnya di atas Total Point (contoh: Total Point
                     // 3.600 dengan Target per Tiket 1.800 -> 2 tiket, Target Tiket 5.400).
@@ -6796,6 +6797,10 @@ startAutoRefresh();
                         } else {
                             catatan136 = 'Target per Tiket (kolom E) belum diisi pada DATA OUTLET BWS - tiket belum dapat dihitung.';
                         }
+                    } else if (item.tiketDiag && item.tiketDiag.defaultDigunakan) {
+                        // Task 143: kolom Target Point tidak ada di sheet -> Target per
+                        // Tiket memakai default 1.800 (aturan user), bukan kosong.
+                        catatan136 = 'Kolom Target Point belum ada di DATA OUTLET BWS - Target per Tiket memakai nilai default 1.800. Tiket diperoleh = Total Point keseluruhan / 1.800; Target Tiket = kelipatan 1.800 berikutnya di atas Total Point. Sisa ' + formatNumberID(sisa136, 2) + ' point menuju tiket berikutnya.';
                     } else {
                         catatan136 = 'Tiket diperoleh = Total Point keseluruhan / Target per Tiket (kolom E). Target Tiket = kelipatan Target per Tiket berikutnya di atas Total Point. Sisa ' + formatNumberID(sisa136, 2) + ' point menuju tiket berikutnya.';
                     }
@@ -8427,8 +8432,9 @@ startAutoRefresh();
                     `;
                 });
 
-                // Task 141: baris TOTAL + Target per Tiket + Target Tiket + Tiket yang
-                // Diperoleh (Target per Tiket = kolom E / Target Point DATA OUTLET BWS).
+                // Task 141/143: baris TOTAL + Target per Tiket + Target Tiket + Tiket
+                // yang Diperoleh (Target per Tiket = kolom Target Point DATA OUTLET
+                // BWS; bila tidak ada di sheet, DEFAULT 1.800).
                 const tVolK136 = item.pointByCategory.reduce(function(a136, r136) { return a136 + (Number(r136.volume) || 0); }, 0);
                 const tKarK136 = item.pointByCategory.reduce(function(a136, r136) { return a136 + (Number(r136.karton) || 0); }, 0);
                 const tpK136 = Number(item.targetPoint) || 0;
@@ -8447,6 +8453,10 @@ startAutoRefresh();
                     } else {
                         catatanK136 = 'Target per Tiket (kolom E) belum diisi pada DATA OUTLET BWS - tiket belum dapat dihitung.';
                     }
+                } else if (item.tiketDiag && item.tiketDiag.defaultDigunakan) {
+                    // Task 143: kolom Target Point tidak ada di sheet -> Target per
+                    // Tiket memakai default 1.800 (aturan user), bukan kosong.
+                    catatanK136 = 'Kolom Target Point belum ada di DATA OUTLET BWS - Target per Tiket memakai nilai default 1.800. Tiket diperoleh = Total Point keseluruhan / 1.800; Target Tiket = kelipatan 1.800 berikutnya di atas Total Point. Sisa ' + formatNumberID(sisaK136, 2) + ' point menuju tiket berikutnya.';
                 } else {
                     catatanK136 = 'Tiket diperoleh = Total Point keseluruhan / Target per Tiket (kolom E). Target Tiket = kelipatan Target per Tiket berikutnya di atas Total Point. Sisa ' + formatNumberID(sisaK136, 2) + ' point menuju tiket berikutnya.';
                 }
