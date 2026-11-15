@@ -4466,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v144</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v145</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -6804,6 +6804,9 @@ startAutoRefresh();
                         // (SPECIALTIES + GTX + MAGNATEC + EDGE) >= target PCO (default 2.000);
                         // MAGNATEC + EDGE (PCO) >= 30% x target PCO. Persentase dihitung
                         // terhadap TARGET GRUP (bukan Total Point keseluruhan) sesuai gambar.
+                        // Task 144 rev4: syarat grup hanya BERLAKU bila outlet punya penjualan
+                        // grup tsb (total > 0) - tanpa penjualan PCO/MCO, syarat grup itu
+                        // dilewati (kasus WANDURI MOTOR: MCO saja -> tiket tetap dihitung).
                         const sy144 = item.tiketSyarat;
                         const syAda144 = sy144 && typeof sy144 === 'object' && sy144.mco && sy144.pco;
                         const defTxt144 = (item.tiketDiag && item.tiketDiag.defaultDigunakan) ? 'Kolom Target Point belum ada di DATA OUTLET BWS - Target per Tiket (target MCO) memakai nilai default 1.800.' : '';
@@ -6811,14 +6814,28 @@ startAutoRefresh();
                         if (syAda144 && sy144.lolos === false) {
                             const g144 = [];
                             const mS144 = sy144.mco, pS144 = sy144.pco;
-                            if (mS144 && mS144.lolosTarget === false) g144.push('total MCO (ESS + ACTIV + POWER + ULTIMATE) ' + formatNumberID(Number(mS144.total) || 0, 2) + ' belum mencapai target MCO ' + formatNumberID(Number(mS144.target) || 0, 2));
-                            if (mS144 && mS144.lolosPersen === false) g144.push('persentase POWER + ULTIMATE (BP) ' + String(Math.round(Number(mS144.persen) || 0)) + '% belum mencapai 30% dari target MCO (min ' + formatNumberID(Number(mS144.minPoin) || 0, 2) + ')');
-                            if (pS144 && pS144.lolosTarget === false) g144.push('total PCO (SPECIALTIES + GTX + MAGNATEC + EDGE) ' + formatNumberID(Number(pS144.total) || 0, 2) + ' belum mencapai target PCO ' + formatNumberID(Number(pS144.target) || 0, 2));
-                            if (pS144 && pS144.lolosPersen === false) g144.push('persentase MAGNATEC + EDGE (PCO) ' + String(Math.round(Number(pS144.persen) || 0)) + '% belum mencapai 30% dari target PCO (min ' + formatNumberID(Number(pS144.minPoin) || 0, 2) + ')');
+                            const mBer144 = !(mS144 && mS144.berlaku === false);
+                            const pBer144 = !(pS144 && pS144.berlaku === false);
+                            if (mS144 && mBer144 && mS144.lolosTarget === false) g144.push('total MCO (ESS + ACTIV + POWER + ULTIMATE) ' + formatNumberID(Number(mS144.total) || 0, 2) + ' belum mencapai target MCO ' + formatNumberID(Number(mS144.target) || 0, 2));
+                            if (mS144 && mBer144 && mS144.lolosPersen === false) g144.push('persentase POWER + ULTIMATE (BP) ' + String(Math.round(Number(mS144.persen) || 0)) + '% belum mencapai 30% dari target MCO (min ' + formatNumberID(Number(mS144.minPoin) || 0, 2) + ')');
+                            if (pS144 && pBer144 && pS144.lolosTarget === false) g144.push('total PCO (SPECIALTIES + GTX + MAGNATEC + EDGE) ' + formatNumberID(Number(pS144.total) || 0, 2) + ' belum mencapai target PCO ' + formatNumberID(Number(pS144.target) || 0, 2));
+                            if (pS144 && pBer144 && pS144.lolosPersen === false) g144.push('persentase MAGNATEC + EDGE (PCO) ' + String(Math.round(Number(pS144.persen) || 0)) + '% belum mencapai 30% dari target PCO (min ' + formatNumberID(Number(pS144.minPoin) || 0, 2) + ')');
                             catatan136 = 'Simulasi Tiket Trip: TIDAK LOLOS' + (g144.length ? ' - ' + g144.join('; ') : '') + '. Tiket belum dapat terhitung.' + (defTxt144 ? ' ' + defTxt144 : '');
                         } else {
                             const syOk144 = syAda144 && sy144.lolos === true;
-                            catatan136 = (syOk144 ? 'Simulasi Tiket Trip: LOLOS - syarat MCO & PCO terpenuhi. ' : '') + defTxt144 + sisaInfo144;
+                            let lolosTxt144 = '';
+                            if (syOk144) {
+                                const mOk144 = !(sy144.mco && sy144.mco.berlaku === false);
+                                const pOk144 = !(sy144.pco && sy144.pco.berlaku === false);
+                                const pTxt144 = [];
+                                if (mOk144 && pOk144) pTxt144.push('syarat MCO & PCO terpenuhi');
+                                else { if (mOk144) pTxt144.push('syarat MCO terpenuhi'); if (pOk144) pTxt144.push('syarat PCO terpenuhi'); }
+                                const sTxt144 = [];
+                                if (!mOk144) sTxt144.push('tanpa penjualan MCO, syarat MCO dilewati');
+                                if (!pOk144) sTxt144.push('tanpa penjualan PCO, syarat PCO dilewati');
+                                lolosTxt144 = 'Simulasi Tiket Trip: LOLOS - ' + (pTxt144.length ? pTxt144.join(' & ') : 'syarat terpenuhi') + (sTxt144.length ? '; ' + sTxt144.join('; ') : '') + '. ';
+                            }
+                            catatan136 = lolosTxt144 + defTxt144 + sisaInfo144;
                         }
                     }
                     trip = '<div class="mt-2 border border-slate-200 rounded-xl overflow-hidden">' +
@@ -8476,6 +8493,9 @@ startAutoRefresh();
                     // (SPECIALTIES + GTX + MAGNATEC + EDGE) >= target PCO (default 2.000);
                     // MAGNATEC + EDGE (PCO) >= 30% x target PCO. Persentase dihitung
                     // terhadap TARGET GRUP (bukan Total Point keseluruhan) sesuai gambar.
+                    // Task 144 rev4: syarat grup hanya BERLAKU bila outlet punya penjualan
+                    // grup tsb (total > 0) - tanpa penjualan PCO/MCO, syarat grup itu
+                    // dilewati (kasus WANDURI MOTOR: MCO saja -> tiket tetap dihitung).
                     const syK144 = item.tiketSyarat;
                     const syAdaK144 = syK144 && typeof syK144 === 'object' && syK144.mco && syK144.pco;
                     const defTxtK144 = (item.tiketDiag && item.tiketDiag.defaultDigunakan) ? 'Kolom Target Point belum ada di DATA OUTLET BWS - Target per Tiket (target MCO) memakai nilai default 1.800.' : '';
@@ -8483,14 +8503,28 @@ startAutoRefresh();
                     if (syAdaK144 && syK144.lolos === false) {
                         const gK144 = [];
                         const mSK144 = syK144.mco, pSK144 = syK144.pco;
-                        if (mSK144 && mSK144.lolosTarget === false) gK144.push('total MCO (ESS + ACTIV + POWER + ULTIMATE) ' + formatNumberID(Number(mSK144.total) || 0, 2) + ' belum mencapai target MCO ' + formatNumberID(Number(mSK144.target) || 0, 2));
-                        if (mSK144 && mSK144.lolosPersen === false) gK144.push('persentase POWER + ULTIMATE (BP) ' + String(Math.round(Number(mSK144.persen) || 0)) + '% belum mencapai 30% dari target MCO (min ' + formatNumberID(Number(mSK144.minPoin) || 0, 2) + ')');
-                        if (pSK144 && pSK144.lolosTarget === false) gK144.push('total PCO (SPECIALTIES + GTX + MAGNATEC + EDGE) ' + formatNumberID(Number(pSK144.total) || 0, 2) + ' belum mencapai target PCO ' + formatNumberID(Number(pSK144.target) || 0, 2));
-                        if (pSK144 && pSK144.lolosPersen === false) gK144.push('persentase MAGNATEC + EDGE (PCO) ' + String(Math.round(Number(pSK144.persen) || 0)) + '% belum mencapai 30% dari target PCO (min ' + formatNumberID(Number(pSK144.minPoin) || 0, 2) + ')');
+                        const mBerK144 = !(mSK144 && mSK144.berlaku === false);
+                        const pBerK144 = !(pSK144 && pSK144.berlaku === false);
+                        if (mSK144 && mBerK144 && mSK144.lolosTarget === false) gK144.push('total MCO (ESS + ACTIV + POWER + ULTIMATE) ' + formatNumberID(Number(mSK144.total) || 0, 2) + ' belum mencapai target MCO ' + formatNumberID(Number(mSK144.target) || 0, 2));
+                        if (mSK144 && mBerK144 && mSK144.lolosPersen === false) gK144.push('persentase POWER + ULTIMATE (BP) ' + String(Math.round(Number(mSK144.persen) || 0)) + '% belum mencapai 30% dari target MCO (min ' + formatNumberID(Number(mSK144.minPoin) || 0, 2) + ')');
+                        if (pSK144 && pBerK144 && pSK144.lolosTarget === false) gK144.push('total PCO (SPECIALTIES + GTX + MAGNATEC + EDGE) ' + formatNumberID(Number(pSK144.total) || 0, 2) + ' belum mencapai target PCO ' + formatNumberID(Number(pSK144.target) || 0, 2));
+                        if (pSK144 && pBerK144 && pSK144.lolosPersen === false) gK144.push('persentase MAGNATEC + EDGE (PCO) ' + String(Math.round(Number(pSK144.persen) || 0)) + '% belum mencapai 30% dari target PCO (min ' + formatNumberID(Number(pSK144.minPoin) || 0, 2) + ')');
                         catatanK136 = 'Simulasi Tiket Trip: TIDAK LOLOS' + (gK144.length ? ' - ' + gK144.join('; ') : '') + '. Tiket belum dapat terhitung.' + (defTxtK144 ? ' ' + defTxtK144 : '');
                     } else {
                         const syOkK144 = syAdaK144 && syK144.lolos === true;
-                        catatanK136 = (syOkK144 ? 'Simulasi Tiket Trip: LOLOS - syarat MCO & PCO terpenuhi. ' : '') + defTxtK144 + sisaInfoK144;
+                        let lolosTxtK144 = '';
+                        if (syOkK144) {
+                            const mOkK144 = !(syK144.mco && syK144.mco.berlaku === false);
+                            const pOkK144 = !(syK144.pco && syK144.pco.berlaku === false);
+                            const pTxtK144 = [];
+                            if (mOkK144 && pOkK144) pTxtK144.push('syarat MCO & PCO terpenuhi');
+                            else { if (mOkK144) pTxtK144.push('syarat MCO terpenuhi'); if (pOkK144) pTxtK144.push('syarat PCO terpenuhi'); }
+                            const sTxtK144 = [];
+                            if (!mOkK144) sTxtK144.push('tanpa penjualan MCO, syarat MCO dilewati');
+                            if (!pOkK144) sTxtK144.push('tanpa penjualan PCO, syarat PCO dilewati');
+                            lolosTxtK144 = 'Simulasi Tiket Trip: LOLOS - ' + (pTxtK144.length ? pTxtK144.join(' & ') : 'syarat terpenuhi') + (sTxtK144.length ? '; ' + sTxtK144.join('; ') : '') + '. ';
+                        }
+                        catatanK136 = lolosTxtK144 + defTxtK144 + sisaInfoK144;
                     }
                 }
                 categoryHtml += `
