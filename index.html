@@ -4466,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v146</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v147</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -5051,7 +5051,10 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
         // (rev4). Data tiketSyarat diregister saat blok kontrak dirender
         // (registerTiketPersen145); popup memakai overlay TERPISAH dengan
         // z-index di atas #customModal sehingga detail yang terbuka tidak
-        // hilang saat popup ditutup.
+        // hilang saat popup ditutup. CATATAN rev2 (fix popup tertimpa):
+        // style "logout-modal-center-fix" memaksa .modern-modal-overlay
+        // (detail modal) ke z-index:99999 !important, sehingga overlay
+        // popup wajib z-index:100010 !important agar tampil DI ATAS detail.
         var _tiketPersenData145 = {};
         var _tiketPersenSeq145 = 0;
         function registerTiketPersen145(sy145, tiket145, outlet145, periode145) {
@@ -5143,7 +5146,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             if (!overlay145) {
                 overlay145 = document.createElement('div');
                 overlay145.id = 'tiketPersenPopup145';
-                overlay145.setAttribute('style', 'display:none;position:fixed;inset:0;z-index:10001;padding:14px;align-items:center;justify-content:center;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);');
+                overlay145.setAttribute('style', 'display:none;position:fixed;inset:0;z-index:100010 !important;padding:14px;align-items:center;justify-content:center;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);');
                 overlay145.innerHTML = '<div class="w-full bg-white rounded-2xl shadow-2xl overflow-hidden" style="max-width:22rem;" id="tiketPersenCard145"></div>';
                 document.body.appendChild(overlay145);
                 overlay145.addEventListener('mousedown', function(evO145) {
