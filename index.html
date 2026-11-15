@@ -4466,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v131</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v132</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -6732,6 +6732,17 @@ startAutoRefresh();
                 return String(x.custCode || '').trim().toLowerCase() === custKey;
             });
         }
+        // Task 134: format tanggal kontrak "yyyy-MM-dd" -> "DD MMMM YYYY" (nama bulan Indonesia),
+        // mis. "2026-05-01" -> "01 Mei 2026"; nilai kosong -> "-", format tak dikenal dikembalikan apa adanya.
+        function kontrakFormatTanggalID(value) {
+            const s = String(value == null ? '' : value).trim().slice(0, 10);
+            const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (!m) return (value == null || String(value).trim() === '') ? '-' : String(value);
+            const NAMA_BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const idxBulan = Number(m[2]) - 1;
+            if (idxBulan < 0 || idxBulan > 11) return String(value);
+            return ('0' + Number(m[3])).slice(-2) + ' ' + NAMA_BULAN[idxBulan] + ' ' + m[1];
+        }
         function monitoringKontrakHtml(data) {
             // Task 133: cukup cocokkan CUST.CODE — hanya outlet BWS yang punya baris
             // kontrak di DATA OUTLET BWS; outlet IWS tidak punya baris sehingga seksi
@@ -6759,10 +6770,8 @@ startAutoRefresh();
                         '</tr></thead><tbody>' + trows + '</tbody></table></div></div>';
                 }
                 return '<div class="mt-2 rounded-xl border border-slate-200 overflow-hidden">' +
-                    '<div class="px-3 py-2 bg-gradient-to-r from-slate-900 to-emerald-900 text-white">' +
-                    '<div class="text-[9px] uppercase tracking-wider text-emerald-300 font-bold">Periode Kontrak</div>' +
-                    '<div class="text-[11px] font-bold mt-0.5">' + escapeHtml(String(item.start || '-')) + ' s/d ' + escapeHtml(String(item.end || '-')) + '</div>' +
-                    '</div>' +
+                    // Task 134: kartu header gradient (label periode) dihapus;
+                    // periode kini ditampilkan pada label Pencapaian Volume Kontrak (DD MMMM YYYY).
                     '<div class="p-2.5">' +
                     '<div class="grid grid-cols-4 gap-2">' +
                     '<div class="rounded-lg border border-slate-200 p-2 bg-white"><div class="text-[8px] text-slate-400">Target</div><div class="text-[11px] font-bold text-slate-800">' + formatNumberID(item.target, 1) + '</div></div>' +
@@ -6770,7 +6779,7 @@ startAutoRefresh();
                     '<div class="rounded-lg border border-slate-200 p-2 bg-white"><div class="text-[8px] text-slate-400">Gap</div><div class="text-[11px] font-bold ' + (gap <= 0 ? 'text-emerald-700' : 'text-red-600') + '">' + formatNumberID(gap, 1) + '</div></div>' +
                     '<div class="rounded-lg border border-indigo-200 p-2 bg-indigo-50"><div class="text-[8px] text-indigo-600">Point</div><div class="text-[11px] font-bold text-indigo-800">' + formatNumberID(item.totalPoint, 2) + '</div></div>' +
                     '</div>' +
-                    '<div class="mt-2"><div class="flex justify-between items-center mb-1"><span class="text-[9px] font-bold text-slate-500">Pencapaian Volume Kontrak</span><span class="text-[9px] font-bold text-slate-700">' + formatPercentID(pct) + '</span></div>' +
+                    '<div class="mt-2"><div class="flex justify-between items-center mb-1"><span class="text-[9px] font-bold text-slate-500">Pencapaian Volume Kontrak pada ' + escapeHtml(kontrakFormatTanggalID(item.start)) + ' sd ' + escapeHtml(kontrakFormatTanggalID(item.end)) + '</span><span class="text-[9px] font-bold text-slate-700">' + formatPercentID(pct) + '</span></div>' +
                     '<div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full ' + pctBar + '" style="width:' + Math.min(Math.max(pct, 0), 100) + '%"></div></div></div>' +
                     trip +
                     '</div></div>';
