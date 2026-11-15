@@ -4466,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v147</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v148</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -5055,6 +5055,9 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
         // style "logout-modal-center-fix" memaksa .modern-modal-overlay
         // (detail modal) ke z-index:99999 !important, sehingga overlay
         // popup wajib z-index:100010 !important agar tampil DI ATAS detail.
+        // Task 145-c: kartu grup TANPA penjualan (berlaku=false) tidak ditampilkan
+        // sama sekali di popup (user: "Jika MCO, tidak perlu tampilkan Magnatec
+        // dan Edge, begitu juga sebaliknya") - subjudul popup menyesuaikan.
         var _tiketPersenData145 = {};
         var _tiketPersenSeq145 = 0;
         function registerTiketPersen145(sy145, tiket145, outlet145, periode145) {
@@ -5128,14 +5131,21 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             }
             const syaratP145 = Number(sy145.syaratPersen) || 30;
             const lolosSemua145 = sy145.lolos === true;
+            // Task 145-c: kartu grup hanya tampil bila grup BERLAKU (ada penjualan)
+            // - outlet MCO-saja tidak menampilkan kartu Magnatec + Edge (PCO),
+            // begitu juga sebaliknya (user). Cache lama tanpa field berlaku ->
+            // kedua kartu tetap tampil (perilaku lama utuh).
+            const mcoTampil145 = !(sy145.mco && sy145.mco.berlaku === false);
+            const pcoTampil145 = !(sy145.pco && sy145.pco.berlaku === false);
             const statusHtml145 = '<div class="rounded-xl px-3 py-2.5 flex items-center justify-between gap-2 ' + (lolosSemua145 ? 'border border-emerald-200 bg-emerald-50' : 'border border-red-200 bg-red-50') + '">' +
                 '<div><div class="text-[9px] font-bold text-slate-400">Status Simulasi Tiket Trip</div><div class="text-[11px] font-extrabold ' + (lolosSemua145 ? 'text-emerald-700' : 'text-red-700') + '">' + (lolosSemua145 ? 'LOLOS' : 'TIDAK LOLOS') + '</div></div>' +
                 '<div class="text-right"><div class="text-[9px] font-bold text-slate-400">Tiket Diperoleh</div><div class="text-[11px] font-extrabold text-slate-800">' + (Number(reg145.tiket) || 0) + ' Tiket</div></div>' +
             '</div>';
+            const subJudul145 = (mcoTampil145 && pcoTampil145) ? 'Power + Ultimate (MCO) • Magnatec + Edge (PCO)' : (mcoTampil145 ? 'Power + Ultimate (MCO)' : (pcoTampil145 ? 'Magnatec + Edge (PCO)' : 'Tidak ada penjualan MCO & PCO'));
             const header145 = '<div class="px-4 py-3 bg-gradient-to-r from-slate-900 to-emerald-900 text-white">' +
                 '<div class="flex items-start justify-between gap-2">' +
                     '<div><div class="text-[9px] uppercase tracking-wider text-emerald-300 font-bold">Persentase Tiket Trip</div>' +
-                    '<div class="text-[11px] font-bold mt-0.5">Power + Ultimate (MCO) • Magnatec + Edge (PCO)</div>' +
+                    '<div class="text-[11px] font-bold mt-0.5">' + subJudul145 + '</div>' +
                     '<div class="text-[9px] text-slate-300 mt-0.5">' + escapeHtml(reg145.outlet || '-') + (reg145.periode ? ' • ' + escapeHtml(reg145.periode) : '') + '</div></div>' +
                     '<button type="button" onclick="tutupPopupTiketPersen145()" aria-label="Tutup" title="Tutup" class="w-7 h-7 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition shrink-0">' +
                         '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>' +
@@ -5162,9 +5172,16 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                     }
                 }, true);
             }
+            let isiKartu145 = '';
+            if (mcoTampil145 || pcoTampil145) {
+                if (mcoTampil145) isiKartu145 += tiketPersenGrupHtml145(sy145.mco, 'MCO', syaratP145);
+                if (pcoTampil145) isiKartu145 += tiketPersenGrupHtml145(sy145.pco, 'PCO', syaratP145);
+            } else {
+                isiKartu145 = '<div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-[11px] font-bold text-slate-500 text-center">Tidak ada penjualan MCO dan PCO untuk outlet ini</div>';
+            }
             const card145 = document.getElementById('tiketPersenCard145');
             if (card145) card145.innerHTML = header145 +
-                '<div class="p-3 space-y-2.5" style="max-height:65vh;overflow-y:auto;">' + tiketPersenGrupHtml145(sy145.mco, 'MCO', syaratP145) + tiketPersenGrupHtml145(sy145.pco, 'PCO', syaratP145) + statusHtml145 + '</div>';
+                '<div class="p-3 space-y-2.5" style="max-height:65vh;overflow-y:auto;">' + isiKartu145 + statusHtml145 + '</div>';
             overlay145.style.display = 'flex';
         }
 
