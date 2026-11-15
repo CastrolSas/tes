@@ -3846,7 +3846,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                         <section id="cstKunjunganCard" class="cst-card cst-kunjungan-card" aria-label="Kunjungan bengkel hari ini">
                             <div class="cst-card-head"><span class="cst-card-ic" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.6v3.2M16 3.6v3.2M4.4 10.4h15.2M5.6 5.8h12.8a1.6 1.6 0 0 1 1.6 1.6v11.2a1.6 1.6 0 0 1-1.6 1.6H5.6a1.6 1.6 0 0 1-1.6-1.6V7.4a1.6 1.6 0 0 1 1.6-1.6Z"/></svg></span><h3 class="cst-card-title">Kunjungan Bengkel Hari ini</h3><span id="cstKunjunganLabel" class="cst-kunjungan-label"></span><span id="cstKunjunganCount" class="cst-kunjungan-count">0 bengkel</span><span id="kjQuarterChip" class="hidden" style="font-size:9px;font-weight:700;color:#0f766e;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:6px;padding:2px 6px;line-height:1;"></span><span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v107i</span></div>
                             <div class="relative mx-3.5 mt-2 mb-1"><span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></span><input type="text" id="kjSearchInput" oninput="filterKunjunganTable()" placeholder="Cari nama outlet..." class="w-full pl-9 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition"></div>
-                            <div class="cst-kunjungan-tblwrap"><table class="w-full text-left border-collapse text-[11px]" style="min-width:1240px;table-layout:fixed;"><thead><tr class="bg-slate-100 text-slate-700 border-b border-slate-200"><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Status</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;">DSR</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:13%;">Nama Outlet</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;">CUST.CODE</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Target</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Actual</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Gap</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:6%;">Ach.</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;" title="Pencapaian kontrak BWS berdasarkan periode kontrak">Kontrak</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;" title="Point Trip BWS periode kontrak">Point Trip</th><th id="kjThM1" class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Bulan 1</th><th id="kjThM2" class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Bulan 2</th><th id="kjThM3" class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Bulan 3</th></tr></thead><tbody id="cstKunjunganBody"><tr><td colspan="13" class="cst-kunjungan-empty">Memuat...</td></tr></tbody></table></div>
+                            <div class="cst-kunjungan-tblwrap"><table class="w-full text-left border-collapse text-[11px]" style="min-width:1240px;table-layout:fixed;"><thead><tr class="bg-slate-100 text-slate-700 border-b border-slate-200"><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Status</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;">DSR</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:13%;">Nama Outlet</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;">CUST.CODE</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Target</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Actual</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Gap</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:6%;">Ach.</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;" title="Pencapaian kontrak BWS berdasarkan periode kontrak">Kontrak</th><th class="p-2.5 font-bold text-center whitespace-nowrap" style="width:8%;" title="Point Trip BWS tahun berjalan">Point Trip</th><th id="kjThM1" class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Bulan 1</th><th id="kjThM2" class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Bulan 2</th><th id="kjThM3" class="p-2.5 font-bold text-center whitespace-nowrap" style="width:7%;">Bulan 3</th></tr></thead><tbody id="cstKunjunganBody"><tr><td colspan="13" class="cst-kunjungan-empty">Memuat...</td></tr></tbody></table></div>
                         </section>
                         <section class="cst-card cst-status-card" aria-label="Ringkasan status transaksi outlet">
                             <div class="cst-card-head"><span class="cst-card-ic" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.4v4.9l3.1 1.9"/></svg></span><h3 class="cst-card-title">Ringkasan Status Transaksi Outlet</h3><div class="home-status-filters"><label>Bulan <select id="homeStatusMonth"></select></label><label>Tahun <select id="homeStatusYear"></select></label></div></div>
@@ -4337,7 +4337,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                     <div class="flex justify-between items-center border-b border-slate-200 pb-2">
                         <div>
                             <h2 class="text-base font-bold text-slate-800">Outlet Kontrak</h2>
-                            <p class="text-[10px] text-slate-400 mt-0.5">Pencapaian kontrak & Point Trip periode kontrak</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Pencapaian kontrak & Point Trip tahun berjalan</p>
                         </div>
                         <span id="outletKontrakYear" class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200"></span>
                     </div>
@@ -4466,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v136</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v137</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -6766,7 +6766,7 @@ startAutoRefresh();
                             '<td class="p-2 text-right text-slate-600">' + formatNumberID(row.karton, 2) + ' <span class="text-[8px] text-slate-400">' + divText + '</span></td>' +
                             '<td class="p-2 text-right font-bold text-indigo-700">' + formatNumberID(row.point, 2) + '</td></tr>';
                     }).join('');
-                    // Task 136: baris TOTAL tabel Point Trip.
+                    // Task 136: baris TOTAL Point Trip Tahun Berjalan.
                     let tVol136 = 0, tKar136 = 0;
                     item.pointByCategory.forEach(function(r136) { tVol136 += Number(r136.volume) || 0; tKar136 += Number(r136.karton) || 0; });
                     const totalRow136 = '<tr class="bg-slate-50 border-t-2 border-slate-200">' +
@@ -6797,7 +6797,7 @@ startAutoRefresh();
                         catatan136 = 'Syarat tiket: Point mencapai Target Point DAN Power Fam mencapai Target Power Fam; tiket ke-n mengikuti kelipatan per target (Power Fam ' + formatNumberID(pfa136, 1) + ' / ' + formatNumberID(pft136, 1) + ' dus).';
                     }
                     trip = '<div class="mt-2 border border-slate-200 rounded-xl overflow-hidden">' +
-                        '<div class="px-3 py-2 bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-700">Point Trip Periode Kontrak</div>' +
+                        '<div class="px-3 py-2 bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-700">Point Trip Tahun Berjalan</div>' +
                         '<div class="overflow-x-auto"><table class="w-full text-[10px]"><thead><tr class="bg-white border-b border-slate-200 text-slate-500">' +
                         '<th class="p-2 text-left font-bold">Kategori</th><th class="p-2 text-right font-bold">Volume</th><th class="p-2 text-right font-bold">Karton</th><th class="p-2 text-right font-bold">Point</th>' +
                         '</tr></thead><tbody>' + trows + totalRow136 + '</tbody></table></div>' +
@@ -8395,7 +8395,7 @@ startAutoRefresh();
                 categoryHtml = `
                     <div class="mt-3 border border-slate-200 rounded-xl overflow-hidden">
                         <div class="px-3 py-2.5 bg-slate-50 border-b border-slate-200">
-                            <div class="font-bold text-slate-700 text-xs">Point Trip Periode Kontrak</div>
+                            <div class="font-bold text-slate-700 text-xs">Point Trip Tahun Berjalan</div>
                             <div class="text-[9px] text-slate-400 mt-0.5"></div>
                         </div>
                         <div class="overflow-x-auto">
@@ -8475,7 +8475,7 @@ startAutoRefresh();
             } else {
                 categoryHtml = `
                     <div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 text-[10px] text-slate-400 text-center">
-                        Belum ada Point Trip pada periode kontrak.
+                        Belum ada Point Trip untuk tahun berjalan.
                     </div>
                 `;
             }
@@ -10918,7 +10918,7 @@ startAutoRefresh();
                         ? '<span class="font-semibold ' + konCls + '" title="Periode kontrak: ' + escapeHtml(kon.period) + '">' + formatPercentID(kon.pct) + '</span>'
                         : '<span class="text-slate-400">-</span>';
                     const pointCell = kon
-                        ? '<span class="font-bold text-indigo-700" title="Point Trip periode kontrak">' + formatNumberID(kon.point, 2) + '</span>'
+                        ? '<span class="font-bold text-indigo-700" title="Point Trip tahun berjalan">' + formatNumberID(kon.point, 2) + '</span>'
                         : '<span class="text-slate-400">-</span>';
                     const statusChip = !hasMon
                         ? '<span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-500 border border-slate-200">-</span>'
