@@ -4466,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v139</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v140</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -6787,7 +6787,15 @@ startAutoRefresh();
                     const tiketVal136 = tiketOk136 ? (String(Number(item.totalTiket) || 0) + ' Tiket') : '-';
                     let catatan136;
                     if (tp136 <= 0) {
-                        catatan136 = 'Target per Tiket (kolom E) belum diisi pada DATA OUTLET BWS - tiket belum dapat dihitung.';
+                        // Task 142: diagnostik pembacaan sheet bila target tidak terbaca.
+                        const d142 = item.tiketDiag;
+                        if (d142 && typeof d142 === 'object') {
+                            const lbl142 = function(k) { let n = Number(k), s = ''; if (isNaN(n) || n < 0) return '-'; while (n >= 0) { s = String.fromCharCode(65 + (n % 26)) + s; n = Math.floor(n / 26) - 1; } return s; };
+                            const contohTxt142 = Array.isArray(d142.contohE) && d142.contohE.length ? d142.contohE.map(function(x142) { return '"' + escapeHtml(String(x142)) + '"'; }).join(', ') : '(kosong)';
+                            catatan136 = 'Target per Tiket belum terbaca dari DATA OUTLET BWS. Kolom terpilih: ' + (lbl142(d142.kolom) !== '-' ? 'kolom ' + lbl142(d142.kolom) + ' (via ' + escapeHtml(String(d142.via || '-')) + ')' : 'tidak ditemukan') + '. Kolom E: header "' + escapeHtml(String(d142.headerE || '(kosong)')) + '", contoh isi: ' + contohTxt142 + ', sel angka: ' + (Number(d142.angkaE) || 0) + '/' + (Number(d142.terisiE) || 0) + '. Header terbaca: [' + escapeHtml(String(d142.headerSheet || '-')) + '].';
+                        } else {
+                            catatan136 = 'Target per Tiket (kolom E) belum diisi pada DATA OUTLET BWS - tiket belum dapat dihitung.';
+                        }
                     } else {
                         catatan136 = 'Tiket diperoleh = Total Point keseluruhan / Target per Tiket (kolom E). Target Tiket = kelipatan Target per Tiket berikutnya di atas Total Point. Sisa ' + formatNumberID(sisa136, 2) + ' point menuju tiket berikutnya.';
                     }
@@ -8430,7 +8438,15 @@ startAutoRefresh();
                 const tiketOkK136 = tpK136 > 0;
                 let catatanK136;
                 if (tpK136 <= 0) {
-                    catatanK136 = 'Target per Tiket (kolom E) belum diisi pada DATA OUTLET BWS - tiket belum dapat dihitung.';
+                    // Task 142: diagnostik pembacaan sheet bila target tidak terbaca.
+                    const dK142 = item.tiketDiag;
+                    if (dK142 && typeof dK142 === 'object') {
+                        const lblK142 = function(k) { let n = Number(k), s = ''; if (isNaN(n) || n < 0) return '-'; while (n >= 0) { s = String.fromCharCode(65 + (n % 26)) + s; n = Math.floor(n / 26) - 1; } return s; };
+                        const contohTxtK142 = Array.isArray(dK142.contohE) && dK142.contohE.length ? dK142.contohE.map(function(x142) { return '"' + escapeHtml(String(x142)) + '"'; }).join(', ') : '(kosong)';
+                        catatanK136 = 'Target per Tiket belum terbaca dari DATA OUTLET BWS. Kolom terpilih: ' + (lblK142(dK142.kolom) !== '-' ? 'kolom ' + lblK142(dK142.kolom) + ' (via ' + escapeHtml(String(dK142.via || '-')) + ')' : 'tidak ditemukan') + '. Kolom E: header "' + escapeHtml(String(dK142.headerE || '(kosong)')) + '", contoh isi: ' + contohTxtK142 + ', sel angka: ' + (Number(dK142.angkaE) || 0) + '/' + (Number(dK142.terisiE) || 0) + '. Header terbaca: [' + escapeHtml(String(dK142.headerSheet || '-')) + '].';
+                    } else {
+                        catatanK136 = 'Target per Tiket (kolom E) belum diisi pada DATA OUTLET BWS - tiket belum dapat dihitung.';
+                    }
                 } else {
                     catatanK136 = 'Tiket diperoleh = Total Point keseluruhan / Target per Tiket (kolom E). Target Tiket = kelipatan Target per Tiket berikutnya di atas Total Point. Sisa ' + formatNumberID(sisaK136, 2) + ' point menuju tiket berikutnya.';
                 }
