@@ -4466,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v145</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v146</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -5042,6 +5042,129 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                 if (e && e.key === 'Escape' && overlay.style.display === 'flex') closeModal(false);
             });
         })();
+
+        // Task 145: klik box "Tiket yang Diperoleh" -> POPUP PERSENTASE
+        // Power + Ultimate (MCO) & Magnatec + Edge (PCO). Persentase dihitung
+        // terhadap TARGET GRUP sesuai logika simulasi tiket (backend v144):
+        // MCO = (POWER + ULTIMATE) / target MCO, PCO = (MAGNATEC + EDGE) /
+        // target PCO, syarat minimal 30%. Grup tanpa penjualan -> DILEWATI
+        // (rev4). Data tiketSyarat diregister saat blok kontrak dirender
+        // (registerTiketPersen145); popup memakai overlay TERPISAH dengan
+        // z-index di atas #customModal sehingga detail yang terbuka tidak
+        // hilang saat popup ditutup.
+        var _tiketPersenData145 = {};
+        var _tiketPersenSeq145 = 0;
+        function registerTiketPersen145(sy145, tiket145, outlet145, periode145) {
+            try {
+                _tiketPersenSeq145 += 1;
+                const key145 = 'tp145' + _tiketPersenSeq145;
+                _tiketPersenData145[key145] = { sy: sy145, tiket: Number(tiket145) || 0, outlet: String(outlet145 || ''), periode: String(periode145 || '') };
+                return key145;
+            } catch (e145) { return ''; }
+        }
+        function tiketPersenKey145(ev145, key145) {
+            if (ev145 && (ev145.key === 'Enter' || ev145.key === ' ')) { ev145.preventDefault(); bukaPopupTiketPersen145(key145); }
+        }
+        function tutupPopupTiketPersen145() {
+            const o145 = document.getElementById('tiketPersenPopup145');
+            if (o145) o145.style.display = 'none';
+        }
+        function tiketPersenGrupHtml145(g145, grp145, syaratP145) {
+            const gg145 = (g145 && typeof g145 === 'object') ? g145 : {};
+            const berlaku145 = !(gg145.berlaku === false);
+            const lolos145 = berlaku145 && gg145.lolos === true;
+            const persen145 = Math.round(Number(gg145.persen) || 0);
+            const poin145 = Number(gg145.poinKualifikasi) || 0;
+            const target145 = Number(gg145.target) || 0;
+            const min145 = Number(gg145.minPoin) || 0;
+            const kual145 = String(gg145.kategoriKualifikasi || ('Kualifikasi ' + grp145)).split(' + ').filter(function(n145) { return String(n145 || '').trim() !== ''; });
+            const chip145 = !berlaku145
+                ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[8px] font-extrabold text-slate-500 bg-slate-100 border-slate-200">DILEWATI</span>'
+                : (lolos145
+                    ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[8px] font-extrabold text-emerald-700 bg-emerald-50 border-emerald-200">LOLOS</span>'
+                    : '<span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[8px] font-extrabold text-red-700 bg-red-50 border-red-200">TIDAK LOLOS</span>');
+            const warna145 = !berlaku145 ? 'text-slate-400' : (lolos145 ? 'text-emerald-600' : 'text-red-600');
+            const bar145 = !berlaku145 ? 'bg-slate-300' : (lolos145 ? 'bg-emerald-500' : 'bg-red-500');
+            const kartu145 = !berlaku145 ? 'border-slate-200 bg-slate-50' : (lolos145 ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50');
+            const rinc145 = Array.isArray(gg145.rincian) ? gg145.rincian : [];
+            let barisK145 = '';
+            kual145.forEach(function(n145) {
+                let p145 = 0;
+                rinc145.forEach(function(r145) {
+                    if (String((r145 && r145.kategori) || '').toUpperCase() === String(n145).toUpperCase()) p145 = Number(r145.point) || 0;
+                });
+                barisK145 += '<div class="flex justify-between items-center"><span class="text-slate-500">' + escapeHtml(String(n145)) + '</span><span class="font-bold text-slate-700">' + formatNumberID(p145, 2) + '</span></div>';
+            });
+            if (!barisK145) barisK145 = '<div class="text-slate-400">-</div>';
+            const namaKual145 = escapeHtml(kual145.join(' + ') || ('Kualifikasi ' + grp145));
+            const nilai145 = berlaku145
+                ? '<div class="text-[26px] leading-none font-extrabold ' + warna145 + '">' + persen145 + '%</div>' +
+                  '<div class="text-[8.5px] text-slate-400 leading-tight ml-1.5 mb-0.5">dari target ' + grp145 + '<br>' + formatNumberID(target145, 2) + '</div>'
+                : '<div class="text-[26px] leading-none font-extrabold text-slate-400">-</div>' +
+                  '<div class="text-[8.5px] text-slate-400 leading-tight ml-1.5 mb-0.5">Tanpa penjualan ' + grp145 + '<br>syarat dilewati</div>';
+            const statusBar145 = !berlaku145 ? '<span class="font-extrabold text-slate-400">Dilewati</span>'
+                : (lolos145 ? '<span class="font-extrabold text-emerald-600">Terpenuhi</span>' : '<span class="font-extrabold text-red-600">Belum terpenuhi</span>');
+            return '<div class="rounded-xl border p-3 ' + kartu145 + '">' +
+                '<div class="flex items-center justify-between gap-2">' +
+                    '<div class="text-[10px] font-extrabold text-slate-700">' + namaKual145 + ' <span class="text-[8px] font-bold text-slate-400">(' + grp145 + ')</span></div>' + chip145 +
+                '</div>' +
+                '<div class="flex items-end mt-1.5">' + nilai145 + '</div>' +
+                '<div class="h-1.5 rounded-full bg-white border border-slate-200 overflow-hidden mt-1"><div class="h-full rounded-full ' + bar145 + '" style="width:' + Math.min(Math.max(berlaku145 ? persen145 : 0, 0), 100) + '%"></div></div>' +
+                '<div class="mt-2.5 space-y-1 text-[9px]">' + barisK145 +
+                    '<div class="flex justify-between items-center border-t border-slate-200 pt-1"><span class="font-bold text-slate-600">Total ' + namaKual145 + '</span><span class="font-extrabold text-slate-800">' + formatNumberID(poin145, 2) + '</span></div>' +
+                    '<div class="flex justify-between items-center"><span class="text-slate-500">Syarat ' + (Number(syaratP145) || 30) + '% (min ' + formatNumberID(min145, 2) + ' point)</span>' + statusBar145 + '</div>' +
+                '</div>' +
+            '</div>';
+        }
+        function bukaPopupTiketPersen145(key145) {
+            const reg145 = key145 ? (_tiketPersenData145[String(key145)] || null) : null;
+            const sy145 = (reg145 && reg145.sy && typeof reg145.sy === 'object') ? reg145.sy : null;
+            if (!sy145 || !sy145.mco || !sy145.pco) {
+                showModal('Persentase Tiket Trip', 'Data persentase syarat tiket belum tersedia untuk outlet ini. Buka ulang halaman Kontrak untuk memuat data terbaru.');
+                return;
+            }
+            const syaratP145 = Number(sy145.syaratPersen) || 30;
+            const lolosSemua145 = sy145.lolos === true;
+            const statusHtml145 = '<div class="rounded-xl px-3 py-2.5 flex items-center justify-between gap-2 ' + (lolosSemua145 ? 'border border-emerald-200 bg-emerald-50' : 'border border-red-200 bg-red-50') + '">' +
+                '<div><div class="text-[9px] font-bold text-slate-400">Status Simulasi Tiket Trip</div><div class="text-[11px] font-extrabold ' + (lolosSemua145 ? 'text-emerald-700' : 'text-red-700') + '">' + (lolosSemua145 ? 'LOLOS' : 'TIDAK LOLOS') + '</div></div>' +
+                '<div class="text-right"><div class="text-[9px] font-bold text-slate-400">Tiket Diperoleh</div><div class="text-[11px] font-extrabold text-slate-800">' + (Number(reg145.tiket) || 0) + ' Tiket</div></div>' +
+            '</div>';
+            const header145 = '<div class="px-4 py-3 bg-gradient-to-r from-slate-900 to-emerald-900 text-white">' +
+                '<div class="flex items-start justify-between gap-2">' +
+                    '<div><div class="text-[9px] uppercase tracking-wider text-emerald-300 font-bold">Persentase Tiket Trip</div>' +
+                    '<div class="text-[11px] font-bold mt-0.5">Power + Ultimate (MCO) • Magnatec + Edge (PCO)</div>' +
+                    '<div class="text-[9px] text-slate-300 mt-0.5">' + escapeHtml(reg145.outlet || '-') + (reg145.periode ? ' • ' + escapeHtml(reg145.periode) : '') + '</div></div>' +
+                    '<button type="button" onclick="tutupPopupTiketPersen145()" aria-label="Tutup" title="Tutup" class="w-7 h-7 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition shrink-0">' +
+                        '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>' +
+                    '</button>' +
+                '</div>' +
+            '</div>';
+            let overlay145 = document.getElementById('tiketPersenPopup145');
+            if (!overlay145) {
+                overlay145 = document.createElement('div');
+                overlay145.id = 'tiketPersenPopup145';
+                overlay145.setAttribute('style', 'display:none;position:fixed;inset:0;z-index:10001;padding:14px;align-items:center;justify-content:center;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);');
+                overlay145.innerHTML = '<div class="w-full bg-white rounded-2xl shadow-2xl overflow-hidden" style="max-width:22rem;" id="tiketPersenCard145"></div>';
+                document.body.appendChild(overlay145);
+                overlay145.addEventListener('mousedown', function(evO145) {
+                    if (evO145.target === overlay145) tutupPopupTiketPersen145();
+                });
+                // Escape menutup POPUP SAJA (capture di window, sebelum handler
+                // global modal) sehingga detail modal di bawahnya tetap terbuka.
+                window.addEventListener('keydown', function(evW145) {
+                    const oW145 = document.getElementById('tiketPersenPopup145');
+                    if (evW145 && evW145.key === 'Escape' && oW145 && oW145.style.display === 'flex') {
+                        evW145.stopPropagation();
+                        tutupPopupTiketPersen145();
+                    }
+                }, true);
+            }
+            const card145 = document.getElementById('tiketPersenCard145');
+            if (card145) card145.innerHTML = header145 +
+                '<div class="p-3 space-y-2.5" style="max-height:65vh;overflow-y:auto;">' + tiketPersenGrupHtml145(sy145.mco, 'MCO', syaratP145) + tiketPersenGrupHtml145(sy145.pco, 'PCO', syaratP145) + statusHtml145 + '</div>';
+            overlay145.style.display = 'flex';
+        }
+
 
         let currentUser = "";
         let currentUsernameInput = "";
@@ -6809,6 +6932,10 @@ startAutoRefresh();
                         // dilewati (kasus WANDURI MOTOR: MCO saja -> tiket tetap dihitung).
                         const sy144 = item.tiketSyarat;
                         const syAda144 = sy144 && typeof sy144 === 'object' && sy144.mco && sy144.pco;
+                        // Task 145: registrasi data persentase tiket utk popup
+                        // (box "Tiket yang Diperoleh" clickable).
+                        var keyPersen145 = '';
+                        if (syAda144) keyPersen145 = registerTiketPersen145(sy144, Number(item.totalTiket) || 0, String(item.outlet || ''), kontrakFormatTanggalID(item.start) + ' sd ' + kontrakFormatTanggalID(item.end));
                         const defTxt144 = (item.tiketDiag && item.tiketDiag.defaultDigunakan) ? 'Kolom Target Point belum ada di DATA OUTLET BWS - Target per Tiket (target MCO) memakai nilai default 1.800.' : '';
                         const sisaInfo144 = 'Tiket diperoleh = Total Point keseluruhan / Target per Tiket' + ((item.tiketDiag && item.tiketDiag.defaultDigunakan) ? ' (default 1.800)' : ' (kolom E)') + '. Target Tiket = kelipatan Target per Tiket berikutnya di atas Total Point. Sisa ' + formatNumberID(sisa136, 2) + ' point menuju tiket berikutnya.';
                         if (syAda144 && sy144.lolos === false) {
@@ -6846,7 +6973,7 @@ startAutoRefresh();
                         '<div class="px-3 py-2.5 border-t border-slate-200 bg-white grid grid-cols-3 gap-2">' +
                         '<div class="rounded-lg border border-slate-200 p-2 bg-slate-50"><div class="text-[8px] font-semibold text-slate-400">Target per Tiket</div><div class="text-[11px] font-bold text-slate-800">' + (tp136 > 0 ? formatNumberID(tp136, 2) : '-') + '</div></div>' +
                         '<div class="rounded-lg border border-indigo-200 p-2 bg-indigo-50"><div class="text-[8px] font-semibold text-indigo-600">Target Tiket</div><div class="text-[11px] font-bold text-indigo-800">' + (tt136 > 0 ? formatNumberID(tt136, 2) : '-') + '</div></div>' +
-                        '<div class="rounded-lg border border-amber-200 p-2 bg-amber-50"><div class="text-[8px] font-semibold text-amber-600">Tiket yang Diperoleh</div><div class="text-[11px] font-extrabold text-amber-800">' + tiketVal136 + '</div></div>' +
+                        '<div class="rounded-lg border border-amber-200 p-2 bg-amber-50 cursor-pointer select-none hover:border-amber-300 hover:shadow-sm transition" role="button" tabindex="0" title="Ketuk untuk melihat persentase Power + Ultimate (MCO) & Magnatec + Edge (PCO)" aria-label="Ketuk untuk melihat persentase Power + Ultimate (MCO) dan Magnatec + Edge (PCO)" onclick="bukaPopupTiketPersen145(\'' + (keyPersen145 || '') + '\')" onkeydown="tiketPersenKey145(event,\'' + (keyPersen145 || '') + '\')"><div class="flex items-center justify-between gap-1"><div class="text-[8px] font-semibold text-amber-600">Tiket yang Diperoleh</div><svg class="w-3 h-3 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div><div class="text-[11px] font-extrabold text-amber-800">' + tiketVal136 + '</div><div class="text-[7.5px] font-semibold text-amber-500 mt-0.5">Ketuk: % MCO & PCO</div></div>' +
                         '</div>' +
                         '<div class="px-3 pb-2.5 text-[8.5px] leading-snug text-slate-400">' + catatan136 + '</div>' +
                         '</div></div>';
@@ -8498,6 +8625,10 @@ startAutoRefresh();
                     // dilewati (kasus WANDURI MOTOR: MCO saja -> tiket tetap dihitung).
                     const syK144 = item.tiketSyarat;
                     const syAdaK144 = syK144 && typeof syK144 === 'object' && syK144.mco && syK144.pco;
+                    // Task 145: registrasi data persentase tiket utk popup
+                    // (box "Tiket yang Diperoleh" clickable).
+                    var keyPersenK145 = '';
+                    if (syAdaK144) keyPersenK145 = registerTiketPersen145(syK144, Number(item.totalTiket) || 0, String(item.outlet || ''), kontrakFormatTanggalID(item.start) + ' sd ' + kontrakFormatTanggalID(item.end));
                     const defTxtK144 = (item.tiketDiag && item.tiketDiag.defaultDigunakan) ? 'Kolom Target Point belum ada di DATA OUTLET BWS - Target per Tiket (target MCO) memakai nilai default 1.800.' : '';
                     const sisaInfoK144 = 'Tiket diperoleh = Total Point keseluruhan / Target per Tiket' + ((item.tiketDiag && item.tiketDiag.defaultDigunakan) ? ' (default 1.800)' : ' (kolom E)') + '. Target Tiket = kelipatan Target per Tiket berikutnya di atas Total Point. Sisa ' + formatNumberID(sisaK136, 2) + ' point menuju tiket berikutnya.';
                     if (syAdaK144 && syK144.lolos === false) {
@@ -8546,9 +8677,13 @@ startAutoRefresh();
                                 <div class="text-[9px] font-semibold text-indigo-600">Target Tiket</div>
                                 <div class="text-sm font-bold text-indigo-800">${ttK136 > 0 ? formatNumberID(ttK136, 2) : '-'}</div>
                             </div>
-                            <div class="rounded-lg border border-amber-200 p-2 bg-amber-50">
-                                <div class="text-[9px] font-semibold text-amber-600">Tiket yang Diperoleh</div>
+                            <div class="rounded-lg border border-amber-200 p-2 bg-amber-50 cursor-pointer select-none hover:border-amber-300 hover:shadow-sm transition" role="button" tabindex="0" title="Ketuk untuk melihat persentase Power + Ultimate (MCO) & Magnatec + Edge (PCO)" aria-label="Ketuk untuk melihat persentase Power + Ultimate (MCO) dan Magnatec + Edge (PCO)" onclick="bukaPopupTiketPersen145('${keyPersenK145 || ''}')" onkeydown="tiketPersenKey145(event,'${keyPersenK145 || ''}')">
+                                <div class="flex items-center justify-between gap-1">
+                                    <div class="text-[9px] font-semibold text-amber-600">Tiket yang Diperoleh</div>
+                                    <svg class="w-3 h-3 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                </div>
                                 <div class="text-sm font-extrabold text-amber-800">${tiketOkK136 ? String(Number(item.totalTiket) || 0) + ' Tiket' : '-'}</div>
+                                <div class="text-[8px] font-semibold text-amber-500 mt-0.5">Ketuk: % MCO & PCO</div>
                             </div>
                         </div>
                         <div class="px-3 pb-3 text-[9px] leading-snug text-slate-400">${catatanK136}</div>
