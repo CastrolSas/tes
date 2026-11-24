@@ -4466,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v152</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v153</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -5060,6 +5060,14 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
         // dan Edge, begitu juga sebaliknya") - subjudul popup menyesuaikan.
         // Task 145-d: target kualifikasi di popup = TOTAL utk tiket yang
         // diperoleh (tiket × syarat per tiket; 3 Tiket -> 1620, bukan 540).
+        // Task 146 (v153): target kategori khusus kini dari KOLOM F sheet DATA
+        // TRIP BWS per baris kategori (backend v146, field baru khususWajib) -
+        // user: "Target di tentukan dari sheet Data Trip BWS kolom F. Jika kolom
+        // F terisi 540, maka target per tiket harus mencapai 540. Jika kolom F
+        // kosong, maka tidak diwajibkan mencapai point di kolom F." Bukan lagi
+        // 30% x target grup. Kolom F kosong utk grup -> kartu tampil "-",
+        // "Tidak diwajibkan", status netral; kolom F terisi -> target = kolom F
+        // (minPoin) dan tetap berlipat mengikuti TIER tiket (Task 145-f).
         // Task 145-f (v151): target kategori khusus mengikuti TIER tiket
         // BERIKUTNYA (user: 1 Tiket -> Target Tiket ke-2, khusus MCO
         // 2 × 540 = 1.080; Target Tiket 2 × 1.800 = 3.600 di backend v145).
@@ -5087,6 +5095,15 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             const poin145 = Number(gg145.poinKualifikasi) || 0;
             const target145 = Number(gg145.target) || 0;
             const min145 = Number(gg145.minPoin) || 0;
+            // Task 146 (v153): field khususWajib dari backend v146 - kolom F
+            // DATA TRIP BWS. false = kolom F kosong -> syarat khusus grup TIDAK
+            // DIWAJIBKAN (user: "Jika kolom F kosong, maka tidak diwajibkan
+            // mencapai point di kolom F"): persen "-", tanpa target, warna
+            // netral, status "Tidak diwajibkan". true = wajib dgn target kolom
+            // F (minPoin); teks "Syarat 30% per tiket" diganti "Syarat kategori
+            // khusus" (nilai bukan lagi 30% x target grup). Cache lama tanpa
+            // khususWajib -> dianggap wajib (perilaku lama utuh).
+            const wajib145 = gg145.khususWajib !== false;
             // Task 145-f (v151): target kategori khusus mengikuti TIER tiket
             // BERIKUTNYA (user: "Jika Outlet telah mendapatkan 1 tiket, Target
             // Point akan berubah ke Target Tiket ke 2 (termasuk Kategori khusus
@@ -5096,12 +5113,14 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             // keseluruhan ikut naik ke 2 x 1.800 = 3.600 (backend v145).
             // Tiket 0 -> Target Tiket ke-1 (1 x minPoin); fallback target grup
             // bila minPoin 0 (cache lama). Menskalakan revisi Task 145-d.
+            // Task 146: grup tanpa kolom F (wajib145=false) tidak punya target
+            // khusus -> tanpa tier scaling (dasar 0, persen 0).
             const tiketN145 = Math.max(0, Math.floor(Number(tiket145) || 0));
             const tiketTier145 = tiketN145 + 1;
-            const totalSyarat145 = min145 > 0 ? (tiketTier145 * min145) : target145;
-            const dasar145 = totalSyarat145 > 0 ? totalSyarat145 : target145;
-            const persen145 = dasar145 > 0 ? Math.round((poin145 / dasar145) * 100) : 0;
-            const terpenuhi145 = berlaku145 && dasar145 > 0 && (poin145 + 1e-9) >= dasar145;
+            const totalSyarat145 = (wajib145 && min145 > 0) ? (tiketTier145 * min145) : (wajib145 ? target145 : 0);
+            const dasar145 = wajib145 ? (totalSyarat145 > 0 ? totalSyarat145 : target145) : 0;
+            const persen145 = (wajib145 && dasar145 > 0) ? Math.round((poin145 / dasar145) * 100) : 0;
+            const terpenuhi145 = berlaku145 && wajib145 && dasar145 > 0 && (poin145 + 1e-9) >= dasar145;
             const kual145 = String(gg145.kategoriKualifikasi || ('Kualifikasi ' + grp145)).split(' + ').filter(function(n145) { return String(n145 || '').trim() !== ''; });
             const chip145 = !berlaku145
                 ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[8px] font-extrabold text-slate-500 bg-slate-100 border-slate-200">DILEWATI</span>'
@@ -5111,9 +5130,11 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             // Task 145-f: warna/bar/kartu mengikuti progres menuju target tier
             // (terpenuhi145), bukan gate tiket diperoleh (lolos145) - chip tetap
             // memakai lolos145 (kualifikasi tiket yang sudah diperoleh).
-            const warna145 = !berlaku145 ? 'text-slate-400' : (terpenuhi145 ? 'text-emerald-600' : 'text-red-600');
-            const bar145 = !berlaku145 ? 'bg-slate-300' : (terpenuhi145 ? 'bg-emerald-500' : 'bg-red-500');
-            const kartu145 = !berlaku145 ? 'border-slate-200 bg-slate-50' : (terpenuhi145 ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50');
+            // Task 146: grup tidak diwajibkan (kolom F kosong) -> warna netral
+            // slate (bukan merah "gagal" ataupun hijau "terpenuhi").
+            const warna145 = !berlaku145 ? 'text-slate-400' : (!wajib145 ? 'text-slate-500' : (terpenuhi145 ? 'text-emerald-600' : 'text-red-600'));
+            const bar145 = !berlaku145 ? 'bg-slate-300' : (!wajib145 ? 'bg-slate-300' : (terpenuhi145 ? 'bg-emerald-500' : 'bg-red-500'));
+            const kartu145 = !berlaku145 ? 'border-slate-200 bg-slate-50' : (!wajib145 ? 'border-slate-200 bg-white' : (terpenuhi145 ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'));
             const rinc145 = Array.isArray(gg145.rincian) ? gg145.rincian : [];
             let barisK145 = '';
             kual145.forEach(function(n145) {
@@ -5125,22 +5146,28 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             });
             if (!barisK145) barisK145 = '<div class="text-slate-400">-</div>';
             const namaKual145 = escapeHtml(kual145.join(' + ') || ('Kualifikasi ' + grp145));
-            const nilai145 = berlaku145
-                ? '<div class="text-[26px] leading-none font-extrabold ' + warna145 + '">' + persen145 + '%</div>' +
-                  '<div class="text-[8.5px] text-slate-400 leading-tight ml-1.5 mb-0.5">dari target ' + grp145 + '<br>' + formatNumberID(dasar145, 2) + ' (Target Tiket ke-' + tiketTier145 + ': ' + tiketTier145 + ' × ' + formatNumberID(min145, 2) + ')</div>'
-                : '<div class="text-[26px] leading-none font-extrabold text-slate-400">-</div>' +
-                  '<div class="text-[8.5px] text-slate-400 leading-tight ml-1.5 mb-0.5">Tanpa penjualan ' + grp145 + '<br>syarat dilewati</div>';
+            // Task 146: tampilan persen - grup tanpa kolom F -> "-" dgn
+            // keterangan "Tidak diwajibkan / kolom F DATA TRIP BWS kosong".
+            const nilai145 = !berlaku145
+                ? '<div class="text-[26px] leading-none font-extrabold text-slate-400">-</div>' +
+                  '<div class="text-[8.5px] text-slate-400 leading-tight ml-1.5 mb-0.5">Tanpa penjualan ' + grp145 + '<br>syarat dilewati</div>'
+                : (!wajib145
+                    ? '<div class="text-[26px] leading-none font-extrabold text-slate-400">-</div>' +
+                      '<div class="text-[8.5px] text-slate-400 leading-tight ml-1.5 mb-0.5">Tidak diwajibkan<br>kolom F DATA TRIP BWS kosong</div>'
+                    : '<div class="text-[26px] leading-none font-extrabold ' + warna145 + '">' + persen145 + '%</div>' +
+                      '<div class="text-[8.5px] text-slate-400 leading-tight ml-1.5 mb-0.5">dari target ' + grp145 + '<br>' + formatNumberID(dasar145, 2) + ' (Target Tiket ke-' + tiketTier145 + ': ' + tiketTier145 + ' × ' + formatNumberID(min145, 2) + ')</div>');
             const statusBar145 = !berlaku145 ? '<span class="font-extrabold text-slate-400">Dilewati</span>'
-                : (terpenuhi145 ? '<span class="font-extrabold text-emerald-600">Terpenuhi</span>' : '<span class="font-extrabold text-red-600">Belum terpenuhi</span>');
+                : (!wajib145 ? '<span class="font-extrabold text-slate-500">Tidak diwajibkan</span>'
+                : (terpenuhi145 ? '<span class="font-extrabold text-emerald-600">Terpenuhi</span>' : '<span class="font-extrabold text-red-600">Belum terpenuhi</span>'));
             return '<div class="rounded-xl border p-3 ' + kartu145 + '">' +
                 '<div class="flex items-center justify-between gap-2">' +
                     '<div class="text-[10px] font-extrabold text-slate-700">' + namaKual145 + ' <span class="text-[8px] font-bold text-slate-400">(' + grp145 + ')</span></div>' + chip145 +
                 '</div>' +
                 '<div class="flex items-end mt-1.5">' + nilai145 + '</div>' +
-                '<div class="h-1.5 rounded-full bg-white border border-slate-200 overflow-hidden mt-1"><div class="h-full rounded-full ' + bar145 + '" style="width:' + Math.min(Math.max(berlaku145 ? persen145 : 0, 0), 100) + '%"></div></div>' +
+                '<div class="h-1.5 rounded-full bg-white border border-slate-200 overflow-hidden mt-1"><div class="h-full rounded-full ' + bar145 + '" style="width:' + Math.min(Math.max((berlaku145 && wajib145) ? persen145 : 0, 0), 100) + '%"></div></div>' +
                 '<div class="mt-2.5 space-y-1 text-[9px]">' + barisK145 +
                     '<div class="flex justify-between items-center border-t border-slate-200 pt-1"><span class="font-bold text-slate-600">Total ' + namaKual145 + '</span><span class="font-extrabold text-slate-800">' + formatNumberID(poin145, 2) + '</span></div>' +
-                    '<div class="flex justify-between items-center"><span class="text-slate-500">Syarat ' + (Number(syaratP145) || 30) + '% per tiket (Target Tiket ke-' + tiketTier145 + ': ' + tiketTier145 + ' × ' + formatNumberID(min145, 2) + ' = ' + formatNumberID(totalSyarat145, 2) + ')</span>' + statusBar145 + '</div>' +
+                    '<div class="flex justify-between items-center"><span class="text-slate-500">' + (!berlaku145 ? 'Tanpa penjualan ' + grp145 : (!wajib145 ? 'Syarat kategori khusus tidak diwajibkan (kolom F DATA TRIP BWS kosong)' : 'Syarat kategori khusus (Target Tiket ke-' + tiketTier145 + ': ' + tiketTier145 + ' × ' + formatNumberID(min145, 2) + ' = ' + formatNumberID(totalSyarat145, 2) + ')')) + '</span>' + statusBar145 + '</div>' +
                 '</div>' +
             '</div>';
         }
