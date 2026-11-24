@@ -4466,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v156</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v157</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -5107,7 +5107,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
             // netral, status "Tidak diwajibkan". true = wajib dgn target kolom
             // F (minPoin); teks "Syarat 30% per tiket" diganti "Syarat kategori
             // khusus" (nilai bukan lagi 30% x target grup). Cache lama tanpa
-            // khususWajib -> dianggap wajib (perilaku lama utuh).
+            // khususWajib -> dianggap wajib (perilaku lama utuh). Task 150 (v157, backend v150): field baru nonaktifChannel - syarat khusus di-scope per CHANNEL OUTLET (outlet channel PCO/CAS tidak dibebani syarat Power Fam MCO, MCO/BP tidak dibebani syarat Magnatec+Edge PCO; semua kategori point tetap dihitung); teks kartu menyesuaikan alasan (channel bukan cocok vs kolom F kosong).
             const wajib145 = gg145.khususWajib !== false;
             // Task 145-f (v151): target kategori khusus mengikuti TIER tiket
             // BERIKUTNYA (user: "Jika Outlet telah mendapatkan 1 tiket, Target
@@ -5158,7 +5158,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                   '<div class="text-[8.5px] text-slate-400 leading-tight ml-1.5 mb-0.5">Tanpa penjualan ' + grp145 + '<br>syarat dilewati</div>'
                 : (!wajib145
                     ? '<div class="text-[26px] leading-none font-extrabold text-slate-400">-</div>' +
-                      '<div class="text-[8.5px] text-slate-400 leading-tight ml-1.5 mb-0.5">Tidak diwajibkan<br>kolom F DATA TRIP BWS kosong</div>'
+                      '<div class="text-[8.5px] text-slate-400 leading-tight ml-1.5 mb-0.5">' + (gg145.nonaktifChannel === true ? ('Tidak diwajibkan<br>channel outlet bukan ' + grp145) : 'Tidak diwajibkan<br>kolom F DATA TRIP BWS kosong') + '</div>'
                     : '<div class="text-[26px] leading-none font-extrabold ' + warna145 + '">' + persen145 + '%</div>' +
                       '<div class="text-[8.5px] text-slate-400 leading-tight ml-1.5 mb-0.5">dari target ' + grp145 + '<br>' + formatNumberID(dasar145, 2) + ' (Target Tiket ke-' + tiketTier145 + ': ' + tiketTier145 + ' × ' + formatNumberID(min145, 2) + ')</div>');
             const statusBar145 = !berlaku145 ? '<span class="font-extrabold text-slate-400">Dilewati</span>'
@@ -5172,7 +5172,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                 '<div class="h-1.5 rounded-full bg-white border border-slate-200 overflow-hidden mt-1"><div class="h-full rounded-full ' + bar145 + '" style="width:' + Math.min(Math.max((berlaku145 && wajib145) ? persen145 : 0, 0), 100) + '%"></div></div>' +
                 '<div class="mt-2.5 space-y-1 text-[9px]">' + barisK145 +
                     '<div class="flex justify-between items-center border-t border-slate-200 pt-1"><span class="font-bold text-slate-600">Total ' + namaKual145 + '</span><span class="font-extrabold text-slate-800">' + formatNumberID(poin145, 2) + '</span></div>' +
-                    '<div class="flex justify-between items-center"><span class="text-slate-500">' + (!berlaku145 ? 'Tanpa penjualan ' + grp145 : (!wajib145 ? 'Syarat kategori khusus tidak diwajibkan (kolom F DATA TRIP BWS kosong)' : 'Syarat kategori khusus (Target Tiket ke-' + tiketTier145 + ': ' + tiketTier145 + ' × ' + formatNumberID(min145, 2) + ' = ' + formatNumberID(totalSyarat145, 2) + ')')) + '</span>' + statusBar145 + '</div>' +
+                    '<div class="flex justify-between items-center"><span class="text-slate-500">' + (!berlaku145 ? 'Tanpa penjualan ' + grp145 : (!wajib145 ? (gg145.nonaktifChannel === true ? ('Syarat kategori khusus tidak berlaku (channel outlet bukan ' + grp145 + ')') : 'Syarat kategori khusus tidak diwajibkan (kolom F DATA TRIP BWS kosong)') : 'Syarat kategori khusus (Target Tiket ke-' + tiketTier145 + ': ' + tiketTier145 + ' × ' + formatNumberID(min145, 2) + ' = ' + formatNumberID(totalSyarat145, 2) + ')')) + '</span>' + statusBar145 + '</div>' +
                 '</div>' +
             '</div>';
         }
