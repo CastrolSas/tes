@@ -4271,6 +4271,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <select id="pencapaianPeriodSelect" onchange="loadPencapaianSales()" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                 <option value="">Memuat...</option>
                             </select>
+                            <span id="pencapaianUpdatingChip" class="hidden inline-flex items-center gap-1 text-[9px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-1"><svg class="animate-spin" style="width:10px;height:10px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path stroke-linecap="round" d="M12 3a9 9 0 1 0 9 9"/></svg>Memperbarui...</span>
                         </div>
                     </div>
                     <div id="pencapaianSalesList" class="space-y-3"></div>
@@ -4466,7 +4467,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v159</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v160</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -9160,6 +9161,20 @@ startAutoRefresh();
             const a = pencapaianAreaOverride();
             return (currentUsernameInput || 'admin').toLowerCase() + (a ? '@area:' + a.toLowerCase() : '');
         }
+        // Task 152 (v160): prioritas request user di atas prefetch latar belakang.
+        // Saat user mengubah filter (atau membuka tab Sales), semua prefetch senyap
+        // (detail/batch semua periode/sales) DITUNDA beberapa detik agar slot koneksi
+        // & eksekusi GAS hanya dipakai request filter yang sedang berjalan - banjir
+        // prefetch paralel sebelumnya membuat request filter berikutnya antre (delay).
+        let pencapaianUserBusyUntil152 = 0;
+        const pencapaianInFlight152_ = {};
+        function pencapaianNoteUserBusy152_(ms) { pencapaianUserBusyUntil152 = Math.max(pencapaianUserBusyUntil152, Date.now() + (Number(ms) || 3000)); }
+        function pencapaianUserBusy152_() { return Date.now() < pencapaianUserBusyUntil152; }
+        function pencapaianDeferPrefetch152_(fn) {
+            if (!pencapaianUserBusy152_()) { fn(); return; }
+            const wait152 = Math.max(400, pencapaianUserBusyUntil152 - Date.now() + 800);
+            setTimeout(function() { try { fn(); } catch (eDp152) {} }, wait152);
+        }
         // Task 123: dropdown Filter Area (halaman Sales) - tampil hanya bila kolom AREA akun kosong.
         function loadPencapaianAreaFilter() {
             const sel = document.getElementById('pencapaianAreaFilter');
@@ -9184,6 +9199,7 @@ startAutoRefresh();
             const salesSel = document.getElementById('pencapaianSalesFilter');
             if (salesSel) salesSel.value = '';
             loadPencapaianSalesFilter();
+            pencapaianNoteUserBusy152_(3000); // Task 152 (v160): ganti area = aktivitas user, prefetch ditunda
             loadPencapaianSales(true, true);
         }
 
@@ -9210,7 +9226,7 @@ startAutoRefresh();
                         c.months.some(function(m){ return Number(m.target || 0) !== 0 || Number(m.actual || 0) !== 0; });
                 });
                 const healKey = 'pencapaianHeal_' + cacheKey + '|' + key;
-                if (!hasCat && !window[healKey]) { window[healKey] = true; loadPencapaianSales(true, true); }
+                if (!hasCat && !window[healKey]) { window[healKey] = true; loadPencapaianSales(true, true, false, true); } // Task 152 (v160): softForce - cache server tetap dipakai
             } else {
                 loadPencapaianSales(false, true);
             }
@@ -9241,6 +9257,7 @@ startAutoRefresh();
 
         function prefetchPencapaianDetailData(sales, period) {
             if (!sales || !period) return;
+            if (pencapaianUserBusy152_()) { pencapaianDeferPrefetch152_(function() { prefetchPencapaianDetailData(sales, period); }); return; } // Task 152 (v160): tunda bila request user sedang berjalan
             const cats = ['value','volume','active','product','powerbrand','noo'];
             cats.forEach(function(category, index) {
                 const key = pencapaianUserKeyLow()+'|'+String(sales||'').toUpperCase()+'|'+String(period||'')+'|'+category;
@@ -9311,6 +9328,7 @@ startAutoRefresh();
         // belum tersedia pada Code.gs yang terpasang). Tetap berjalan di latar belakang.
         function _legacyPrefetchOwnerPeriods(keySales, requestOwner, periods) {
             try {
+                if (pencapaianUserBusy152_()) { pencapaianDeferPrefetch152_(function() { _legacyPrefetchOwnerPeriods(keySales, requestOwner, periods); }); return; } // Task 152 (v160)
                 const userLow = pencapaianUserKeyLow(); // Task 123
                 let chain = Promise.resolve();
                 periods.forEach(function(p) {
@@ -9336,6 +9354,7 @@ startAutoRefresh();
         function _prefetchPencapaianOwnerAllPeriods(keySales, requestOwner, forceRefresh) {
             const ownerKey = String(keySales || '');
             try {
+                if (pencapaianUserBusy152_()) { pencapaianDeferPrefetch152_(function() { _prefetchPencapaianOwnerAllPeriods(keySales, requestOwner, forceRefresh); }); return; } // Task 152 (v160)
                 const userLow = pencapaianUserKeyLow(); // Task 123
                 const periods = pencapaianPeriodsKnownFromCache();
                 if (!periods.length) return;
@@ -9364,7 +9383,7 @@ startAutoRefresh();
             } catch(e) { pencapaianBatchInFlight_[ownerKey] = false; }
         }
         // Prefetch semua periode pencapaian secara senyap agar pergantian filter
-        // Kuartal/Kategori/Sales menampilkan data INSTAN dari cache (tanpa tanda memuat). Task 152 (v159, backend v151): server membaca DAMEN via proyeksi cache bersama _getDamenPerfRows_ (1x baca utk semua sales/kuartal/detail, TTL 900s) + TTL cache hasil 600s + forceRefresh ikut menghangatkan cache -> batch prefetch jauh lebih ringan dan pergantian filter makin cepat.
+        // Kuartal/Kategori/Sales menampilkan data INSTAN dari cache (tanpa tanda memuat). Task 152 (v160, backend v152): server membaca DAMEN via proyeksi cache bersama _getDamenPerfRows_ (1x baca utk semua sales/kuartal/detail, TTL 900s) + proyeksi TARGET PER SALES bersama + TTL cache hasil 600s + memo area 900s; prefetch latar belakang DITUNDA saat user baru mengubah filter (prioritas request user, v160) dan forceRefresh ikut menghangatkan cache -> pergantian filter makin cepat.
         // Task 42: memakai panggilan batch semua periode + melanjutkan pemanasan
         // semua kombinasi sales x periode untuk Admin/akun Nama kosong.
         function _prefetchAllPencapaianPeriods(res, forceRefresh) {
@@ -9383,6 +9402,7 @@ startAutoRefresh();
         function _prefetchAllPencapaianSalesPeriods(res, forceServerRefresh) {
             try {
                 if (!canViewAllPencapaianSales()) return;
+                if (pencapaianUserBusy152_()) { pencapaianDeferPrefetch152_(function() { _prefetchAllPencapaianSalesPeriods(res, forceServerRefresh); }); return; } // Task 152 (v160)
                 const salesFilter = document.getElementById('pencapaianSalesFilter');
                 const salesList = salesFilter ? [''].concat(Array.prototype.slice.call(salesFilter.options || [])
                     .map(function(o){ return String(o.value || '').trim(); })
@@ -9434,10 +9454,13 @@ startAutoRefresh();
             try { appLocalCacheSet('PENCAPAIAN_' + sessionCacheUserKey(), pencapaianCache); } catch (ePs) {}
             try { __pencapaianDataStale = false; } catch (eFl) {}
         }
-        function loadPencapaianSales(forceReloadPeriods, silentRefresh, resetBrowserCache) {
+        function loadPencapaianSales(forceReloadPeriods, silentRefresh, resetBrowserCache, softForce) {
             // Task 100: refresh paksa (tombol refresh / perubahan data) + resetBrowserCache
             // -> bersihkan cache browser agar actual SEMUA sales dimuat ulang.
             if (forceReloadPeriods === true && resetBrowserCache === true) resetPencapaianBrowserCache();
+            // Task 152 (v160): perubahan filter oleh user = aktivitas prioritas -
+            // tunda semua prefetch latar belakang beberapa detik ke depan.
+            if (!silentRefresh) pencapaianNoteUserBusy152_(3000);
             const loading = document.getElementById('pencapaianLoading');
             const container = document.getElementById('pencapaianSalesList');
             const periodSelect = document.getElementById('pencapaianPeriodSelect');
@@ -9484,8 +9507,18 @@ startAutoRefresh();
             // Setiap perubahan filter boleh langsung membuat request baru.
             // Request lama tidak boleh menghalangi filter baru dan hasil lama
             // akan diabaikan jika sudah ada request yang lebih baru.
+            // Task 152 (v160): dedupe - request utk kombinasi filter yang sama yang
+            // masih berjalan tidak diulang (hindari request ganda saat filter diganti
+            // cepat), kecuali refresh paksa.
+            if (forceReloadPeriods !== true && pencapaianInFlight152_[cacheKey]) {
+                if (loading) loading.classList.add('hidden');
+                return;
+            }
+            pencapaianInFlight152_[cacheKey] = true;
             const requestId = ++pencapaianRequestSeq;
             pencapaianLoading = true;
+            const updChip152 = (!silentRefresh) ? document.getElementById('pencapaianUpdatingChip') : null;
+            if (updChip152) updChip152.classList.remove('hidden');
             const hadCache = !!pencapaianCache[cacheKey];
             if (hadCache) {
                 const cachedRes = pencapaianCache[cacheKey];
@@ -9498,9 +9531,12 @@ startAutoRefresh();
             // Task 37: loading Pencapaian sepenuhnya di belakang layar (tanpa kartu & spinner global).
             if (loading) loading.classList.add('hidden');
             google.script.run.withSuccessHandler(function(res) {
+                delete pencapaianInFlight152_[cacheKey];
                 if (requestId !== pencapaianRequestSeq) return;
                 pencapaianLoading = false;
                 if (!silentRefresh) showLoading(false);
+                const updChipH152 = document.getElementById('pencapaianUpdatingChip');
+                if (updChipH152) updChipH152.classList.add('hidden');
                 pencapaianCache[cacheKey] = res || {};
                 try { appLocalCacheSet('PENCAPAIAN_' + sessionCacheUserKey(), pencapaianCache); } catch(e) {}
                 _prefetchAllPencapaianPeriods(res, forceReloadPeriods === true);
@@ -9516,12 +9552,15 @@ startAutoRefresh();
                 renderPencapaianSales(Array.isArray(res && res.data) ? res.data : []);
                 prefetchPencapaianDetailData(canViewAll ? selectedSales : currentUser, res && res.selectedPeriod ? res.selectedPeriod : selectedPeriod);
             }).withFailureHandler(function(err) {
+                delete pencapaianInFlight152_[cacheKey];
                 if (requestId !== pencapaianRequestSeq) return;
                 pencapaianLoading = false;
                 if (!silentRefresh) showLoading(false);
                 if (loading) loading.classList.add('hidden');
+                const updChipF152 = document.getElementById('pencapaianUpdatingChip');
+                if (updChipF152) updChipF152.classList.add('hidden');
                 if (!hadCache && container) container.innerHTML = '<div class="bg-white border border-red-200 rounded-2xl p-6 text-center text-xs text-red-500">Gagal memuat pencapaian: ' + escapeHtml(err && err.message ? err.message : 'Terjadi kesalahan.') + '</div>';
-            }).getPencapaianSales(canViewAll ? selectedSales : currentUser, currentUsernameInput, selectedPeriod, forceReloadPeriods === true, window._adminAlias || '', pencapaianAreaOverride()); // Task 121/123
+            }).getPencapaianSales(canViewAll ? selectedSales : currentUser, currentUsernameInput, selectedPeriod, forceReloadPeriods === true && softForce !== true, window._adminAlias || '', pencapaianAreaOverride()); // Task 121/123, Task 152 (v160): softForce
         }
 
         function formatPricelistDate(value) {
@@ -11996,7 +12035,7 @@ if(tab==='home'){loadHomeRebuild();startHomeRebuildAuto();}
 if(tab==='riwayat')loadRiwayat(false, true);
 if(tab==='approval')loadApproval(false, true);
 if(tab==='tagihan')loadTagihan(false, true);
-            if(tab==='pencapaian'){ if (__pencapaianDataStale === true) { loadPencapaianSales(true, true, true); } else { loadPencapaianSales(false, true); } } // Task 100: setelah perubahan data di halaman lain, buka tab Pencapaian memuat ulang penuh
+            if(tab==='pencapaian'){ pencapaianNoteUserBusy152_(3000); if (__pencapaianDataStale === true) { loadPencapaianSales(true, true, true); } else { loadPencapaianSales(false, true); } } // Task 100: setelah perubahan data di halaman lain, buka tab Pencapaian memuat ulang penuh. Task 152 (v160): buka tab = aktivitas user, prefetch ditunda
             if(tab==='monitoring')loadMonitoring(false, true);
             if(tab==='outletkontrak')loadOutletKontrak(false, true);
             if(tab==='outletbws')loadOutletBWSAdmin(false, true);
