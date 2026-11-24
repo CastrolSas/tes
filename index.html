@@ -4466,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v158</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v159</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -9364,7 +9364,7 @@ startAutoRefresh();
             } catch(e) { pencapaianBatchInFlight_[ownerKey] = false; }
         }
         // Prefetch semua periode pencapaian secara senyap agar pergantian filter
-        // Kuartal/Kategori/Sales menampilkan data INSTAN dari cache (tanpa tanda memuat).
+        // Kuartal/Kategori/Sales menampilkan data INSTAN dari cache (tanpa tanda memuat). Task 152 (v159, backend v151): server membaca DAMEN via proyeksi cache bersama _getDamenPerfRows_ (1x baca utk semua sales/kuartal/detail, TTL 900s) + TTL cache hasil 600s + forceRefresh ikut menghangatkan cache -> batch prefetch jauh lebih ringan dan pergantian filter makin cepat.
         // Task 42: memakai panggilan batch semua periode + melanjutkan pemanasan
         // semua kombinasi sales x periode untuk Admin/akun Nama kosong.
         function _prefetchAllPencapaianPeriods(res, forceRefresh) {
