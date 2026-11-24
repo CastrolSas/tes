@@ -4466,7 +4466,7 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
                             <h2 class="text-base font-bold text-slate-800">List NOO TVD</h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v154</span>
+                            <span style="font-size:9px;font-weight:700;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px;line-height:1;">v155</span>
                             <button type="button" onclick="loadNoobyTVD(true, false)" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold shadow-sm transition">↻ Refresh</button>
                         </div>
                     </div>
@@ -5062,6 +5062,11 @@ select.select2-hidden-accessible { width: 1px !important; max-width: 1px !import
         // diperoleh (tiket × syarat per tiket; 3 Tiket -> 1620, bukan 540).
         // Task 146 (v153): target kategori khusus kini dari KOLOM F sheet DATA
         // TRIP BWS per baris kategori (backend v146, field baru khususWajib) -
+        // Task 148 (v155, backend v148): koreksi perhitungan khusus - minPoin =
+        // NILAI kolom F DATA TRIP BWS apa adanya sebagai TARGET PER TIKET
+        // (bukan jumlah antar baris kategori; kolom F 540 di baris POWER &
+        // ULTIMATE -> per tiket 540, bukan 1.080). Tier tetap (N+1) x minPoin
+        // (Task 145-f) = "perhitungan seperti yg sebelumnya".
         // user: "Target di tentukan dari sheet Data Trip BWS kolom F. Jika kolom
         // F terisi 540, maka target per tiket harus mencapai 540. Jika kolom F
         // kosong, maka tidak diwajibkan mencapai point di kolom F." Bukan lagi
